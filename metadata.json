@@ -1,0 +1,8 @@
+{
+  "name": "StaySyncOS Advanced Hotel Management System",
+  "description": "A comprehensive, multi-tenant hotel management system featuring integrated accounting, staff time tracking, and AI-powered insights using the Gemini API.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
