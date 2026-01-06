@@ -1,7 +1,10 @@
 # 1. Properties
 # We removed the arrays (users, bookings) because the compiler bans them.
 # You query them using "bookings(where: {propertyId: ...})" instead.
-type Property @table(name: "properties") {
+type Property 
+  @table(name: "properties") 
+  @auth(level: PUBLIC) 
+{
   id: UUID! @default(expr: "uuidV4()")
   name: String!
   address: String

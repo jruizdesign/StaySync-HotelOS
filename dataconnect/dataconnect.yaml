@@ -1,4 +1,4 @@
-specVersion: "v1"
+specVersion: "v1beta"
 serviceId: "staysync-hotelos-service"
 location: "us-central1"
 schema:
