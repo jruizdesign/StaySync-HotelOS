@@ -46,6 +46,8 @@ type Room @table(name: "rooms") {
   id: UUID! @default(expr: "uuidV4()")
   roomNumber: String!
   roomType: String!
+  floor: Int
+  status: String # AVAILABLE, OCCUPIED, DIRTY, MAINTENANCE
   capacity: Int
   pricePerNight: Float
   

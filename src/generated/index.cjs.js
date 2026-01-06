@@ -66,3 +66,15 @@ exports.updateUserStatusRef = updateUserStatusRef;
 exports.updateUserStatus = function updateUserStatus(dcOrVars, vars) {
   return executeMutation(updateUserStatusRef(dcOrVars, vars));
 };
+
+const updateRoomRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateRoom', inputVars);
+}
+updateRoomRef.operationName = 'UpdateRoom';
+exports.updateRoomRef = updateRoomRef;
+
+exports.updateRoom = function updateRoom(dcOrVars, vars) {
+  return executeMutation(updateRoomRef(dcOrVars, vars));
+};

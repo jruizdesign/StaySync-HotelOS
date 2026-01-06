@@ -42,6 +42,8 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
     id
     roomNumber
     roomType
+    floor
+    status
     pricePerNight
   }
 
@@ -104,6 +106,25 @@ mutation UpdateUserStatus(
     id: $id,
     data: {
       status: $status
+    }
+  )
+}
+
+# MUTATION: Update Room Status & Details
+mutation UpdateRoom(
+  $id: UUID!,
+  $status: String,
+  $type: String,
+  $floor: Int,
+  $number: String
+) @auth(level: USER) {
+  room_update(
+    key: { id: $id },
+    data: {
+      status: $status,
+      roomType: $type,
+      floor: $floor,
+      roomNumber: $number
     }
   )
 }

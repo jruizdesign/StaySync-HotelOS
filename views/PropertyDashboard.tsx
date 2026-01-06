@@ -37,6 +37,7 @@ export default function PropertyDashboard() {
     const appUser: User | null = useMemo(() => {
         if (!firebaseUser) return null;
         return {
+            id: firebaseUser.uid, // Assuming Firebase UID can serve as the User ID
             uid: firebaseUser.uid,
             email: firebaseUser.email || "",
             name: firebaseUser.displayName || "Staff Member",

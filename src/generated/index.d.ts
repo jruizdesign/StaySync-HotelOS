@@ -55,6 +55,8 @@ export interface GetPropertyDashboardData {
         id: UUIDString;
         roomNumber: string;
         roomType: string;
+        floor?: number | null;
+        status?: string | null;
         pricePerNight?: number | null;
       } & Room_Key)[];
         users: ({
@@ -91,6 +93,18 @@ export interface UpdatePropertyVariables {
   address?: string | null;
   email?: string | null;
   phoneNumber?: string | null;
+}
+
+export interface UpdateRoomData {
+  room_update?: Room_Key | null;
+}
+
+export interface UpdateRoomVariables {
+  id: UUIDString;
+  status?: string | null;
+  type?: string | null;
+  floor?: number | null;
+  number?: string | null;
 }
 
 export interface UpdateUserStatusData {
@@ -166,4 +180,16 @@ export const updateUserStatusRef: UpdateUserStatusRef;
 
 export function updateUserStatus(vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
 export function updateUserStatus(dc: DataConnect, vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
+
+interface UpdateRoomRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateRoomVariables): MutationRef<UpdateRoomData, UpdateRoomVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateRoomVariables): MutationRef<UpdateRoomData, UpdateRoomVariables>;
+  operationName: string;
+}
+export const updateRoomRef: UpdateRoomRef;
+
+export function updateRoom(vars: UpdateRoomVariables): MutationPromise<UpdateRoomData, UpdateRoomVariables>;
+export function updateRoom(dc: DataConnect, vars: UpdateRoomVariables): MutationPromise<UpdateRoomData, UpdateRoomVariables>;
 
