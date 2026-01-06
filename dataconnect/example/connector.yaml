@@ -4,3 +4,7 @@ generate:
     - outputDir: ../../src/dataconnect-admin-generated
       package: "@dataconnect/admin-generated"
       packageJsonDir: ../..
+  javascriptSdk:
+    outputDir: ../../src/dataconnect-generated
+    package: "@stay-sync/hotel-os"
+    packageJsonDir: ../..

@@ -1,11 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  MessageSquare, 
-  X, 
-  Send, 
-  Sparkles, 
-  Loader2, 
+import {
+  MessageSquare,
+  X,
+  Send,
+  Sparkles,
+  Loader2,
   ChevronDown,
   Bot,
   User,
@@ -25,7 +25,7 @@ When users ask questions, provide actionable insights specific to hotel manageme
 
 const AIChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
     { role: 'model', text: "Welcome to Lumina Intelligence. I'm your operational concierge. How can I help you optimize your property today?" }
   ]);
   const [input, setInput] = useState('');
@@ -47,7 +47,7 @@ const AIChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: [
@@ -98,11 +98,10 @@ const AIChat: React.FC = () => {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
-                  m.role === 'user' 
-                  ? 'bg-blue-600 text-white shadow-md rounded-tr-none' 
-                  : 'bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-none'
-                }`}>
+                <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${m.role === 'user'
+                    ? 'bg-blue-600 text-white shadow-md rounded-tr-none'
+                    : 'bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-none'
+                  }`}>
                   {m.text}
                 </div>
               </div>
@@ -120,15 +119,15 @@ const AIChat: React.FC = () => {
           {/* Input */}
           <div className="p-6 bg-white border-t border-slate-100 shrink-0">
             <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-2xl">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Ask Lumina anything..."
                 className="flex-1 bg-transparent border-none outline-none px-3 text-sm font-medium text-slate-700 placeholder:text-slate-400"
               />
-              <button 
+              <button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
                 className="p-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
@@ -141,11 +140,10 @@ const AIChat: React.FC = () => {
       )}
 
       {/* Toggle Button */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group relative flex items-center gap-3 px-6 py-4 rounded-[2rem] shadow-2xl transition-all duration-300 active:scale-90 ${
-          isOpen ? 'bg-slate-900 text-white w-16 h-16' : 'bg-blue-600 text-white'
-        }`}
+        className={`group relative flex items-center gap-3 px-6 py-4 rounded-[2rem] shadow-2xl transition-all duration-300 active:scale-90 ${isOpen ? 'bg-slate-900 text-white w-16 h-16' : 'bg-blue-600 text-white'
+          }`}
       >
         <div className="absolute inset-0 rounded-[2rem] bg-blue-400/20 animate-ping group-hover:block hidden"></div>
         {isOpen ? (
