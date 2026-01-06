@@ -1,0 +1,6 @@
+# connector/connector.gql
+
+# 1. Allow creating a room (PUBLIC access)
+mutation CreateRoom($data: Room_InsertInput!) @auth(level: PUBLIC) {
+  room_insert(data: $data)
+}
