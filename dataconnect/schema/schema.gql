@@ -42,12 +42,15 @@ type Booking @table(name: "bookings") {
 }
 
 # 4. Rooms
-type Room @table(name: "rooms") {
+type Room 
+  @table(name: "rooms") 
+  @auth(level: PUBLIC) 
+{
   id: UUID! @default(expr: "uuidV4()")
   roomNumber: String!
   roomType: String!
   floor: Int
-  roomStatus: String # AVAILABLE, OCCUPIED, DIRTY, MAINTENANCE
+  roomStatus: String 
   capacity: Int
   price: Float
   
@@ -55,3 +58,5 @@ type Room @table(name: "rooms") {
   propertyId: UUID!
   property: Property!
 }
+
+ 
