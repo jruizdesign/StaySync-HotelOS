@@ -2,6 +2,25 @@
 
 # 1. Renamed to 'CreateRoomEntry' to avoid conflicts
 # 2. Changed type to 'Room_Data!' as requested by the error
-mutation CreateRoomEntry($data: Room_Data!) @auth(level: PUBLIC) {
-  room_insert(data: $data)
+# connector/connector.gql
+
+mutation CreateRoomEntry(
+  $roomNumber: String!,
+  $roomType: String!,
+  $floor: Int,
+  $roomStatus: String,
+  $capacity: Int,
+  $price: Float,
+  $propertyId: UUID!
+) @auth(level: PUBLIC) {
+  room_insert(data: {
+    roomNumber: $roomNumber,
+    roomType: $roomType,
+    floor: $floor,
+    roomStatus: $roomStatus,
+    capacity: $capacity,
+    price: $price,
+    propertyId: $propertyId
+  })
+}
 }
