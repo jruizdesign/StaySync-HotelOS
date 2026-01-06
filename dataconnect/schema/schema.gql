@@ -45,20 +45,19 @@ type Booking @table(name: "bookings") {
 }
 
 # 4. Rooms
-type Room 
-  @table(name: "rooms") 
-  @auth(level: PUBLIC) 
-{
+ttype Room @table(name: "rooms") { # Remove @auth from here
   id: UUID! @default(expr: "uuidV4()")
-  roomNumber: String!
-  roomType: String!
-  floor: Int
-  roomStatus: String 
-  capacity: Int
-  price: Float
   
-  # Link to Property
-  propertyId: UUID!
+  # Add @auth to the fields you want to write to
+  roomNumber: String! @auth(level: PUBLIC)
+  roomType: String! @auth(level: PUBLIC)
+  floor: Int @auth(level: PUBLIC)
+  roomStatus: String @auth(level: PUBLIC)
+  capacity: Int @auth(level: PUBLIC)
+  price: Float @auth(level: PUBLIC)
+  
+  # Don't forget the relations
+  propertyId: UUID! @auth(level: PUBLIC)
   property: Property!
 }
 
