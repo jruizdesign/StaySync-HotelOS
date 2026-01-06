@@ -1,0 +1,5 @@
+connectorId: "default"
+generate:
+  javascriptSdk:
+    outputDir: "../../src/generated" # This puts the React hooks in your src folder
+    package: "@firebasegen/default"

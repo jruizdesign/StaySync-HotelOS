@@ -8,6 +8,5 @@ schema:
       database: "staysync-hotelos-3-database"
       cloudSql:
         instanceId: "staysync-hotelos"
-        # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
-        # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
-connectorDirs: ["./example"]
+        # schemaValidation: "STRICT" 
+connectorDirs: ["./connector"]

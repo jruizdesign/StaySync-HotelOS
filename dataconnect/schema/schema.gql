@@ -9,6 +9,10 @@ type Property @table(name: "properties") {
   email: String
 }
 
+users: [User!]! 
+bookings: [Booking!]! 
+rooms: [Room!]!
+
 # 2. Users
 type User @table(name: "users") {
   id: String! @col(name: "uid") 
