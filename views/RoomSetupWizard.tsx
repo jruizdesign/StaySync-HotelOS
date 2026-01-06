@@ -66,7 +66,8 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                     roomType: config.roomType,
                     floor: config.floorNumber,
                     price: config.price,
-                    roomStatus: 'AVAILABLE'
+                    roomStatus: 'AVAILABLE',
+                    capacity: 2
                 }));
             });
 
