@@ -2,6 +2,8 @@ import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
+import { useQuery } from '@tanstack/react-query';
+import { getPropertyDashboard } from '@firebasegen/default';
 
 // Import your views
 import Dashboard from "./Dashboard";
@@ -10,6 +12,8 @@ import Maintenance from "./Maintenance";
 import Accounting from "./Accounting";
 import Bookings from "./Bookings";
 import FeatureRequests from "./FeatureRequests";
+import StaffTracker from "./StaffTracker";
+import Settings from "./Settings";
 import { User } from "../types"; // Import your custom type
 
 const MOCK_PROPERTIES = [
@@ -41,6 +45,19 @@ export default function PropertyDashboard() {
         };
     }, [firebaseUser, claims]);
 
+    // Fetch Real Data if not demo
+    const isDemoMode = propertyId === 'demo';
+
+    const { data: dashboardData, isLoading: isLoadingData } = useQuery({
+        queryKey: ['dashboard', propertyId],
+        queryFn: async () => {
+            if (isDemoMode || !propertyId) return null;
+            const res = await getPropertyDashboard({ propertyId });
+            return res.data;
+        },
+        enabled: !!propertyId && !isDemoMode
+    });
+
     if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
     if (!appUser) {
@@ -52,10 +69,11 @@ export default function PropertyDashboard() {
         );
     }
 
-    const currentProperty = MOCK_PROPERTIES.find(p => p.id === propertyId);
-    if (!currentProperty) return <div>Property Not Found</div>;
+    const currentProperty = isDemoMode
+        ? MOCK_PROPERTIES.find(p => p.id === 'demo')
+        : (dashboardData?.property ? { ...dashboardData.property, rooms: 0 } : MOCK_PROPERTIES.find(p => p.id === propertyId));
 
-    const isDemoMode = propertyId === 'demo';
+    if (!currentProperty && !isLoadingData && !isDemoMode) return <div>Property Not Found</div>;
 
     return (
         <Layout
@@ -100,6 +118,22 @@ export default function PropertyDashboard() {
                     user={appUser}
                     onAddRequest={(r: any) => setFeatureRequests((prev: any) => [r, ...prev])}
                     onUpdateRequest={(r: any) => setFeatureRequests((prev: any) => prev.map((old: any) => old.id === r.id ? r : old))}
+                />
+            )}
+
+            {activeTab === 'staff' && (
+                <StaffTracker
+                    user={appUser}
+                    isDemoMode={isDemoMode}
+                    propertyId={propertyId}
+                    staffList={isDemoMode ? undefined : dashboardData?.users}
+                />
+            )}
+
+            {activeTab === 'settings' && (
+                <Settings
+                    property={currentProperty as any}
+                    isDemoMode={isDemoMode}
                 />
             )}
         </Layout>
