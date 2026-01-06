@@ -45,7 +45,7 @@ type Booking @table(name: "bookings") {
 }
 
 # 4. Rooms
-ttype Room @table(name: "rooms") { # Remove @auth from here
+type Room @table(name: "rooms") { # Remove @auth from here
   id: UUID! @default(expr: "uuidV4()")
   
   # Add @auth to the fields you want to write to
