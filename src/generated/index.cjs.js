@@ -42,3 +42,27 @@ exports.createBookingRef = createBookingRef;
 exports.createBooking = function createBooking(dcOrVars, vars) {
   return executeMutation(createBookingRef(dcOrVars, vars));
 };
+
+const updatePropertyRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateProperty', inputVars);
+}
+updatePropertyRef.operationName = 'UpdateProperty';
+exports.updatePropertyRef = updatePropertyRef;
+
+exports.updateProperty = function updateProperty(dcOrVars, vars) {
+  return executeMutation(updatePropertyRef(dcOrVars, vars));
+};
+
+const updateUserStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateUserStatus', inputVars);
+}
+updateUserStatusRef.operationName = 'UpdateUserStatus';
+exports.updateUserStatusRef = updateUserStatusRef;
+
+exports.updateUserStatus = function updateUserStatus(dcOrVars, vars) {
+  return executeMutation(updateUserStatusRef(dcOrVars, vars));
+};

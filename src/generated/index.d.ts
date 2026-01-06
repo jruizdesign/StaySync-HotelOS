@@ -57,6 +57,14 @@ export interface GetPropertyDashboardData {
         roomType: string;
         pricePerNight?: number | null;
       } & Room_Key)[];
+        users: ({
+          id: string;
+          email: string;
+          role: string;
+          name?: string | null;
+          pin?: string | null;
+          status?: string | null;
+        } & User_Key)[];
 }
 
 export interface GetPropertyDashboardVariables {
@@ -71,6 +79,27 @@ export interface Property_Key {
 export interface Room_Key {
   id: UUIDString;
   __typename?: 'Room_Key';
+}
+
+export interface UpdatePropertyData {
+  property_update?: Property_Key | null;
+}
+
+export interface UpdatePropertyVariables {
+  id: UUIDString;
+  name?: string | null;
+  address?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+}
+
+export interface UpdateUserStatusData {
+  user_update?: User_Key | null;
+}
+
+export interface UpdateUserStatusVariables {
+  id: string;
+  status: string;
 }
 
 export interface User_Key {
@@ -113,4 +142,28 @@ export const createBookingRef: CreateBookingRef;
 
 export function createBooking(vars: CreateBookingVariables): MutationPromise<CreateBookingData, CreateBookingVariables>;
 export function createBooking(dc: DataConnect, vars: CreateBookingVariables): MutationPromise<CreateBookingData, CreateBookingVariables>;
+
+interface UpdatePropertyRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdatePropertyVariables): MutationRef<UpdatePropertyData, UpdatePropertyVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdatePropertyVariables): MutationRef<UpdatePropertyData, UpdatePropertyVariables>;
+  operationName: string;
+}
+export const updatePropertyRef: UpdatePropertyRef;
+
+export function updateProperty(vars: UpdatePropertyVariables): MutationPromise<UpdatePropertyData, UpdatePropertyVariables>;
+export function updateProperty(dc: DataConnect, vars: UpdatePropertyVariables): MutationPromise<UpdatePropertyData, UpdatePropertyVariables>;
+
+interface UpdateUserStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateUserStatusVariables): MutationRef<UpdateUserStatusData, UpdateUserStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateUserStatusVariables): MutationRef<UpdateUserStatusData, UpdateUserStatusVariables>;
+  operationName: string;
+}
+export const updateUserStatusRef: UpdateUserStatusRef;
+
+export function updateUserStatus(vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
+export function updateUserStatus(dc: DataConnect, vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
 

@@ -1,4 +1,3 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -7,47 +6,77 @@ service cloud.firestore {
     // HELPER FUNCTIONS
     // ---------------------------------------------------------
 
-    // Check if the user is a Super Admin based on Custom Claim
+    // 1. Role Checks
     function isSuperAdmin() {
-      return request.auth.token.role == 'SYSTEM_ADMIN';
+      return request.auth.token.role == 'SUPER_ADMIN';
     }
 
-    // Check if the user's token belongs to the requested Property Path
+    function isManager() {
+      return request.auth.token.role == 'MANAGER'; 
+    }
+
+    // 2. Tenancy Check (The Golden Rule)
     function belongsToProperty(propertyId) {
       return request.auth.token.propertyId == propertyId;
     }
 
-    // Check if the user is signed in
     function isSignedIn() {
       return request.auth != null;
     }
 
     // ---------------------------------------------------------
-    // TENANCY RULES
+    // COLLECTION RULES
     // ---------------------------------------------------------
 
-    // The Root Property Collection
-    // Structure: /properties/{propertyId}
+    // Root Collection: Properties (Multi-Tenant Isolation)
     match /properties/{propertyId} {
       
-      // READ: Allow if Super Admin OR if it matches the user's assigned property
+      // Property Document Access
       allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
-      
-      // WRITE: Only Super Admins can create/delete properties
       allow write: if isSignedIn() && isSuperAdmin();
 
-      // Sub-collection: Time Clocks (High Frequency Real-time Data)
-      // Structure: /properties/{propertyId}/time_clocks/{clockId}
+      // -------------------------------------------------------
+      // SUB-COLLECTION: TIME CLOCKS
+      // -------------------------------------------------------
       match /time_clocks/{clockId} {
-        // READ/WRITE: 
-        // 1. Super Admin has "God View" (can see/edit all clocks)
-        // 2. Managers/Staff can only see/edit clocks within their own property
-        allow read, write: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+        // READ: Managers can read all. Staff can read their own.
+        allow read: if isSignedIn() && (
+          isSuperAdmin() || 
+          (belongsToProperty(propertyId) && (isManager() || resource.data.userId == request.auth.uid))
+        );
+
+        // CREATE: Staff can only create for themselves.
+        allow create: if isSignedIn() && belongsToProperty(propertyId) && (
+          isSuperAdmin() || 
+          isManager() || 
+          request.resource.data.userId == request.auth.uid
+        );
+
+        // UPDATE: Users can clock out (update their own doc). Managers can edit any.
+        allow update: if isSignedIn() && belongsToProperty(propertyId) && (
+          isSuperAdmin() || 
+          isManager() || 
+          (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid)
+        );
       }
 
-      // Sub-collection: Live Operations Feed (for Dashboard)
-      match /live_events/{eventId} {
-        allow read, write: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+      // -------------------------------------------------------
+      // SUB-COLLECTION: MAINTENANCE TICKETS
+      // -------------------------------------------------------
+      match /maintenance_tickets/{ticketId} {
+        // READ: Anyone in the property can view tickets
+        allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+
+        // CREATE: Anyone in the property can report an issue
+        allow create: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+
+        // UPDATE: Managers can do anything. Staff can only update if assigned or created by them.
+        allow update: if isSignedIn() && belongsToProperty(propertyId) && (
+          isSuperAdmin() || 
+          isManager() || 
+          resource.data.assignedTo == request.auth.uid || 
+          resource.data.createdBy == request.auth.uid
+        );
       }
     }
     

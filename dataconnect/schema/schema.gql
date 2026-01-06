@@ -13,7 +13,11 @@ type Property @table(name: "properties") {
 type User @table(name: "users") {
   id: String! @col(name: "uid") 
   email: String!
-  role: String! 
+  role: String!
+  name: String
+  pin: String
+  status: String # Active, On-Break, Out
+  lastActive: Date
   
   # Link to Property
   propertyId: UUID

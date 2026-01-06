@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { adminListProperties, getPropertyDashboard, createBooking } from '@firebasegen/default';
+import { adminListProperties, getPropertyDashboard, createBooking, updateProperty, updateUserStatus } from '@firebasegen/default';
 
 
 // Operation AdminListProperties: 
@@ -25,6 +25,12 @@ const { data } = await GetPropertyDashboard(dataConnect, getPropertyDashboardVar
 
 // Operation CreateBooking:  For variables, look at type CreateBookingVars in ../index.d.ts
 const { data } = await CreateBooking(dataConnect, createBookingVars);
+
+// Operation UpdateProperty:  For variables, look at type UpdatePropertyVars in ../index.d.ts
+const { data } = await UpdateProperty(dataConnect, updatePropertyVars);
+
+// Operation UpdateUserStatus:  For variables, look at type UpdateUserStatusVars in ../index.d.ts
+const { data } = await UpdateUserStatus(dataConnect, updateUserStatusVars);
 
 
 ```

@@ -18,13 +18,19 @@ export interface User {
   email: string;
   role: UserRole;
   propertyId: string | null;
+  pin?: string;
+  status?: 'Active' | 'On-Break' | 'Out';
+  lastActive?: string;
 }
 
 export interface Property {
   id: string;
   name: string;
-  location: string;
-  totalRooms: number;
+  location?: string;
+  address?: string;
+  totalRooms?: number;
+  email?: string;
+  phoneNumber?: string;
 }
 
 export interface Room {

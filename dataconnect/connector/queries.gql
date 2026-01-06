@@ -43,11 +43,23 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
     roomNumber
     roomType
     pricePerNight
-    # REMOVED "status" because it is not in your schema
+  }
+
+  users(
+    where: {
+      propertyId: { eq: $propertyId }
+    }
+  ) {
+    id
+    email
+    role
+    name
+    pin
+    status
   }
 }
 
-# 3. MUTATION
+# 3. MUTATIONS
 mutation CreateBooking(
   $propertyId: UUID!, 
   $guestName: String!, 
@@ -61,6 +73,34 @@ mutation CreateBooking(
     checkOutDate: $checkOut,
     status: "CONFIRMED"
   })
-  # REMOVED "{ id }" block. 
-  # This version of Data Connect returns the key automatically without selecting it.
+}
+
+mutation UpdateProperty(
+  $id: UUID!,
+  $name: String,
+  $address: String,
+  $email: String,
+  $phoneNumber: String
+) @auth(level: USER) {
+  property_update(
+    id: $id, 
+    data: {
+      name: $name,
+      address: $address,
+      email: $email,
+      phoneNumber: $phoneNumber
+    }
+  )
+}
+
+mutation UpdateUserStatus(
+  $id: String!,
+  $status: String!
+) @auth(level: USER) {
+  user_update(
+    id: $id,
+    data: {
+      status: $status
+    }
+  )
 }

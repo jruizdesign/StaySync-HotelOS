@@ -33,7 +33,7 @@ import {
 import { GoogleGenAI } from '@google/genai';
 
 import { useQuery } from "@tanstack/react-query";
-import { adminListAllProperties, getPropertyDashboard } from "@firebasegen/default";
+import { adminListProperties, getPropertyDashboard } from "@firebasegen/default";
 import { dc } from '../lib/firebase';
 
 // --- Types ---

@@ -8,6 +8,8 @@ import Dashboard from "./Dashboard";
 import Guests from "./Guests";
 import Maintenance from "./Maintenance";
 import Accounting from "./Accounting";
+import StaffTracker from "./StaffTracker";
+import Settings from "./Settings";
 import Bookings from "./Bookings";
 import FeatureRequests from "./FeatureRequests";
 import { User, UserRole } from "../types"; // Import your custom type
@@ -116,6 +118,22 @@ export default function PropertyDashboard() {
                     user={appUser}
                     onAddRequest={(r: any) => setFeatureRequests((prev: any) => [r, ...prev])}
                     onUpdateRequest={(r: any) => setFeatureRequests((prev: any) => prev.map((old: any) => old.id === r.id ? r : old))}
+                />
+            )}
+
+            {activeTab === 'staff' && (
+                <StaffTracker
+                    user={appUser}
+                    isDemoMode={isDemoMode}
+                    propertyId={propertyId}
+                    staffList={isDemoMode ? undefined : dashboardData?.users}
+                />
+            )}
+
+            {activeTab === 'settings' && (
+                <Settings
+                    property={currentProperty as any}
+                    isDemoMode={isDemoMode}
                 />
             )}
         </Layout>

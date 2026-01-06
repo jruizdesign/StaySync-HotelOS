@@ -434,6 +434,33 @@ extend type User {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.id", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `lastActive` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastActive_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.lastActive", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `name` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  name_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.name", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `pin` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  pin_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.pin", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `propertyId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   propertyId_count(
@@ -451,6 +478,23 @@ extend type User {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.role", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  status_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.status", purpose: QUERY_COUNT)
+  """
+  ✨ Minimum of the `lastActive` field in the `User` table.
+  """
+  lastActive_min: Date @fdc_generated(from: "User.lastActive", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `lastActive` field in the `User` table.
+  """
+  lastActive_max: Date @fdc_generated(from: "User.lastActive", purpose: QUERY_MAX)
   """
   A generated field that is used for caching results in SDKs.
   """
