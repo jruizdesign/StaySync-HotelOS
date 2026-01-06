@@ -27,22 +27,7 @@ interface SettingsProps {
 }
 
 // Mock Data for "Visual Database" in Demo Mode
-const MOCK_DB_DATA = {
-    bookings: [
-        { id: 'b1', guestName: 'Alice Johnson', status: 'Confirmed', roomNumber: '101' },
-        { id: 'b2', guestName: 'Bob Smith', status: 'Checked-In', roomNumber: '102' },
-        { id: 'b3', guestName: 'Charlie Brown', status: 'Completed', roomNumber: '103' },
-    ],
-    rooms: [
-        { id: 'r1', roomNumber: '101', type: 'Single', price: 150 },
-        { id: 'r2', roomNumber: '102', type: 'Double', price: 200 },
-        { id: 'r3', roomNumber: '103', type: 'Suite', price: 350 },
-    ],
-    users: [
-        { id: 'u1', name: 'Maria Gonzalez', role: 'STAFF', status: 'Active' },
-        { id: 'u2', name: 'James Wilson', role: 'MANAGER', status: 'Active' },
-    ]
-};
+// MOCK_DB_DATA removed for production
 
 const Settings: React.FC<SettingsProps> = ({ property, isDemoMode, dashboardData }) => {
     const queryClient = useQueryClient();
@@ -95,21 +80,15 @@ const Settings: React.FC<SettingsProps> = ({ property, isDemoMode, dashboardData
         e.preventDefault();
         setIsSaving(true);
 
-        if (isDemoMode) {
-            // Simulate save in demo mode
-            await new Promise(resolve => setTimeout(resolve, 800));
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 3000);
-        } else {
-            // Real Cloud SQL Update
-            await mutation.mutateAsync(formData);
-        }
+        // Real Cloud SQL Update
+        await mutation.mutateAsync(formData);
 
         setIsSaving(false);
     };
 
     // Determine data to show in Visualizer
-    const dbData = isDemoMode ? MOCK_DB_DATA : {
+    // Determine data to show in Visualizer
+    const dbData = {
         bookings: dashboardData?.bookings || [],
         rooms: dashboardData?.rooms || [],
         users: dashboardData?.users || []

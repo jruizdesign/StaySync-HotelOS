@@ -26,22 +26,10 @@ import {
 } from 'lucide-react';
 import { Booking } from '../types';
 
-const INITIAL_BOOKINGS: Booking[] = [
-  { id: 'b1', guestName: 'Emma Thompson', guestEmail: 'emma.t@example.com', guestPhone: '+1 555-010-9988', numberOfGuests: 2, roomNumber: '204', checkIn: '2023-10-27', checkOut: '2023-10-30', status: 'Checked-In', totalAmount: 450 },
-  { id: 'b2', guestName: 'James Miller', guestEmail: 'james.m@example.com', guestPhone: '+1 555-012-3344', numberOfGuests: 1, roomNumber: '105', checkIn: '2023-10-28', checkOut: '2023-11-01', status: 'Confirmed', totalAmount: 820 },
-  { id: 'b3', guestName: 'Sophia Garcia', guestEmail: 'sophia.g@example.com', guestPhone: '+1 555-019-2211', numberOfGuests: 3, roomNumber: '412', checkIn: '2023-10-25', checkOut: '2023-10-27', status: 'Completed', totalAmount: 340 },
-  { id: 'b4', guestName: 'Robert Wilson', guestEmail: 'robert.w@example.com', guestPhone: '+1 555-018-7766', numberOfGuests: 1, roomNumber: '302', checkIn: '2023-10-29', checkOut: undefined, status: 'Checked-In', totalAmount: 1200 },
-];
+// MOCK DATA removed for production
 
 // Simulated Database for Autocomplete Linking
-const MOCK_GUEST_DATABASE = [
-  { name: 'Sarah Marshall', email: 'sarah.m@example.com', phone: '+1 555-010-2345' },
-  { name: 'David Chen', email: 'david.chen@techcorp.com', phone: '+1 555-010-8877' },
-  { name: 'Marcus Thorne', email: 'mthorne@consulting.co', phone: '+1 555-011-9922' },
-  { name: 'Emma Thompson', email: 'emma.t@example.com', phone: '+1 555-010-9988' },
-  { name: 'James Miller', email: 'james.m@example.com', phone: '+1 555-012-3344' },
-  { name: 'Sophia Garcia', email: 'sophia.g@example.com', phone: '+1 555-019-2211' }
-];
+const MOCK_GUEST_DATABASE: any[] = [];
 
 
 
@@ -57,11 +45,11 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
   const { data: dashboardData } = useQuery({
     queryKey: ['dashboard', propertyId],
     queryFn: async () => {
-      if (!propertyId || isDemoMode) return null;
+      if (!propertyId) return null;
       const res = await getPropertyDashboard({ propertyId });
       return res.data;
     },
-    enabled: !!propertyId && !isDemoMode
+    enabled: !!propertyId
   });
 
   // 2. Map Backend Data to UI Data
@@ -81,9 +69,8 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
     }));
   }, [dashboardData]);
 
-  const [localBookings, setLocalBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-
-  const bookings = isDemoMode ? localBookings : realBookings;
+  const [localBookings, setLocalBookings] = useState<Booking[]>([]);
+  const bookings = realBookings;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -175,39 +162,19 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
     e.preventDefault();
     if (!currentBooking) return;
 
-    if (isDemoMode) {
-      // ... demo logic ...
-      if (currentBooking.status === 'Completed' && currentBooking.id) {
-        setIsGeneratingDocs(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsGeneratingDocs(false);
-      }
-
-      if (currentBooking.id) {
-        setLocalBookings(prev => prev.map(b => b.id === currentBooking.id ? (currentBooking as Booking) : b));
-      } else {
-        const newBooking = {
-          ...currentBooking,
-          id: 'b' + Math.random().toString(36).substr(2, 5)
-        } as Booking;
-        setLocalBookings([newBooking, ...localBookings]);
-      }
-      setIsModalOpen(false);
+    // Real Data
+    if (currentBooking.id) {
+      alert("Editing not yet supported in this version.");
     } else {
-      // Real Data
-      if (currentBooking.id) {
-        alert("Editing not yet supported in this version.");
-      } else {
-        // CREATE
-        setIsGeneratingDocs(true); // Reusing loading state
-        createBookingMutation.mutate({
-          propertyId: propertyId!,
-          guestName: currentBooking.guestName || 'Guest',
-          checkIn: currentBooking.checkIn || new Date().toISOString(),
-          checkOut: currentBooking.checkOut || new Date().toISOString()
-        });
-        setIsGeneratingDocs(false);
-      }
+      // CREATE
+      setIsGeneratingDocs(true); // Reusing loading state
+      createBookingMutation.mutate({
+        propertyId: propertyId!,
+        guestName: currentBooking.guestName || 'Guest',
+        checkIn: currentBooking.checkIn || new Date().toISOString(),
+        checkOut: currentBooking.checkOut || new Date().toISOString()
+      });
+      setIsGeneratingDocs(false);
     }
   };
 

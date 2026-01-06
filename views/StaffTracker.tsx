@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { createUser } from '@firebasegen/default';
 import {
   getFirestore,
   collection,
@@ -27,21 +28,15 @@ import {
   Lock,
   Delete,
   ShieldCheck,
-  Timer
+  Timer,
+  UserPlus,
+  RefreshCw,
+  Mail
 } from 'lucide-react';
 import { TimeEntry } from '../types';
 
 // Mock data fallback for Demo Mode
-const MOCK_STAFF_MEMBERS = [
-  { id: 'u-1', name: 'Maria Gonzalez', role: 'Housekeeping Lead', status: 'Active', startTime: '08:00 AM', pin: '1234' },
-  { id: 'u-2', name: 'James Wilson', role: 'Front Desk', status: 'Active', startTime: '07:45 AM', pin: '0000' },
-  { id: 'u-3', name: 'Sarah Davis', role: 'Concierge', status: 'On-Break', startTime: '09:00 AM', pin: '1111' },
-  { id: 'u-4', name: 'Robert Chen', role: 'Maintenance', status: 'Out', startTime: null, pin: '2222' },
-];
-
-const MOCK_TIME_ENTRIES: TimeEntry[] = [
-  { id: 'te1', userId: 'u-1', userName: 'Maria Gonzalez', date: '2023-11-01', clockIn: '08:00 AM', clockOut: null, breakStart: null, breakEnd: null, totalHours: '--', status: 'Active' },
-];
+// MOCK DATA removed for production
 
 interface StaffTrackerProps {
   user?: any;
@@ -55,7 +50,7 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
 
   // 1. STATE: Real-time Active Shifts from Firestore
   const [activeShifts, setActiveShifts] = useState<Record<string, any>>({});
-  const [recentLogs, setRecentLogs] = useState<TimeEntry[]>(isDemoMode ? MOCK_TIME_ENTRIES : []);
+  const [recentLogs, setRecentLogs] = useState<TimeEntry[]>([]);
 
   // 2. STATE: UI Logic
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -65,10 +60,54 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
   const [authStaff, setAuthStaff] = useState<{ id: string, name: string, action: string, currentStatus: string } | null>(null);
   const [pinBuffer, setPinBuffer] = useState('');
   const [isError, setIsError] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'STAFF' });
+  const [isInviting, setIsInviting] = useState(false);
+
+  const inviteMutation = useMutation({
+    mutationFn: async (vars: any) => {
+      return await createUser(vars);
+    },
+    onSuccess: () => {
+      // Invalidate dashboard query to refresh staff list
+      const queryClient = useQueryClient();
+      queryClient.invalidateQueries({ queryKey: ['dashboard', propertyId] });
+      setShowInviteModal(false);
+      setInviteForm({ name: '', email: '', role: 'STAFF' });
+      alert("Staff member invited successfully!");
+    },
+    onError: (err) => {
+      console.error(err);
+      alert("Failed to invite staff.");
+    }
+  });
+
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isDemoMode) {
+      alert("Cannot invite in Demo Mode.");
+      return;
+    }
+    setIsInviting(true);
+    try {
+      await inviteMutation.mutateAsync({
+        id: crypto.randomUUID(),
+        email: inviteForm.email,
+        role: inviteForm.role,
+        name: inviteForm.name,
+        propertyId: propertyId,
+        status: 'INVITED' // Initial status
+      });
+    } catch (e) {
+      // handled in onError
+    } finally {
+      setIsInviting(false);
+    }
+  };
 
   // --- EFFECT: Listen to Firestore Time Clocks ---
   useEffect(() => {
-    if (isDemoMode || !propertyId) return;
+    if (!propertyId) return;
 
     // A. Listen for currently ACTIVE shifts (endTime == null)
     const activeQ = query(
@@ -133,7 +172,6 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
 
   // --- MERGE LOGIC: SQL Users + Firestore Shifts ---
   const mergedStaffList = useMemo(() => {
-    if (isDemoMode) return MOCK_STAFF_MEMBERS;
     if (!staffList) return [];
 
     return staffList.map(u => {
@@ -200,9 +238,8 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
 
   // --- FIRESTORE WRITES ---
   const performClockAction = async (userId: string, userName: string, action: string, currentStatus: string) => {
-    if (isDemoMode || !propertyId) {
-      console.log("Demo Mode Action:", action);
-      // Update Mock State locally for demo feels could be added here
+    if (!propertyId) {
+      console.log("No Property ID found");
       return;
     }
 
@@ -321,6 +358,16 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
           <Filter size={18} />
           Filter Duty
         </button>
+
+        {!isDemoMode && (
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="px-8 py-5 bg-slate-900 text-white rounded-[2rem] shadow-lg shadow-slate-900/20 font-bold text-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+          >
+            <UserPlus size={18} />
+            Invite Staff
+          </button>
+        )}
       </div>
 
       {/* Staff Kiosk Grid */}
@@ -526,6 +573,61 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
           </div>
         </div>
       )}
+      {/* INVITE MODAL */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowInviteModal(false)}></div>
+          <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 animate-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-black text-slate-800">Invite Staff</h2>
+              <button onClick={() => setShowInviteModal(false)}><X className="text-slate-400" /></button>
+            </div>
+            <form onSubmit={handleInviteSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase">Full Name</label>
+                <input
+                  required
+                  type="text"
+                  className="w-full p-4 bg-slate-50 rounded-xl font-bold"
+                  value={inviteForm.name}
+                  onChange={e => setInviteForm({ ...inviteForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase">Email Address</label>
+                <input
+                  required
+                  type="email"
+                  className="w-full p-4 bg-slate-50 rounded-xl font-bold"
+                  value={inviteForm.email}
+                  onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase">Role</label>
+                <select
+                  className="w-full p-4 bg-slate-50 rounded-xl font-bold"
+                  value={inviteForm.role}
+                  onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })}
+                >
+                  <option value="STAFF">Staff</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <button
+                disabled={isInviting}
+                type="submit"
+                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold mt-4 hover:bg-blue-700 transition-all flex justify-center items-center gap-2"
+              >
+                {isInviting ? <RefreshCw className="animate-spin" /> : <Mail size={18} />}
+                {isInviting ? 'Sending...' : 'Send Invitation'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }

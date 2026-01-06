@@ -17,11 +17,7 @@ import Settings from "./Settings";
 import SystemLogs from "./SystemLogs";
 import { User } from "../types"; // Import your custom type
 
-const MOCK_PROPERTIES = [
-    { id: "p-london-01", name: "StaySync London Prime", location: "London, UK", rooms: 120 },
-    { id: "p-nyc-02", name: "StaySync NYC Central", location: "New York, USA", rooms: 240 },
-    { id: "demo", name: "StaySync Demo Hotel", location: "Virtual Sandbox", rooms: 50 }
-];
+// MOCK_PROPERTIES removed for production
 
 export default function PropertyDashboard() {
     const { propertyId } = useParams<{ propertyId: string }>();
@@ -71,9 +67,9 @@ export default function PropertyDashboard() {
         );
     }
 
-    const currentProperty = isDemoMode
-        ? MOCK_PROPERTIES.find(p => p.id === 'demo')
-        : (dashboardData?.property ? { ...dashboardData.property, rooms: 0 } : MOCK_PROPERTIES.find(p => p.id === propertyId));
+    const currentProperty = dashboardData?.property
+        ? { ...dashboardData.property, rooms: dashboardData.rooms?.length || 0 }
+        : null;
 
     if (!currentProperty && !isLoadingData && !isDemoMode) return <div>Property Not Found</div>;
 
@@ -83,7 +79,7 @@ export default function PropertyDashboard() {
             setActiveTab={setActiveTab}
             user={appUser} // Passing the converted appUser
             currentProperty={currentProperty as any}
-            properties={MOCK_PROPERTIES}
+            properties={[]} // No mock list
             onPropertyChange={(p) => navigate(`/dashboard/${p.id}`)}
             onLogout={() => navigate('/login')}
         >

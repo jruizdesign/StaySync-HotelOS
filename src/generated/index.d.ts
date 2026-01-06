@@ -48,6 +48,19 @@ export interface CreateRoomVariables {
   status?: string | null;
 }
 
+export interface CreateUserData {
+  user_insert: User_Key;
+}
+
+export interface CreateUserVariables {
+  id: string;
+  email: string;
+  role: string;
+  name?: string | null;
+  propertyId?: UUIDString | null;
+  status?: string | null;
+}
+
 export interface GetPropertyDashboardData {
   property?: {
     id: UUIDString;
@@ -217,4 +230,16 @@ export const createRoomRef: CreateRoomRef;
 
 export function createRoom(vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
 export function createRoom(dc: DataConnect, vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
+
+interface CreateUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateUserVariables): MutationRef<CreateUserData, CreateUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateUserVariables): MutationRef<CreateUserData, CreateUserVariables>;
+  operationName: string;
+}
+export const createUserRef: CreateUserRef;
+
+export function createUser(vars: CreateUserVariables): MutationPromise<CreateUserData, CreateUserVariables>;
+export function createUser(dc: DataConnect, vars: CreateUserVariables): MutationPromise<CreateUserData, CreateUserVariables>;
 

@@ -150,3 +150,21 @@ mutation CreateRoom(
 # ... (Keep your existing queries) ...
 
 
+
+mutation CreateUser(
+  $id: String!,
+  $email: String!,
+  $role: String!,
+  $name: String,
+  $propertyId: UUID,
+  $status: String
+) @auth(level: USER) {
+  user_insert(data: {
+    id: $id,
+    email: $email,
+    role: $role,
+    name: $name,
+    propertyId: $propertyId,
+    status: $status
+  })
+}

@@ -35,16 +35,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
 
   // Merge Real Data or Use Mocks
   const rooms = useMemo(() => {
-    if (isDemoMode || !data) {
-      // Mock Data fallback
-      return [
-        { id: '101', number: '101', type: 'Single', floor: 1, status: 'AVAILABLE' },
-        { id: '102', number: '102', type: 'Double', floor: 1, status: 'OCCUPIED' },
-        { id: '103', number: '103', type: 'Suite', floor: 1, status: 'DIRTY' },
-        { id: '104', number: '104', type: 'Double', floor: 1, status: 'MAINTENANCE' },
-        { id: '201', number: '201', type: 'Suite', floor: 2, status: 'OCCUPIED' },
-      ];
-    }
+    if (!data) return [];
 
     // Merge SQL Rooms with Active Bookings to determine Guest Name
     return data.rooms.map((room: any) => {
@@ -90,7 +81,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
 
   const toggleStatus = async (e: React.MouseEvent, room: any, newStatus: string) => {
     e.stopPropagation();
-    if (isDemoMode) return; // Handle mock state locally if strictly needed
+    e.stopPropagation();
 
     // Call Cloud SQL Mutation
     await updateRoomMutation.mutateAsync({
@@ -106,15 +97,13 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
     e.preventDefault();
     if (!editingRoom) return;
 
-    if (!isDemoMode) {
-      await updateRoomMutation.mutateAsync({
-        id: editingRoom.id,
-        status: editingRoom.status,
-        type: editingRoom.type,
-        floor: editingRoom.floor,
-        number: editingRoom.number
-      });
-    }
+    await updateRoomMutation.mutateAsync({
+      id: editingRoom.id,
+      status: editingRoom.status,
+      type: editingRoom.type,
+      floor: editingRoom.floor,
+      number: editingRoom.number
+    });
     setEditingRoom(null);
   };
 
@@ -122,7 +111,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   const handleQuickMaintenanceReport = async () => {
     if (!viewingRoom || !quickReportIssue) return;
 
-    if (!isDemoMode && propertyId) {
+    if (propertyId) {
       try {
         // A. Add ticket to Firestore
         await addDoc(collection(db, `properties/${propertyId}/maintenance_tickets`), {
