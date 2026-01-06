@@ -1,0 +1,460 @@
+extend type Mutation {
+  """
+  ✨ Insert a single `Booking` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  booking_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Booking_Data!
+  ): Booking_KeyOutput! @fdc_generated(from: "Booking", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `Property` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  property_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Property_Data!
+  ): Property_KeyOutput! @fdc_generated(from: "Property", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `Room` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  room_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Room_Data!
+  ): Room_KeyOutput! @fdc_generated(from: "Room", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `User` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert `Booking` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  booking_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Booking_Data!]!
+  ): [Booking_KeyOutput!]! @fdc_generated(from: "Booking", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `Property` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  property_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Property_Data!]!
+  ): [Property_KeyOutput!]! @fdc_generated(from: "Property", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `Room` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  room_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Room_Data!]!
+  ): [Room_KeyOutput!]! @fdc_generated(from: "Room", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `User` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert or update a single `Booking` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Booking`.
+  """
+  booking_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Booking_Data!
+  ): Booking_KeyOutput! @fdc_generated(from: "Booking", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `Property` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Property`.
+  """
+  property_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Property_Data!
+  ): Property_KeyOutput! @fdc_generated(from: "Property", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `Room` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Room`.
+  """
+  room_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Room_Data!
+  ): Room_KeyOutput! @fdc_generated(from: "Room", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `User` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update `Booking` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Booking`.
+  """
+  booking_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Booking_Data!]!
+  ): [Booking_KeyOutput!]! @fdc_generated(from: "Booking", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `Property` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Property`.
+  """
+  property_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Property_Data!]!
+  ): [Property_KeyOutput!]! @fdc_generated(from: "Property", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `Room` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Room`.
+  """
+  room_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Room_Data!]!
+  ): [Room_KeyOutput!]! @fdc_generated(from: "Room", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `User` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Update a single `Booking` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Booking` or `null` if not found.
+  """
+  booking_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Booking_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Booking_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Booking_Data!
+  ): Booking_KeyOutput @fdc_generated(from: "Booking", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `Property` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Property` or `null` if not found.
+  """
+  property_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Property_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Property_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Property_Data!
+  ): Property_KeyOutput @fdc_generated(from: "Property", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `Room` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Room` or `null` if not found.
+  """
+  room_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Room_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Room_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Room_Data!
+  ): Room_KeyOutput @fdc_generated(from: "Room", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `User` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `User` or `null` if not found.
+  """
+  user_update(
+    """
+    The unique ID of the object.
+    """
+    id: String
+
+    """
+    ✨ `_expr` server value variant of `id` (The unique ID of the object.)
+    """
+    id_expr: String_Expr
+
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: User_Data!
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update `Booking` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  booking_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Booking_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Booking_Data!
+  ): Int! @fdc_generated(from: "Booking", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `Property` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  property_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Property_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Property_Data!
+  ): Int! @fdc_generated(from: "Property", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `Room` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  room_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Room_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Room_Data!
+  ): Int! @fdc_generated(from: "Room", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `User` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  user_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: User_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: User_Data!
+  ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Delete a single `Booking` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  booking_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Booking_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Booking_FirstRow
+  ): Booking_KeyOutput @fdc_generated(from: "Booking", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `Property` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  property_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Property_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Property_FirstRow
+  ): Property_KeyOutput @fdc_generated(from: "Property", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `Room` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  room_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Room_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Room_FirstRow
+  ): Room_KeyOutput @fdc_generated(from: "Room", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `User` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  user_delete(
+    """
+    The unique ID of the object.
+    """
+    id: String
+
+    """
+    ✨ `_expr` server value variant of `id` (The unique ID of the object.)
+    """
+    id_expr: String_Expr
+
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete `Booking` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  booking_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Booking_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Booking", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `Property` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  property_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Property_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Property", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `Room` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  room_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Room_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Room", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `User` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  user_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: User_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "User", purpose: DELETE_MULTIPLE)
+}

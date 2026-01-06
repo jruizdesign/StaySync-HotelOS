@@ -1,14 +1,12 @@
-
 # 1. Properties
+# We removed the arrays (users, bookings) because the compiler bans them.
+# You query them using "bookings(where: {propertyId: ...})" instead.
 type Property @table(name: "properties") {
   id: UUID! @default(expr: "uuidV4()")
   name: String!
   address: String
   phoneNumber: String
   email: String
-  users: [User!]! @relation(name: "property_users")
-  bookings: [Booking!]! @relation(name: "property_bookings")
-  rooms: [Room!]! @relation(name: "property_rooms")
 }
 
 # 2. Users
@@ -17,11 +15,9 @@ type User @table(name: "users") {
   email: String!
   role: String! 
   
-  # The Foreign Key (Actual Data)
+  # Link to Property
   propertyId: UUID
-  
-  # The Link (Data Connect infers this links to Property via propertyId)
-  property: Property @relation(name: "property_users")
+  property: Property 
 }
 
 # 3. Bookings
@@ -32,10 +28,9 @@ type Booking @table(name: "bookings") {
   checkOutDate: Date!
   status: String!
   
-  # The Foreign Key
+  # Link to Property
   propertyId: UUID!
-  # The Link
-  property: Property! @relation(name: "property_bookings")
+  property: Property!
   
   # Link to Room
   roomId: UUID
@@ -46,13 +41,11 @@ type Booking @table(name: "bookings") {
 type Room @table(name: "rooms") {
   id: UUID! @default(expr: "uuidV4()")
   roomNumber: String!
-  status: String # Status like Clean, Dirty, Occupied
   roomType: String!
   capacity: Int
   pricePerNight: Float
   
-  # The Foreign Key
+  # Link to Property
   propertyId: UUID!
-  # The Link
-  property: Property! @relation(name: "property_rooms")
+  property: Property!
 }

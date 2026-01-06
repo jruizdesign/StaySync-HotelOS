@@ -1,0 +1,66 @@
+# 1. ADMIN QUERY
+query AdminListProperties @auth(level: USER) {
+  properties {
+    id
+    name
+    address
+    email
+  }
+}
+
+# 2. DASHBOARD QUERY
+query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
+  
+  property(id: $propertyId) {
+    id
+    name
+    address
+  }
+
+  bookings(
+    where: { 
+      propertyId: { eq: $propertyId } 
+    }
+    orderBy: { checkInDate: ASC }
+  ) {
+    id
+    guestName
+    status
+    checkInDate
+    checkOutDate
+    room {
+      roomNumber
+    }
+  }
+
+  rooms(
+    where: { 
+      propertyId: { eq: $propertyId } 
+    }
+    orderBy: { roomNumber: ASC }
+  ) {
+    id
+    roomNumber
+    roomType
+    pricePerNight
+    # REMOVED "status" because it is not in your schema
+  }
+}
+
+# 3. MUTATION
+mutation CreateBooking(
+  $propertyId: UUID!, 
+  $guestName: String!, 
+  $checkIn: Date!, 
+  $checkOut: Date!
+) @auth(level: USER) {
+  booking_insert(data: {
+    propertyId: $propertyId,
+    guestName: $guestName,
+    checkInDate: $checkIn,
+    checkOutDate: $checkOut,
+    status: "CONFIRMED"
+  })
+  # REMOVED "{ id }" block. 
+  # This version of Data Connect returns the key automatically without selecting it.
+}
