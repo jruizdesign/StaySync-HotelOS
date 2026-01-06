@@ -42,7 +42,6 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
             newConfigs.push({
                 floorNumber: f,
                 roomCount: roomsPerFloor,
-                roomCount: roomsPerFloor,
                 startNumber: f * 100 + 1, // Floor 1 start 101, Floor 2 start 201
                 roomType: defaultType,
                 price: defaultPrice
@@ -63,9 +62,6 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
             const allRooms = configs.flatMap(config => {
                 return Array.from({ length: config.roomCount }).map((_, i) => ({
                     propertyId: propertyId,
-                    roomNumber: (config.startNumber + i).toString(),
-                    roomType: config.roomType,
-                    floor: config.floorNumber,
                     roomNumber: (config.startNumber + i).toString(),
                     roomType: config.roomType,
                     floor: config.floorNumber,
