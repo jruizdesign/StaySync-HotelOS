@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  Wallet, 
-  Users, 
-  Settings, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  Wallet,
+  Users,
+  Settings,
+  LogOut,
   Building2,
   ChevronDown,
   Clock,
@@ -29,15 +29,15 @@ interface LayoutProps {
   onLogout: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ 
-  children, 
-  activeTab, 
-  setActiveTab, 
-  user, 
-  currentProperty, 
-  properties, 
+const Layout: React.FC<LayoutProps> = ({
+  children,
+  activeTab,
+  setActiveTab,
+  user,
+  currentProperty,
+  properties,
   onPropertyChange,
-  onLogout 
+  onLogout
 }) => {
   const mainMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -59,11 +59,10 @@ const Layout: React.FC<LayoutProps> = ({
   const NavItem: React.FC<{ item: any }> = ({ item }) => (
     <button
       onClick={() => setActiveTab(item.id)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
-        activeTab === item.id 
-        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' 
-        : 'hover:bg-slate-800 hover:text-white'
-      }`}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === item.id
+          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+          : 'hover:bg-slate-800 hover:text-white'
+        }`}
     >
       <item.icon size={20} />
       {item.label}
@@ -79,7 +78,7 @@ const Layout: React.FC<LayoutProps> = ({
             L
           </div>
           <div>
-            <h1 className="text-white font-bold tracking-tight">LUMINA</h1>
+            <h1 className="text-white font-bold tracking-tight">STAYSYNC OS</h1>
             <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Management</p>
           </div>
         </div>
@@ -92,12 +91,12 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="px-4 py-4 space-y-1 border-t border-slate-800">
           <div className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">System</div>
           {systemMenuItems.filter(item => {
-             // Hide restricted items from regular STAFF
-             if (item.restricted && user.role === UserRole.STAFF) return false;
-             return true;
+            // Hide restricted items from regular STAFF
+            if (item.restricted && user.role === UserRole.STAFF) return false;
+            return true;
           }).map((item) => <NavItem key={item.id} item={item} />)}
-          
-          <button 
+
+          <button
             onClick={onLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 hover:text-rose-400 transition-all text-sm font-medium mt-2"
           >
@@ -118,12 +117,12 @@ const Layout: React.FC<LayoutProps> = ({
                 <span className="font-semibold text-slate-700">{currentProperty.name}</span>
                 <ChevronDown size={16} className="text-slate-400" />
               </button>
-              
+
               {user.role === UserRole.SYSTEM_ADMIN && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 invisible group-hover:visible z-50">
                   <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Switch Property</div>
                   {properties.map(p => (
-                    <button 
+                    <button
                       key={p.id}
                       onClick={() => onPropertyChange(p)}
                       className="w-full text-left px-4 py-2.5 hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"

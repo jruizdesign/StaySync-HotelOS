@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
-const SYSTEM_PROMPT = `You are Lumina AI, the elite concierge and operational advisor for Lumina HMS (Hotel Management System). 
+const SYSTEM_PROMPT = `You are StaySync AI, the elite concierge and operational advisor for StaySync HotelOS. 
 Your personality is professional, highly efficient, and encouraging.
 You have expertise in:
 1. Revenue Management (RevPAR, ADR optimization)
@@ -26,7 +26,7 @@ When users ask questions, provide actionable insights specific to hotel manageme
 const AIChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
-    { role: 'model', text: "Welcome to Lumina Intelligence. I'm your operational concierge. How can I help you optimize your property today?" }
+    { role: 'model', text: "Welcome to StaySync Intelligence. I'm your operational concierge. How can I help you optimize your property today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +60,7 @@ const AIChat: React.FC = () => {
         }
       });
 
-      const aiText = response.text || "I'm having trouble connecting to the Lumina neural network. Please try again.";
+      const aiText = response.text || "I'm having trouble connecting to the StaySync neural network. Please try again.";
       setMessages(prev => [...prev, { role: 'model', text: aiText }]);
     } catch (error) {
       console.error("AI Error:", error);
@@ -82,7 +82,7 @@ const AIChat: React.FC = () => {
                 <Sparkles size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Lumina Concierge</h3>
+                <h3 className="font-bold text-sm">StaySync Concierge</h3>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Intelligence</span>
@@ -99,8 +99,8 @@ const AIChat: React.FC = () => {
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${m.role === 'user'
-                    ? 'bg-blue-600 text-white shadow-md rounded-tr-none'
-                    : 'bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-none'
+                  ? 'bg-blue-600 text-white shadow-md rounded-tr-none'
+                  : 'bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-none'
                   }`}>
                   {m.text}
                 </div>
@@ -110,7 +110,7 @@ const AIChat: React.FC = () => {
               <div className="flex justify-start">
                 <div className="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin text-blue-600" />
-                  <span className="text-xs text-slate-400 font-medium">Lumina is thinking...</span>
+                  <span className="text-xs text-slate-400 font-medium">StaySync is thinking...</span>
                 </div>
               </div>
             )}
@@ -124,7 +124,7 @@ const AIChat: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask Lumina anything..."
+                placeholder="Ask StaySync anything..."
                 className="flex-1 bg-transparent border-none outline-none px-3 text-sm font-medium text-slate-700 placeholder:text-slate-400"
               />
               <button
@@ -151,7 +151,7 @@ const AIChat: React.FC = () => {
         ) : (
           <>
             <MessageSquare size={24} />
-            <span className="font-bold text-sm">Lumina Concierge</span>
+            <span className="font-bold text-sm">StaySync Concierge</span>
           </>
         )}
       </button>

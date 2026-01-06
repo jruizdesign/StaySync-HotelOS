@@ -1,12 +1,12 @@
 
 import React, { useState, useMemo, useRef } from 'react';
-import { 
-  UserPlus, 
-  Search, 
-  FileText, 
-  History, 
-  ChevronRight, 
-  ShieldCheck, 
+import {
+  UserPlus,
+  Search,
+  FileText,
+  History,
+  ChevronRight,
+  ShieldCheck,
   CreditCard,
   Mail,
   Phone,
@@ -125,16 +125,16 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
 
   const filteredGuests = useMemo(() => {
     return guests.filter(g => {
-      const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase()) || 
-                           g.idNumber.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase()) ||
+        g.idNumber.toLowerCase().includes(search.toLowerCase());
       const matchesTab = activeSubTab === 'all' ? !g.isDNR : g.isDNR;
       return matchesSearch && matchesTab;
     });
   }, [guests, search, activeSubTab]);
 
-  const selectedGuest = useMemo(() => 
-    guests.find(g => g.id === selectedGuestId), 
-  [guests, selectedGuestId]);
+  const selectedGuest = useMemo(() =>
+    guests.find(g => g.id === selectedGuestId),
+    [guests, selectedGuestId]);
 
   const handleAddGuest = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -165,12 +165,12 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
 
   const startAiAnalysis = async () => {
     if (!selectedFile) return;
-    
+
     setUploadStep('analyzing');
-    
+
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
+
       // Simulate file content analysis by using filename and type since we are in browser
       const prompt = `You are a document classification AI for a hotel management system.
       Analyze the following file metadata and categorize it into exactly one of these categories: 
@@ -214,7 +214,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
       type: aiCategory,
       fileName: selectedFile.name,
       uploadDate: new Date().toISOString().split('T')[0],
-      amount: aiCategory === 'Invoice' || aiCategory === 'Receipt' ? 0 : undefined 
+      amount: aiCategory === 'Invoice' || aiCategory === 'Receipt' ? 0 : undefined
     };
 
     const updatedGuests = guests.map(g => {
@@ -239,40 +239,39 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
   const categorizedDocs = useMemo(() => {
     if (!selectedGuest) return { identity: [], invoices: [], receipts: [], other: [] };
     return {
-        identity: selectedGuest.documents.filter(d => ['Passport', 'Driver License', 'ID Card'].includes(d.type)),
-        invoices: selectedGuest.documents.filter(d => d.type === 'Invoice'),
-        receipts: selectedGuest.documents.filter(d => d.type === 'Receipt'),
-        other: selectedGuest.documents.filter(d => d.type === 'Other')
+      identity: selectedGuest.documents.filter(d => ['Passport', 'Driver License', 'ID Card'].includes(d.type)),
+      invoices: selectedGuest.documents.filter(d => d.type === 'Invoice'),
+      receipts: selectedGuest.documents.filter(d => d.type === 'Receipt'),
+      other: selectedGuest.documents.filter(d => d.type === 'Other')
     };
   }, [selectedGuest]);
 
   const DocumentCard: React.FC<{ doc: GuestDocument; onClick: () => void }> = ({ doc, onClick }) => {
     const isPDF = doc.fileName.toLowerCase().endsWith('.pdf');
     return (
-      <div 
+      <div
         onClick={onClick}
         className="group relative bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-xl hover:border-blue-100 transition-all cursor-pointer overflow-hidden"
       >
         <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl ${
-            doc.type === 'Invoice' ? 'bg-amber-50 text-amber-600' :
+          <div className={`p-3 rounded-xl ${doc.type === 'Invoice' ? 'bg-amber-50 text-amber-600' :
             doc.type === 'Receipt' ? 'bg-emerald-50 text-emerald-600' :
-            ['Passport', 'Driver License', 'ID Card'].includes(doc.type) ? 'bg-blue-50 text-blue-600' :
-            'bg-slate-50 text-slate-600'
-          }`}>
-            {doc.type === 'Receipt' ? <Receipt size={20} /> : 
-             doc.type === 'Invoice' ? <FileText size={20} /> :
-             <ShieldCheck size={20} />}
+              ['Passport', 'Driver License', 'ID Card'].includes(doc.type) ? 'bg-blue-50 text-blue-600' :
+                'bg-slate-50 text-slate-600'
+            }`}>
+            {doc.type === 'Receipt' ? <Receipt size={20} /> :
+              doc.type === 'Invoice' ? <FileText size={20} /> :
+                <ShieldCheck size={20} />}
           </div>
           <div className="flex gap-1">
-             {isPDF ? <span className="text-[8px] font-black bg-rose-500 text-white px-1.5 py-0.5 rounded">PDF</span> : 
-                      <span className="text-[8px] font-black bg-blue-500 text-white px-1.5 py-0.5 rounded">IMG</span>}
+            {isPDF ? <span className="text-[8px] font-black bg-rose-500 text-white px-1.5 py-0.5 rounded">PDF</span> :
+              <span className="text-[8px] font-black bg-blue-500 text-white px-1.5 py-0.5 rounded">IMG</span>}
           </div>
         </div>
         <h4 className="text-xs font-bold text-slate-800 truncate">{doc.fileName}</h4>
         <div className="flex items-center justify-between mt-2">
-           <span className="text-[9px] text-slate-400 font-bold uppercase">{doc.uploadDate}</span>
-           {doc.amount && <span className="text-[9px] font-black text-slate-700">${doc.amount}</span>}
+          <span className="text-[9px] text-slate-400 font-bold uppercase">{doc.uploadDate}</span>
+          {doc.amount && <span className="text-[9px] font-black text-slate-700">${doc.amount}</span>}
         </div>
         <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/5 transition-colors pointer-events-none"></div>
       </div>
@@ -282,7 +281,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
   if (selectedGuest) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-        <button 
+        <button
           onClick={() => {
             setSelectedGuestId(null);
             setProfileTab('overview');
@@ -298,8 +297,8 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
             <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm text-center">
               <div className="relative group mx-auto mb-6 w-32 h-32">
                 {selectedGuest.photoUrl ? (
-                  <img 
-                    src={selectedGuest.photoUrl} 
+                  <img
+                    src={selectedGuest.photoUrl}
                     alt={selectedGuest.name}
                     className="w-32 h-32 rounded-[2rem] object-cover shadow-xl border-4 border-white"
                   />
@@ -309,12 +308,11 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                   </div>
                 )}
               </div>
-              
+
               <h2 className="text-2xl font-bold text-slate-800">{selectedGuest.name}</h2>
               <div className="mt-2 flex items-center justify-center gap-2">
-                <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                  selectedGuest.isDNR ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white shadow-sm'
-                }`}>
+                <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${selectedGuest.isDNR ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white shadow-sm'
+                  }`}>
                   {selectedGuest.isDNR ? 'DO NOT RENT' : `${selectedGuest.status} GUEST`}
                 </div>
               </div>
@@ -350,30 +348,27 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
 
           <div className="lg:col-span-3 space-y-6 flex flex-col">
             <div className="flex items-center gap-2 p-1 bg-white border border-slate-100 rounded-2xl w-fit">
-              <button 
+              <button
                 onClick={() => setProfileTab('overview')}
-                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  profileTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
-                }`}
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${profileTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                  }`}
               >
                 Overview
               </button>
-              <button 
+              <button
                 onClick={() => setProfileTab('documents')}
-                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                  profileTab === 'documents' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
-                }`}
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${profileTab === 'documents' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                  }`}
               >
                 Profile Vault
                 <span className={`w-5 h-5 flex items-center justify-center rounded-lg text-[10px] ${profileTab === 'documents' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600'}`}>
-                    {selectedGuest.documents.length}
+                  {selectedGuest.documents.length}
                 </span>
               </button>
-              <button 
+              <button
                 onClick={() => setProfileTab('history')}
-                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  profileTab === 'history' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
-                }`}
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${profileTab === 'history' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                  }`}
               >
                 Stay Ledger
               </button>
@@ -382,18 +377,18 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
             <div className="flex-1 min-h-[500px]">
               {profileTab === 'overview' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2">
-                   <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                      <h4 className="font-bold text-slate-800 flex items-center gap-2">
-                        <Info size={18} className="text-blue-500" />
-                        Bio & Address
-                      </h4>
-                      <div className="space-y-4">
-                        <div className="p-4 bg-slate-50 rounded-2xl">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Physical Address</p>
-                          <p className="text-sm font-semibold text-slate-700">{selectedGuest.address}</p>
-                        </div>
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                    <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                      <Info size={18} className="text-blue-500" />
+                      Bio & Address
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-slate-50 rounded-2xl">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Physical Address</p>
+                        <p className="text-sm font-semibold text-slate-700">{selectedGuest.address}</p>
                       </div>
-                   </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -404,7 +399,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                       <h3 className="text-lg font-bold text-slate-800">Secure Vault</h3>
                       <p className="text-xs text-slate-500 font-medium">Categorized documentation for audit and verification.</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setIsUploading(true)}
                       className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
                     >
@@ -417,7 +412,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                     {/* Identity Category */}
                     <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                         <ShieldCheck size={14} className="text-blue-500" /> Identity
+                        <ShieldCheck size={14} className="text-blue-500" /> Identity
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {categorizedDocs.identity.map(doc => <DocumentCard key={doc.id} doc={doc} onClick={() => setViewingDoc(doc)} />)}
@@ -428,7 +423,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                     {/* Invoices Category */}
                     <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                         <FileText size={14} className="text-amber-500" /> Invoices
+                        <FileText size={14} className="text-amber-500" /> Invoices
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {categorizedDocs.invoices.map(doc => <DocumentCard key={doc.id} doc={doc} onClick={() => setViewingDoc(doc)} />)}
@@ -439,7 +434,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                     {/* Receipts Category */}
                     <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                         <Receipt size={14} className="text-emerald-500" /> Receipts
+                        <Receipt size={14} className="text-emerald-500" /> Receipts
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {categorizedDocs.receipts.map(doc => <DocumentCard key={doc.id} doc={doc} onClick={() => setViewingDoc(doc)} />)}
@@ -450,7 +445,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                     {/* Other Category */}
                     <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                         <File size={14} className="text-slate-500" /> Other
+                        <File size={14} className="text-slate-500" /> Other
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {categorizedDocs.other.map(doc => <DocumentCard key={doc.id} doc={doc} onClick={() => setViewingDoc(doc)} />)}
@@ -470,14 +465,14 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                   <div className="space-y-4">
                     {selectedGuest.history.map((stay) => (
                       <div key={stay.id} className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                          <div>
-                            <p className="font-black text-slate-800">Room #{stay.roomNumber}</p>
-                            <p className="text-xs text-slate-500">{stay.stayDate}</p>
-                          </div>
-                          <div className="text-right">
-                             <p className="font-black text-slate-800">${stay.amount}</p>
-                             <span className="text-[10px] font-bold text-emerald-600 uppercase">{stay.status}</span>
-                          </div>
+                        <div>
+                          <p className="font-black text-slate-800">Room #{stay.roomNumber}</p>
+                          <p className="text-xs text-slate-500">{stay.stayDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-black text-slate-800">${stay.amount}</p>
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase">{stay.status}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -490,251 +485,250 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
         {/* Improved Document/Receipt Previewer */}
         {viewingDoc && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-             <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setViewingDoc(null)}></div>
-             <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300 flex flex-col">
-                
-                {/* Modal Header */}
-                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-2xl ${
-                       viewingDoc.type === 'Receipt' ? 'bg-emerald-50 text-emerald-600' :
-                       viewingDoc.type === 'Invoice' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+            <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setViewingDoc(null)}></div>
+            <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300 flex flex-col">
+
+              {/* Modal Header */}
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl ${viewingDoc.type === 'Receipt' ? 'bg-emerald-50 text-emerald-600' :
+                    viewingDoc.type === 'Invoice' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
                     }`}>
-                       {viewingDoc.fileName.toLowerCase().endsWith('.pdf') ? <FileText size={24} /> : <ImageIcon size={24} />}
+                    {viewingDoc.fileName.toLowerCase().endsWith('.pdf') ? <FileText size={24} /> : <ImageIcon size={24} />}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">{viewingDoc.fileName}</h2>
+                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">
+                      Uploaded on {viewingDoc.uploadDate} • {viewingDoc.type} Category
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setViewingDoc(null)} className="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-2xl transition-all">
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Simulated Content Area (Preview) */}
+              <div className="flex-1 overflow-y-auto p-12 bg-slate-100/50 flex flex-col items-center">
+                {viewingDoc.fileName.toLowerCase().endsWith('.pdf') ? (
+                  /* Simulated PDF Preview */
+                  <div className="w-full max-w-2xl bg-white p-12 rounded-3xl shadow-xl border border-slate-200 relative min-h-[800px] flex flex-col">
+                    {/* PDF Header Mock */}
+                    <div className="flex justify-between items-start mb-12 border-b border-slate-100 pb-8">
+                      <div>
+                        <h3 className="text-2xl font-black text-slate-900">STAYSYNC GRAND</h3>
+                        <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Document Registry</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-slate-800">PAGE 1 OF 1</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">CONFIDENTIAL RECORD</p>
+                      </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-800">{viewingDoc.fileName}</h2>
-                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">
-                            Uploaded on {viewingDoc.uploadDate} • {viewingDoc.type} Category
+
+                    {/* Document Content Mockup */}
+                    <div className="space-y-8 flex-1">
+                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <h4 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-tighter">Summary of Document</h4>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                          This is a simulated preview of the digital file <strong>{viewingDoc.fileName}</strong>.
+                          In a live environment, this space would render the actual PDF content using a
+                          integrated PDF reader or an object embed.
                         </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <div className="h-4 w-2/3 bg-slate-100 rounded animate-pulse"></div>
+                          <div className="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
+                          <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse"></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
+                          <div className="h-4 w-3/4 bg-slate-100 rounded animate-pulse"></div>
+                          <div className="h-4 w-1/3 bg-slate-100 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+
+                      {viewingDoc.type === 'Receipt' || viewingDoc.type === 'Invoice' ? (
+                        <div className="mt-12 border-t-2 border-slate-900 pt-8">
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-black text-slate-900">TOTAL RECORDED AMOUNT</span>
+                            <span className="text-2xl font-black text-slate-900">${viewingDoc.amount?.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* PDF Footer Mock */}
+                    <div className="mt-12 text-center text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                      StaySync HotelOS Verification Engine • {new Date().getFullYear()}
                     </div>
                   </div>
-                  <button onClick={() => setViewingDoc(null)} className="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-2xl transition-all">
-                    <X size={24} />
-                  </button>
-                </div>
-
-                {/* Simulated Content Area (Preview) */}
-                <div className="flex-1 overflow-y-auto p-12 bg-slate-100/50 flex flex-col items-center">
-                    {viewingDoc.fileName.toLowerCase().endsWith('.pdf') ? (
-                        /* Simulated PDF Preview */
-                        <div className="w-full max-w-2xl bg-white p-12 rounded-3xl shadow-xl border border-slate-200 relative min-h-[800px] flex flex-col">
-                            {/* PDF Header Mock */}
-                            <div className="flex justify-between items-start mb-12 border-b border-slate-100 pb-8">
-                                <div>
-                                    <h3 className="text-2xl font-black text-slate-900">LUMINA GRAND</h3>
-                                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Document Registry</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-xs font-black text-slate-800">PAGE 1 OF 1</p>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">CONFIDENTIAL RECORD</p>
-                                </div>
-                            </div>
-                            
-                            {/* Document Content Mockup */}
-                            <div className="space-y-8 flex-1">
-                                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <h4 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-tighter">Summary of Document</h4>
-                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                        This is a simulated preview of the digital file <strong>{viewingDoc.fileName}</strong>. 
-                                        In a live environment, this space would render the actual PDF content using a 
-                                        integrated PDF reader or an object embed.
-                                    </p>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <div className="h-4 w-2/3 bg-slate-100 rounded animate-pulse"></div>
-                                        <div className="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
-                                        <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse"></div>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
-                                        <div className="h-4 w-3/4 bg-slate-100 rounded animate-pulse"></div>
-                                        <div className="h-4 w-1/3 bg-slate-100 rounded animate-pulse"></div>
-                                    </div>
-                                </div>
-
-                                {viewingDoc.type === 'Receipt' || viewingDoc.type === 'Invoice' ? (
-                                    <div className="mt-12 border-t-2 border-slate-900 pt-8">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-lg font-black text-slate-900">TOTAL RECORDED AMOUNT</span>
-                                            <span className="text-2xl font-black text-slate-900">${viewingDoc.amount?.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </div>
-
-                            {/* PDF Footer Mock */}
-                            <div className="mt-12 text-center text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-                                Lumina HMS StaySync-OS Verification Engine • {new Date().getFullYear()}
-                            </div>
+                ) : (
+                  /* Simulated Image Preview */
+                  <div className="w-full max-w-2xl flex flex-col items-center">
+                    <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden relative group">
+                      <div className="absolute inset-0 bg-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <div className="bg-white px-4 py-2 rounded-xl text-xs font-bold text-blue-600 shadow-xl">
+                          Digital Scan Verified
                         </div>
-                    ) : (
-                        /* Simulated Image Preview */
-                        <div className="w-full max-w-2xl flex flex-col items-center">
-                             <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden relative group">
-                                <div className="absolute inset-0 bg-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                    <div className="bg-white px-4 py-2 rounded-xl text-xs font-bold text-blue-600 shadow-xl">
-                                        Digital Scan Verified
-                                    </div>
-                                </div>
-                                <div className="w-full aspect-[4/3] bg-slate-50 flex items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200">
-                                    <div className="text-center">
-                                        <ImageIcon size={64} className="text-slate-200 mx-auto mb-4" />
-                                        <p className="text-xs font-bold text-slate-400">Digital Image Render Placeholder</p>
-                                        <p className="text-[10px] text-slate-300 mt-1 uppercase font-black tracking-widest">{viewingDoc.fileName}</p>
-                                    </div>
-                                </div>
-                             </div>
-                             <p className="mt-8 text-sm text-slate-500 font-medium max-w-md text-center">
-                                Images are encrypted at rest. The Lumina Sentinel has verified the authenticity of this scan against the guest's profile metadata.
-                             </p>
+                      </div>
+                      <div className="w-full aspect-[4/3] bg-slate-50 flex items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200">
+                        <div className="text-center">
+                          <ImageIcon size={64} className="text-slate-200 mx-auto mb-4" />
+                          <p className="text-xs font-bold text-slate-400">Digital Image Render Placeholder</p>
+                          <p className="text-[10px] text-slate-300 mt-1 uppercase font-black tracking-widest">{viewingDoc.fileName}</p>
                         </div>
-                    )}
-                </div>
+                      </div>
+                    </div>
+                    <p className="mt-8 text-sm text-slate-500 font-medium max-w-md text-center">
+                      Images are encrypted at rest. The StaySync Sentinel has verified the authenticity of this scan against the guest's profile metadata.
+                    </p>
+                  </div>
+                )}
+              </div>
 
-                {/* Modal Footer */}
-                <div className="p-8 border-t border-slate-100 flex gap-4 bg-white shrink-0">
-                    <button className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
-                        <Download size={18} />
-                        Download Original
-                    </button>
-                    <button className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
-                        <Mail size={18} />
-                        Send as Attachment
-                    </button>
-                </div>
-             </div>
+              {/* Modal Footer */}
+              <div className="p-8 border-t border-slate-100 flex gap-4 bg-white shrink-0">
+                <button className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                  <Download size={18} />
+                  Download Original
+                </button>
+                <button className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                  <Mail size={18} />
+                  Send as Attachment
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Upload Modal with AI Workflow */}
         {isUploading && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={resetUploadModal}></div>
-             <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                
-                {/* Modal Header */}
-                <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                   <div>
-                      <h2 className="text-xl font-bold text-slate-800">Secure Document Upload</h2>
-                      <p className="text-xs text-slate-500 font-medium">Add records to the profile vault.</p>
-                   </div>
-                   <button onClick={resetUploadModal} className="p-2 text-slate-400 hover:text-slate-600">
-                      <X size={24} />
-                   </button>
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={resetUploadModal}></div>
+            <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+
+              {/* Modal Header */}
+              <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Secure Document Upload</h2>
+                  <p className="text-xs text-slate-500 font-medium">Add records to the profile vault.</p>
                 </div>
+                <button onClick={resetUploadModal} className="p-2 text-slate-400 hover:text-slate-600">
+                  <X size={24} />
+                </button>
+              </div>
 
-                {/* Step 1: Select File */}
-                {uploadStep === 'select' && (
-                  <div className="p-8 space-y-6">
-                     <div className="space-y-4">
-                        <div 
-                          onClick={() => fileInputRef.current?.click()}
-                          className="border-2 border-dashed border-slate-200 rounded-[1.5rem] p-10 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group"
-                        >
-                           {selectedFile ? (
-                             <div className="flex flex-col items-center">
-                                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
-                                  <FileText size={32} />
-                                </div>
-                                <p className="font-bold text-slate-800">{selectedFile.name}</p>
-                                <p className="text-xs text-slate-400 mt-1">{(selectedFile.size / 1024).toFixed(1)} KB</p>
-                             </div>
-                           ) : (
-                             <>
-                               <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                  <Upload size={24} />
-                               </div>
-                               <p className="text-sm font-bold text-slate-500">Click to select a document</p>
-                               <p className="text-[10px] text-slate-300 mt-1">PDF, JPG, PNG (Max 10MB)</p>
-                             </>
-                           )}
-                           <input 
-                             type="file" 
-                             ref={fileInputRef} 
-                             className="hidden" 
-                             onChange={handleFileSelect} 
-                             accept=".pdf,.jpg,.jpeg,.png"
-                           />
+              {/* Step 1: Select File */}
+              {uploadStep === 'select' && (
+                <div className="p-8 space-y-6">
+                  <div className="space-y-4">
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-200 rounded-[1.5rem] p-10 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group"
+                    >
+                      {selectedFile ? (
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                            <FileText size={32} />
+                          </div>
+                          <p className="font-bold text-slate-800">{selectedFile.name}</p>
+                          <p className="text-xs text-slate-400 mt-1">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                         </div>
-                     </div>
-                     <div className="flex gap-4">
-                        <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Cancel</button>
-                        <button 
-                          onClick={startAiAnalysis}
-                          disabled={!selectedFile}
-                          className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-                        >
-                          <Sparkles size={16} />
-                          Analyze & Upload
-                        </button>
-                     </div>
+                      ) : (
+                        <>
+                          <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <Upload size={24} />
+                          </div>
+                          <p className="text-sm font-bold text-slate-500">Click to select a document</p>
+                          <p className="text-[10px] text-slate-300 mt-1">PDF, JPG, PNG (Max 10MB)</p>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileSelect}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                    </div>
                   </div>
-                )}
+                  <div className="flex gap-4">
+                    <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Cancel</button>
+                    <button
+                      onClick={startAiAnalysis}
+                      disabled={!selectedFile}
+                      className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Sparkles size={16} />
+                      Analyze & Upload
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                {/* Step 2: Analyzing */}
-                {uploadStep === 'analyzing' && (
-                  <div className="p-12 flex flex-col items-center text-center space-y-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl animate-pulse"></div>
-                      <div className="relative w-20 h-20 bg-white border-4 border-blue-50 rounded-full flex items-center justify-center">
-                         <Loader2 size={32} className="text-blue-600 animate-spin" />
-                      </div>
+              {/* Step 2: Analyzing */}
+              {uploadStep === 'analyzing' && (
+                <div className="p-12 flex flex-col items-center text-center space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl animate-pulse"></div>
+                    <div className="relative w-20 h-20 bg-white border-4 border-blue-50 rounded-full flex items-center justify-center">
+                      <Loader2 size={32} className="text-blue-600 animate-spin" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">StaySync Intelligence Analyzing</h3>
+                    <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
+                      Classifying document content and extracting metadata...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Review */}
+              {uploadStep === 'review' && (
+                <div className="p-8 space-y-6">
+                  <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex items-start gap-4">
+                    <div className="p-2 bg-white rounded-xl text-blue-600 shrink-0">
+                      <Sparkles size={20} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800">Lumina Intelligence Analyzing</h3>
-                      <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
-                        Classifying document content and extracting metadata...
-                      </p>
+                      <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1">AI Suggestion</p>
+                      <p className="text-sm font-bold text-slate-700">Categorized as <span className="text-blue-700">{aiCategory}</span></p>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">"{aiReasoning}"</p>
                     </div>
                   </div>
-                )}
 
-                {/* Step 3: Review */}
-                {uploadStep === 'review' && (
-                  <div className="p-8 space-y-6">
-                     <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex items-start gap-4">
-                        <div className="p-2 bg-white rounded-xl text-blue-600 shrink-0">
-                          <Sparkles size={20} />
-                        </div>
-                        <div>
-                          <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1">AI Suggestion</p>
-                          <p className="text-sm font-bold text-slate-700">Categorized as <span className="text-blue-700">{aiCategory}</span></p>
-                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">"{aiReasoning}"</p>
-                        </div>
-                     </div>
-
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm Category</label>
-                        <select 
-                          value={aiCategory} 
-                          onChange={(e) => setAiCategory(e.target.value as any)}
-                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold appearance-none transition-all"
-                        >
-                           <option value="Passport">Passport</option>
-                           <option value="Driver License">Driver License</option>
-                           <option value="ID Card">ID Card</option>
-                           <option value="Invoice">Invoice</option>
-                           <option value="Receipt">Receipt</option>
-                           <option value="Other">Other</option>
-                        </select>
-                     </div>
-
-                     <div className="flex gap-4 pt-2">
-                        <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Discard</button>
-                        <button 
-                          onClick={finalizeUpload}
-                          className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
-                        >
-                          <Check size={16} />
-                          Confirm & Save
-                        </button>
-                     </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm Category</label>
+                    <select
+                      value={aiCategory}
+                      onChange={(e) => setAiCategory(e.target.value as any)}
+                      className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold appearance-none transition-all"
+                    >
+                      <option value="Passport">Passport</option>
+                      <option value="Driver License">Driver License</option>
+                      <option value="ID Card">ID Card</option>
+                      <option value="Invoice">Invoice</option>
+                      <option value="Receipt">Receipt</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
-                )}
-             </div>
+
+                  <div className="flex gap-4 pt-2">
+                    <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Discard</button>
+                    <button
+                      onClick={finalizeUpload}
+                      className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Check size={16} />
+                      Confirm & Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -748,7 +742,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
           <h1 className="text-3xl font-bold text-slate-800">Guest Management</h1>
           <p className="text-slate-500 text-sm mt-1">Unified profiles with automated billing and secure documentation vault.</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsAddingNew(true)}
           className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
         >
@@ -758,24 +752,22 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
       </div>
 
       <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-[1.25rem] self-start w-fit">
-        <button 
+        <button
           onClick={() => setActiveSubTab('all')}
-          className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-black transition-all ${
-            activeSubTab === 'all' 
-            ? 'bg-white text-blue-600 shadow-md' 
+          className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-black transition-all ${activeSubTab === 'all'
+            ? 'bg-white text-blue-600 shadow-md'
             : 'text-slate-500 hover:text-slate-800'
-          }`}
+            }`}
         >
           <Users size={18} />
           Directory
         </button>
-        <button 
+        <button
           onClick={() => setActiveSubTab('dnr')}
-          className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-black transition-all ${
-            activeSubTab === 'dnr' 
-            ? 'bg-rose-600 text-white shadow-md' 
+          className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-black transition-all ${activeSubTab === 'dnr'
+            ? 'bg-rose-600 text-white shadow-md'
             : 'text-slate-500 hover:text-rose-600'
-          }`}
+            }`}
         >
           <Ban size={18} />
           DNR Sentinel
@@ -785,7 +777,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
       <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
+          <input
             type="text"
             placeholder={activeSubTab === 'dnr' ? "Scan restricted list..." : "Find guest by name, ID, or phone..."}
             value={search}
@@ -794,15 +786,15 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
           />
         </div>
         <div className="flex items-center gap-2">
-           <button className="p-3 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-100">
-             <Filter size={18} />
-           </button>
+          <button className="p-3 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-100">
+            <Filter size={18} />
+          </button>
         </div>
       </div>
 
       <div className={`grid grid-cols-1 md:grid-cols-2 ${activeSubTab === 'dnr' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-6`}>
         {filteredGuests.length > 0 ? filteredGuests.map(guest => (
-          <div 
+          <div
             key={guest.id}
             onClick={() => setSelectedGuestId(guest.id)}
             className={`group cursor-pointer bg-white rounded-[2.5rem] p-8 border ${guest.isDNR ? 'border-rose-50' : 'border-slate-100'} shadow-sm hover:shadow-2xl transition-all relative overflow-hidden`}
@@ -821,11 +813,10 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                   <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">{guest.idNumber}</p>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                guest.isDNR ? 'bg-rose-600 text-white' :
-                guest.status === 'VIP' ? 'bg-amber-100 text-amber-700' : 
-                'bg-slate-100 text-slate-600'
-              }`}>
+              <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${guest.isDNR ? 'bg-rose-600 text-white' :
+                guest.status === 'VIP' ? 'bg-amber-100 text-amber-700' :
+                  'bg-slate-100 text-slate-600'
+                }`}>
                 {guest.isDNR ? 'DNR' : guest.status}
               </span>
             </div>
@@ -852,11 +843,11 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
             </div>
           </div>
         )) : (
-           <div className="col-span-full py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
-              <Users size={48} className="text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-400">Guest Database Empty</h3>
-              <p className="text-xs text-slate-400 mt-2 max-w-xs">{isDemoMode ? "Adjust search filters." : "You are in production mode. Add guests to populate the system."}</p>
-           </div>
+          <div className="col-span-full py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+            <Users size={48} className="text-slate-300 mb-4" />
+            <h3 className="text-lg font-bold text-slate-400">Guest Database Empty</h3>
+            <p className="text-xs text-slate-400 mt-2 max-w-xs">{isDemoMode ? "Adjust search filters." : "You are in production mode. Add guests to populate the system."}</p>
+          </div>
         )}
       </div>
 
@@ -872,7 +863,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddGuest} className="p-10 space-y-8">
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">

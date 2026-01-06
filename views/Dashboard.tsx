@@ -244,7 +244,7 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
               <Sparkles size={20} className="text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold tracking-tight">Lumina Operational Intel</h2>
+              <h2 className="text-lg font-bold tracking-tight">StaySync Operational Intel</h2>
               <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Arrears & Maintenance Analysis</p>
             </div>
           </div>
@@ -327,8 +327,8 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
             {liveEvents.map((event) => (
               <div key={event.id} className="p-4 hover:bg-slate-50 rounded-xl transition-colors flex items-start gap-3 animate-in slide-in-from-left-2 duration-300">
                 <div className={`p-2 rounded-full shrink-0 ${event.type === 'maintenance' ? 'bg-amber-100 text-amber-600' :
-                    event.type === 'cleaning' ? 'bg-emerald-100 text-emerald-600' :
-                      event.type === 'checkin' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                  event.type === 'cleaning' ? 'bg-emerald-100 text-emerald-600' :
+                    event.type === 'checkin' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
                   }`}>
                   {event.type === 'maintenance' ? <Wrench size={14} /> :
                     event.type === 'cleaning' ? <Sparkles size={14} /> :

@@ -132,9 +132,7 @@ const App: React.FC = () => {
       <div className="h-screen w-full flex items-center justify-center bg-slate-900">
         <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
           <div className="flex justify-center mb-6">
-            <div className="bg-blue-600 p-3 rounded-xl text-white">
-              <span className="font-bold text-2xl">L</span>
-            </div>
+            <span className="font-bold text-2xl">S</span>
           </div>
           <h1 className="text-2xl font-bold mb-2 text-center text-slate-800">Welcome Back</h1>
           <p className="text-slate-500 text-center mb-8">Login to manage {properties[0].name}</p>
