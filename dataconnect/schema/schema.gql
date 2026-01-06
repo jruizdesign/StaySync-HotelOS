@@ -1,0 +1,62 @@
+scalar Date
+scalar UUID
+
+# 1. Properties
+type Property @table(name: "properties") {
+  id: UUID! @default(expr: "uuid_generate_v4()")
+  name: String!
+  address: String
+  phoneNumber: String
+  email: String
+  
+  # Data Connect automatically finds users/bookings that have "propertyId"
+  # pointing to this Property. You don't need @relation here.
+  users: [User!]! 
+  bookings: [Booking!]! 
+  rooms: [Room!]! 
+}
+
+# 2. Users
+type User @table(name: "users") {
+  id: String! @col(name: "uid") 
+  email: String!
+  role: String! 
+  
+  # The Foreign Key (Actual Data)
+  propertyId: UUID
+  
+  # The Link (Data Connect infers this links to Property via propertyId)
+  property: Property 
+}
+
+# 3. Bookings
+type Booking @table(name: "bookings") {
+  id: UUID! @default(expr: "uuid_generate_v4()")
+  guestName: String!
+  checkInDate: Date!
+  checkOutDate: Date!
+  status: String!
+  
+  # The Foreign Key
+  propertyId: UUID!
+  # The Link
+  property: Property!
+  
+  # Link to Room
+  roomId: UUID
+  room: Room
+}
+
+# 4. Rooms
+type Room @table(name: "rooms") {
+  id: UUID! @default(expr: "uuid_generate_v4()")
+  roomNumber: String!
+  roomType: String!
+  capacity: Int
+  pricePerNight: Float
+  
+  # The Foreign Key
+  propertyId: UUID!
+  # The Link
+  property: Property!
+}
