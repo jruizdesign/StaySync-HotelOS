@@ -6,6 +6,17 @@ export const connectorConfig = {
   location: 'us-central1'
 };
 
+export const createRoomEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateRoomEntry', inputVars);
+}
+createRoomEntryRef.operationName = 'CreateRoomEntry';
+
+export function createRoomEntry(dcOrVars, vars) {
+  return executeMutation(createRoomEntryRef(dcOrVars, vars));
+}
+
 export const adminListPropertiesRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();

@@ -23,4 +23,3 @@ mutation CreateRoomEntry(
     propertyId: $propertyId
   })
 }
-}

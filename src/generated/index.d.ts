@@ -48,6 +48,20 @@ export interface CreateRoomData {
   room_insert: Room_Key;
 }
 
+export interface CreateRoomEntryData {
+  room_insert: Room_Key;
+}
+
+export interface CreateRoomEntryVariables {
+  roomNumber: string;
+  roomType: string;
+  floor?: number | null;
+  roomStatus?: string | null;
+  capacity?: number | null;
+  price?: number | null;
+  propertyId: UUIDString;
+}
+
 export interface CreateRoomVariables {
   propertyId: UUIDString;
   roomNumber: string;
@@ -164,6 +178,18 @@ export interface User_Key {
   id: string;
   __typename?: 'User_Key';
 }
+
+interface CreateRoomEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
+  operationName: string;
+}
+export const createRoomEntryRef: CreateRoomEntryRef;
+
+export function createRoomEntry(vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
+export function createRoomEntry(dc: DataConnect, vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
 
 interface AdminListPropertiesRef {
   /* Allow users to create refs without passing in DataConnect */

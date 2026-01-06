@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createRoom } from '@firebasegen/default';
+import { createRoomEntry } from "@firebasegen/default";
 import { Check, ChevronRight, Hash, Layers, Loader2, BedDouble, AlertCircle, DollarSign } from 'lucide-react';
 
 interface RoomSetupWizardProps {
@@ -28,8 +28,8 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
     // Batch Creation Mutation
     const createRoomMutation = useMutation({
         mutationFn: async (vars: any) => {
-            // Direct call to generated SDK
-            return await createRoom(vars);
+            // ✅ Use the variable you imported
+            return await createRoomEntry(vars);
         }
     });
 
