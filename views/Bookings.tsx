@@ -1,16 +1,18 @@
 
 import React, { useState, useMemo } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit2, 
-  Trash2, 
-  X, 
-  Calendar, 
-  User, 
-  Hash, 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getPropertyDashboard, createBooking } from '@firebasegen/default';
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  X,
+  Calendar,
+  User,
+  Hash,
   DollarSign,
   CheckCircle2,
   Receipt,
@@ -41,28 +43,81 @@ const MOCK_GUEST_DATABASE = [
   { name: 'Sophia Garcia', email: 'sophia.g@example.com', phone: '+1 555-019-2211' }
 ];
 
+
+
 interface BookingsProps {
   isDemoMode: boolean;
+  propertyId?: string;
 }
 
-const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
-  const [bookings, setBookings] = useState<Booking[]>(isDemoMode ? INITIAL_BOOKINGS : []);
+const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
+  const queryClient = useQueryClient();
+
+  // 1. Fetch Real Data
+  const { data: dashboardData } = useQuery({
+    queryKey: ['dashboard', propertyId],
+    queryFn: async () => {
+      if (!propertyId || isDemoMode) return null;
+      const res = await getPropertyDashboard({ propertyId });
+      return res.data;
+    },
+    enabled: !!propertyId && !isDemoMode
+  });
+
+  // 2. Map Backend Data to UI Data
+  const realBookings = useMemo(() => {
+    if (!dashboardData?.bookings) return [];
+    return dashboardData.bookings.map(b => ({
+      id: b.id,
+      guestName: b.guestName,
+      guestEmail: '', // Not in schema yet
+      guestPhone: '', // Not in schema yet
+      numberOfGuests: 1, // Not in schema yet
+      roomNumber: b.room?.roomNumber || 'Unknown',
+      checkIn: b.checkInDate,
+      checkOut: b.checkOutDate,
+      status: b.status as any,
+      totalAmount: 0 // Not in schema yet
+    }));
+  }, [dashboardData]);
+
+  const [localBookings, setLocalBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+
+  const bookings = isDemoMode ? localBookings : realBookings;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Partial<Booking> | null>(null);
   const [isGeneratingDocs, setIsGeneratingDocs] = useState(false);
-  
+
   // Autocomplete State
   const [guestSuggestions, setGuestSuggestions] = useState<typeof MOCK_GUEST_DATABASE>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // 3. Mutation
+  const createBookingMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await createBooking(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard', propertyId] });
+      setIsModalOpen(false);
+    },
+    onError: (err) => {
+      console.error("Failed to create booking", err);
+      alert("Failed to create booking");
+    }
+  });
+
+  // ... filtering logic ...
   const filteredBookings = useMemo(() => {
-    return bookings.filter(b => 
-      b.guestName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    return bookings.filter(b =>
+      b.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.roomNumber.includes(searchTerm)
     );
   }, [bookings, searchTerm]);
 
+  // ... modal logic ...
   const openModal = (booking: Booking | null = null) => {
     setCurrentBooking(booking || {
       guestName: '',
@@ -80,37 +135,36 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
     setIsModalOpen(true);
   };
 
+  // ... helpers ...
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setCurrentBooking(prev => prev ? ({ ...prev, guestName: val }) : null);
-    
+
     if (val.length > 1) {
-        const matches = MOCK_GUEST_DATABASE.filter(g => g.name.toLowerCase().includes(val.toLowerCase()));
-        setGuestSuggestions(matches);
-        setShowSuggestions(true);
+      const matches = MOCK_GUEST_DATABASE.filter(g => g.name.toLowerCase().includes(val.toLowerCase()));
+      setGuestSuggestions(matches);
+      setShowSuggestions(true);
     } else {
-        setGuestSuggestions([]);
-        setShowSuggestions(false);
+      setGuestSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
   const selectGuest = (guest: typeof MOCK_GUEST_DATABASE[0]) => {
-      setCurrentBooking(prev => prev ? ({
-          ...prev,
-          guestName: guest.name,
-          guestEmail: guest.email,
-          guestPhone: guest.phone
-      }) : null);
-      setShowSuggestions(false);
+    setCurrentBooking(prev => prev ? ({
+      ...prev,
+      guestName: guest.name,
+      guestEmail: guest.email,
+      guestPhone: guest.phone
+    }) : null);
+    setShowSuggestions(false);
   };
 
   const toggleIndefiniteStay = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentBooking) return;
     if (e.target.checked) {
-      // Switch to indefinite
       setCurrentBooking({ ...currentBooking, checkOut: undefined });
     } else {
-      // Switch back to date, default to 1 day after checkin or tomorrow
       const baseDate = currentBooking.checkIn ? new Date(currentBooking.checkIn) : new Date();
       baseDate.setDate(baseDate.getDate() + 1);
       setCurrentBooking({ ...currentBooking, checkOut: baseDate.toISOString().split('T')[0] });
@@ -121,25 +175,40 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
     e.preventDefault();
     if (!currentBooking) return;
 
-    if (currentBooking.status === 'Completed' && currentBooking.id) {
-        // Trigger Doc Generation Simulation
+    if (isDemoMode) {
+      // ... demo logic ...
+      if (currentBooking.status === 'Completed' && currentBooking.id) {
         setIsGeneratingDocs(true);
-        // Simulate a small delay for "generating" PDFs
         await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log(`Auto-generated Invoice & Receipt for ${currentBooking.guestName}`);
         setIsGeneratingDocs(false);
-    }
+      }
 
-    if (currentBooking.id) {
-      setBookings(prev => prev.map(b => b.id === currentBooking.id ? (currentBooking as Booking) : b));
+      if (currentBooking.id) {
+        setLocalBookings(prev => prev.map(b => b.id === currentBooking.id ? (currentBooking as Booking) : b));
+      } else {
+        const newBooking = {
+          ...currentBooking,
+          id: 'b' + Math.random().toString(36).substr(2, 5)
+        } as Booking;
+        setLocalBookings([newBooking, ...localBookings]);
+      }
+      setIsModalOpen(false);
     } else {
-      const newBooking = {
-        ...currentBooking,
-        id: 'b' + Math.random().toString(36).substr(2, 5)
-      } as Booking;
-      setBookings([newBooking, ...bookings]);
+      // Real Data
+      if (currentBooking.id) {
+        alert("Editing not yet supported in this version.");
+      } else {
+        // CREATE
+        setIsGeneratingDocs(true); // Reusing loading state
+        createBookingMutation.mutate({
+          propertyId: propertyId!,
+          guestName: currentBooking.guestName || 'Guest',
+          checkIn: currentBooking.checkIn || new Date().toISOString(),
+          checkOut: currentBooking.checkOut || new Date().toISOString()
+        });
+        setIsGeneratingDocs(false);
+      }
     }
-    setIsModalOpen(false);
   };
 
   const handleDelete = (id: string) => {
@@ -165,7 +234,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
           <h1 className="text-2xl font-bold text-slate-800">Reservations</h1>
           <p className="text-slate-500 text-sm">Manage guest check-ins, stays, and automated departures.</p>
         </div>
-        <button 
+        <button
           onClick={() => openModal()}
           className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
         >
@@ -177,7 +246,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
       <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <div className="relative flex-1 min-w-[240px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
+          <input
             type="text"
             placeholder="Search by guest or room..."
             value={searchTerm}
@@ -220,16 +289,16 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                       <div>
                         <span className="font-semibold text-slate-700 block">{booking.guestName}</span>
                         <div className="flex flex-col gap-0.5 mt-0.5">
-                            {booking.guestEmail && (
-                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                                    <Mail size={10} /> {booking.guestEmail}
-                                </span>
-                            )}
-                            {booking.guestPhone && (
-                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                                    <Phone size={10} /> {booking.guestPhone}
-                                </span>
-                            )}
+                          {booking.guestEmail && (
+                            <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                              <Mail size={10} /> {booking.guestEmail}
+                            </span>
+                          )}
+                          {booking.guestPhone && (
+                            <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                              <Phone size={10} /> {booking.guestPhone}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -267,7 +336,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
+                      <button
                         onClick={() => openModal(booking)}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Edit Booking"
@@ -275,14 +344,14 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                         <Edit2 size={16} />
                       </button>
                       {booking.status === 'Completed' && (
-                        <button 
+                        <button
                           className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
                           title="View Auto-Generated Receipt"
                         >
                           <Receipt size={16} />
                         </button>
                       )}
-                      <button 
+                      <button
                         onClick={() => handleDelete(booking.id)}
                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                       >
@@ -315,43 +384,43 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSave} className="p-8 space-y-5">
               <div className="space-y-2 relative">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <User size={14} /> Guest Name
                 </label>
                 <div className="relative">
-                    <input 
+                  <input
                     required
                     type="text"
                     value={currentBooking.guestName}
                     onChange={handleNameChange}
-                    onFocus={() => { if(currentBooking.guestName && currentBooking.guestName.length > 1) setShowSuggestions(true); }}
+                    onFocus={() => { if (currentBooking.guestName && currentBooking.guestName.length > 1) setShowSuggestions(true); }}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="Search Guest..."
                     autoComplete="off"
-                    />
-                    {showSuggestions && guestSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50 max-h-48 overflow-y-auto">
-                            {guestSuggestions.map((g, idx) => (
-                                <div 
-                                    key={idx}
-                                    onClick={() => selectGuest(g)}
-                                    className="p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between group border-b border-slate-50 last:border-0"
-                                >
-                                    <div>
-                                        <p className="font-bold text-slate-700 text-sm">{g.name}</p>
-                                        <p className="text-[10px] text-slate-400">{g.email}</p>
-                                    </div>
-                                    <div className="hidden group-hover:flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase">
-                                        <Sparkles size={10} /> Link
-                                    </div>
-                                </div>
-                            ))}
+                  />
+                  {showSuggestions && guestSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50 max-h-48 overflow-y-auto">
+                      {guestSuggestions.map((g, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => selectGuest(g)}
+                          className="p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between group border-b border-slate-50 last:border-0"
+                        >
+                          <div>
+                            <p className="font-bold text-slate-700 text-sm">{g.name}</p>
+                            <p className="text-[10px] text-slate-400">{g.email}</p>
+                          </div>
+                          <div className="hidden group-hover:flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase">
+                            <Sparkles size={10} /> Link
+                          </div>
                         </div>
-                    )}
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -361,22 +430,22 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Mail size={14} /> Email
                   </label>
-                  <input 
+                  <input
                     type="email"
                     value={currentBooking.guestEmail || ''}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, guestEmail: e.target.value} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, guestEmail: e.target.value } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="guest@email.com"
                   />
                 </div>
                 <div className="space-y-2">
-                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Phone size={14} /> Phone
                   </label>
-                  <input 
+                  <input
                     type="tel"
                     value={currentBooking.guestPhone || ''}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, guestPhone: e.target.value} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, guestPhone: e.target.value } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="+1 (555) 000-0000"
                   />
@@ -386,38 +455,38 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
               {/* Date Selection & Indefinite Stay */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Calendar size={14} /> Check In
                   </label>
-                  <input 
+                  <input
                     required
                     type="date"
                     value={currentBooking.checkIn}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, checkIn: e.target.value} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, checkIn: e.target.value } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700"
                   />
                 </div>
                 <div className="space-y-2">
-                   <div className="flex justify-between items-center">
-                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                       <Calendar size={14} /> Check Out
                     </label>
                     <label className="flex items-center gap-1.5 cursor-pointer group">
-                       <input 
-                         type="checkbox" 
-                         checked={currentBooking.checkOut === undefined} 
-                         onChange={toggleIndefiniteStay}
-                         className="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                       />
-                       <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest group-hover:text-blue-700">Indefinite</span>
+                      <input
+                        type="checkbox"
+                        checked={currentBooking.checkOut === undefined}
+                        onChange={toggleIndefiniteStay}
+                        className="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest group-hover:text-blue-700">Indefinite</span>
                     </label>
-                   </div>
-                  <input 
+                  </div>
+                  <input
                     required={currentBooking.checkOut !== undefined}
                     disabled={currentBooking.checkOut === undefined}
                     type="date"
                     value={currentBooking.checkOut || ''}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, checkOut: e.target.value} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, checkOut: e.target.value } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
                   />
                 </div>
@@ -428,11 +497,11 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Hash size={14} /> Room
                   </label>
-                  <input 
+                  <input
                     required
                     type="text"
                     value={currentBooking.roomNumber}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, roomNumber: e.target.value} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, roomNumber: e.target.value } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="101"
                   />
@@ -441,12 +510,12 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Users size={14} /> Guests
                   </label>
-                  <input 
+                  <input
                     required
                     type="number"
                     min="1"
                     value={currentBooking.numberOfGuests}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, numberOfGuests: parseInt(e.target.value) || 1} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, numberOfGuests: parseInt(e.target.value) || 1 } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
@@ -454,11 +523,11 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <DollarSign size={14} /> Amount
                   </label>
-                  <input 
+                  <input
                     required
                     type="number"
                     value={currentBooking.totalAmount}
-                    onChange={e => setCurrentBooking(prev => prev ? {...prev, totalAmount: parseFloat(e.target.value)} : null)}
+                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, totalAmount: parseFloat(e.target.value) } : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="0.00"
                   />
@@ -469,9 +538,9 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <CheckCircle2 size={14} /> Status
                 </label>
-                <select 
+                <select
                   value={currentBooking.status}
-                  onChange={e => setCurrentBooking(prev => prev ? {...prev, status: e.target.value as any} : null)}
+                  onChange={e => setCurrentBooking(prev => prev ? { ...prev, status: e.target.value as any } : null)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
                 >
                   <option value="Confirmed">Confirmed</option>
@@ -482,34 +551,34 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
               </div>
 
               {currentBooking.status === 'Completed' && (
-                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                      <FileText className="text-emerald-500 shrink-0 mt-1" size={18} />
-                      <p className="text-xs font-medium text-emerald-700 leading-relaxed">
-                          Marking this booking as <strong>Completed</strong> will automatically generate a final invoice and receipt and add them to the guest's secure document vault.
-                      </p>
-                  </div>
+                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                  <FileText className="text-emerald-500 shrink-0 mt-1" size={18} />
+                  <p className="text-xs font-medium text-emerald-700 leading-relaxed">
+                    Marking this booking as <strong>Completed</strong> will automatically generate a final invoice and receipt and add them to the guest's secure document vault.
+                  </p>
+                </div>
               )}
 
               <div className="pt-4 flex gap-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 py-3 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={isGeneratingDocs}
                   className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                   {isGeneratingDocs ? (
-                      <>
-                        <Loader2 className="animate-spin" size={18} />
-                        Billing...
-                      </>
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      Billing...
+                    </>
                   ) : (
-                      currentBooking.id ? 'Update & Finalize' : 'Create Booking'
+                    currentBooking.id ? 'Update & Finalize' : 'Create Booking'
                   )}
                 </button>
               </div>

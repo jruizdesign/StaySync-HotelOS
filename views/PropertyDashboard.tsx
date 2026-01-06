@@ -12,6 +12,9 @@ import Bookings from "./Bookings";
 import FeatureRequests from "./FeatureRequests";
 import { User, UserRole } from "../types"; // Import your custom type
 
+import { useQuery } from '@tanstack/react-query';
+import { getPropertyDashboard } from '@firebasegen/default';
+
 const MOCK_PROPERTIES = [
     { id: "p-london-01", name: "StaySync London Prime", location: "London, UK", totalRooms: 120 },
     { id: "p-nyc-02", name: "StaySync NYC Central", location: "New York, USA", totalRooms: 240 },
@@ -21,24 +24,36 @@ const MOCK_PROPERTIES = [
 export default function PropertyDashboard() {
     const { propertyId } = useParams<{ propertyId: string }>();
     const navigate = useNavigate();
-    const { user: firebaseUser, claims, loading } = useAuth(); // Rename 'user' to 'firebaseUser' to avoid confusion
+    const { user: firebaseUser, claims, loading } = useAuth();
 
     const [activeTab, setActiveTab] = useState("dashboard");
     const [maintenanceTasks, setMaintenanceTasks] = useState([]);
     const [featureRequests, setFeatureRequests] = useState([]);
 
-    // --- 1. THE FIX: Create a 'Safe User' object that matches your TypeScript interface ---
-    // We combine the Firebase Auth data with the Custom Claims data
+    // Create 'Safe User' object that matches TypeScript interface
     const appUser: User | null = useMemo(() => {
         if (!firebaseUser) return null;
         return {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || "Staff Member",
             email: firebaseUser.email || "",
-            role: (claims?.role as unknown as UserRole) || UserRole.STAFF, // Cast to match your UserRole type
+            role: (claims?.role as unknown as UserRole) || UserRole.STAFF,
             propertyId: claims?.propertyId || null
         };
     }, [firebaseUser, claims]);
+
+    // Fetch Real Data if not demo
+    const isDemoMode = propertyId === 'demo';
+
+    const { data: dashboardData, isLoading: isLoadingData } = useQuery({
+        queryKey: ['dashboard', propertyId],
+        queryFn: async () => {
+            if (isDemoMode || !propertyId) return null;
+            const res = await getPropertyDashboard({ propertyId });
+            return res.data;
+        },
+        enabled: !!propertyId && !isDemoMode
+    });
 
     if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
@@ -51,18 +66,20 @@ export default function PropertyDashboard() {
         );
     }
 
-    const currentProperty = MOCK_PROPERTIES.find(p => p.id === propertyId);
-    if (!currentProperty) return <div>Property Not Found</div>;
+    const currentProperty = isDemoMode
+        ? MOCK_PROPERTIES.find(p => p.id === 'demo')
+        : dashboardData?.property;
 
-    const isDemoMode = propertyId === 'demo';
+    if (!currentProperty && !isLoadingData && !isDemoMode) return <div>Property Not Found</div>;
 
     return (
         <Layout
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            user={appUser} // Passing the converted appUser
+            user={appUser}
             currentProperty={currentProperty as any}
-            properties={MOCK_PROPERTIES}
+            // For now, if real data, just show current property in list or mock list
+            properties={isDemoMode ? MOCK_PROPERTIES : (dashboardData?.property ? [dashboardData.property] : [])}
             onPropertyChange={(p) => navigate(`/dashboard/${p.id}`)}
             onLogout={() => navigate('/login')}
         >
@@ -91,7 +108,7 @@ export default function PropertyDashboard() {
                 <Accounting isDemoMode={isDemoMode} maintenanceTasks={maintenanceTasks} />
             )}
 
-            {activeTab === 'bookings' && <Bookings isDemoMode={isDemoMode} />}
+            {activeTab === 'bookings' && <Bookings isDemoMode={isDemoMode} propertyId={propertyId} />}
 
             {activeTab === 'features' && (
                 <FeatureRequests
