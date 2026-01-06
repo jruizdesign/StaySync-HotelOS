@@ -1,7 +1,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getDataConnect, connectDataConnectEmulator } from 'firebase/data-connect';
-import { connectorConfig } from '@stay-sync/hotel-os';
+import { connectorConfig } from '@firebasegen/default';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB7DSM9yaCzHPa0gHYhCEKHSZP2ZMAuQUo",
@@ -21,7 +21,7 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 export const auth = getAuth(app);
 
 // Connect to emulator in dev
-// Note: You might want to make this conditional on process.env.NODE_ENV
-// But for this session we assume emulator usage.
-connectDataConnectEmulator(dc, 'localhost', 9399);
-connectAuthEmulator(auth, "http://localhost:9099"); 
+if (window.location.hostname === 'localhost') {
+    connectDataConnectEmulator(dc, 'localhost', 9399);
+    connectAuthEmulator(auth, "http://localhost:9099");
+} 
