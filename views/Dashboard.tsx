@@ -413,44 +413,37 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
 
 const Dashboard: React.FC<DashboardProps> = ({ property, isDemoMode, user }) => {
 
-  // LOGIC BRANCH:
-  // If Super Admin, fetch the list of hotels.
-  // If Manager, fetch ONLY their dashboard.
+  // Logic Fix: 
+  // We prioritize the ID passed in via props (which comes from the URL in PropertyDashboard wrapper).
+  // This allows Super Admins to view ANY dashboard they navigated to.
+  // Managers are restricted by the 'propertyId' check done in the parent or routing logic.
 
-  if (user.role === UserRole.SYSTEM_ADMIN) {
-    // Run the Admin Query
-    const { data, isLoading, error } = useQuery({
-      queryKey: ['admin-props'],
-      queryFn: () => adminListAllProperties(dc)
-    });
+  // If this is a Super Admin, they have access to everything.
+  // If this is a Manager, their user.propertyId SHOULD match the property.id.
 
-    if (isLoading) return <div className="h-full flex items-center justify-center text-slate-400 text-sm">Loading admin data...</div>;
-    if (error) return <div className="h-full flex items-center justify-center text-rose-500 text-sm">Error loading data: {(error as any).message}</div>;
+  const propertyIdToFetch = property?.id;
 
-    return <AdminView properties={data?.properties} />;
+  // Safety check: specific property ID required
+  if (!propertyIdToFetch && !isDemoMode) {
+    return <div>Error: No Property Context</div>;
   }
 
-  else {
-    // Run the Tenant Query
-    // CRITICAL: We pass the propertyId from the TRUSTED auth token or user context.
-    // Note: user.propertyId might be null if not assigned, handling that gracefully.
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard', propertyIdToFetch],
+    queryFn: () => getPropertyDashboard(dc, {
+      propertyId: propertyIdToFetch
+    }),
+    enabled: !!propertyIdToFetch && !isDemoMode // Don't fetch if demo mode or no ID
+  });
 
-    // Note: Since 'activeTab' logic in App.tsx maps 'mock' user to ADMIN, you might need to change the mock user role in App.tsx to test this view.
+  if (isLoading && !isDemoMode) return <div className="h-full flex items-center justify-center text-slate-400 text-sm">Loading dashboard...</div>;
 
-    const propertyIdToFetch = user.propertyId || property.id; // Fallback to prop passed from parent if user context lacks it (for demo)
-
-    const { data, isLoading } = useQuery({
-      queryKey: ['dashboard', propertyIdToFetch],
-      queryFn: () => getPropertyDashboard(dc, {
-        propertyId: propertyIdToFetch
-      }),
-      enabled: !!propertyIdToFetch
-    });
-
-    if (isLoading && !isDemoMode) return <div className="h-full flex items-center justify-center text-slate-400 text-sm">Loading dashboard...</div>;
-
-    return <ManagerView data={data} property={property} isDemoMode={isDemoMode} />;
+  if (error && !isDemoMode) {
+    console.error("Dashboard Query Error:", error);
+    return <div className="h-full flex items-center justify-center text-rose-500 text-sm">Error loading data. Check console.</div>;
   }
+
+  return <ManagerView data={data} property={property} isDemoMode={isDemoMode} />;
 };
 
 export default Dashboard;
