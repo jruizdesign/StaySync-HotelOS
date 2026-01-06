@@ -3,13 +3,13 @@
 # You query them using "bookings(where: {propertyId: ...})" instead.
 type Property 
   @table(name: "properties") 
-  @auth(level: PUBLIC) 
+  
 {
   id: UUID! @default(expr: "uuidV4()")
-  name: String!
-  address: String
-  phoneNumber: String
-  email: String
+  name: String! @auth(level: PUBLIC) 
+  address: String @auth(level: PUBLIC)
+  phoneNumber: String @auth(level: PUBLIC)
+  email: String @auth(level: PUBLIC)
 }
 
 # 2. Users
