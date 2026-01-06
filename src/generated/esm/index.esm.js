@@ -72,3 +72,14 @@ export function updateRoom(dcOrVars, vars) {
   return executeMutation(updateRoomRef(dcOrVars, vars));
 }
 
+export const createRoomRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateRoom', inputVars);
+}
+createRoomRef.operationName = 'CreateRoom';
+
+export function createRoom(dcOrVars, vars) {
+  return executeMutation(createRoomRef(dcOrVars, vars));
+}
+

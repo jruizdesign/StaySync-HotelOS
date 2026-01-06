@@ -129,6 +129,24 @@ mutation UpdateRoom(
   )
 }
 
+mutation CreateRoom(
+  $propertyId: UUID!,
+  $roomNumber: String!,
+  $roomType: String!,
+  $floor: Int,
+  $pricePerNight: Float,
+  $status: String
+) @auth(level: USER) {
+  room_insert(data: {
+    propertyId: $propertyId,
+    roomNumber: $roomNumber,
+    roomType: $roomType,
+    floor: $floor,
+    pricePerNight: $pricePerNight,
+    status: $status
+  })
+}
+
 # ... (Keep your existing queries) ...
 
 

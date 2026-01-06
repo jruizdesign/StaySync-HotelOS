@@ -35,6 +35,19 @@ export interface CreateBookingVariables {
   checkOut: DateString;
 }
 
+export interface CreateRoomData {
+  room_insert: Room_Key;
+}
+
+export interface CreateRoomVariables {
+  propertyId: UUIDString;
+  roomNumber: string;
+  roomType: string;
+  floor?: number | null;
+  pricePerNight?: number | null;
+  status?: string | null;
+}
+
 export interface GetPropertyDashboardData {
   property?: {
     id: UUIDString;
@@ -192,4 +205,16 @@ export const updateRoomRef: UpdateRoomRef;
 
 export function updateRoom(vars: UpdateRoomVariables): MutationPromise<UpdateRoomData, UpdateRoomVariables>;
 export function updateRoom(dc: DataConnect, vars: UpdateRoomVariables): MutationPromise<UpdateRoomData, UpdateRoomVariables>;
+
+interface CreateRoomRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateRoomVariables): MutationRef<CreateRoomData, CreateRoomVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateRoomVariables): MutationRef<CreateRoomData, CreateRoomVariables>;
+  operationName: string;
+}
+export const createRoomRef: CreateRoomRef;
+
+export function createRoom(vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
+export function createRoom(dc: DataConnect, vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
 
