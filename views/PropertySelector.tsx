@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { adminListProperties } from '@firebasegen/default'; // The real backend connection
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminListProperties, createProperty, linkUserToProperty } from '@firebasegen/default';
+import { useAuth } from '../components/AuthContext';
 import {
     MapPin,
     ArrowRight,
@@ -10,14 +11,61 @@ import {
     Hotel,
     Users,
     TrendingUp,
-    Loader2
+    Loader2,
+    X
 } from 'lucide-react';
 
 export default function PropertySelector() {
     const navigate = useNavigate();
+    const { user: firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [form, setForm] = useState({ name: '', address: '' });
+    const [isCreating, setIsCreating] = useState(false);
 
-    // 1. FETCH REAL DATA FROM GOOGLE CLOUD SQL
+    // MUTATIONS
+    const createPropMutation = useMutation({
+        mutationFn: async (vars: { name: string, address: string }) => {
+            const res = await createProperty(vars);
+            return res.data.property_insert.id;
+        }
+    });
+
+    const linkUserMutation = useMutation({
+        mutationFn: async (vars: { id: string, propertyId: string }) => {
+            return await linkUserToProperty(vars);
+        }
+    });
+
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!firebaseUser) return;
+        setIsCreating(true);
+        try {
+            // 1. Create Property
+            const newPropertyId = await createPropMutation.mutateAsync({
+                name: form.name,
+                address: form.address
+            });
+
+            // 2. Link User
+            await linkUserMutation.mutateAsync({
+                id: firebaseUser.uid,
+                propertyId: newPropertyId
+            });
+
+            // 3. Refresh & Redirect
+            navigate(`/dashboard/${newPropertyId}`);
+        } catch (err) {
+            console.error("Creation failed", err);
+            alert("Failed to create property. Please try again.");
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    // 1. FETCH REAL DATA
     const { data, isLoading, error } = useQuery({
         queryKey: ["admin-properties"],
         queryFn: async () => {
@@ -33,9 +81,8 @@ export default function PropertySelector() {
         (p.address && p.address.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    // 3. UI HELPERS (To generate nice visuals since DB only has basic info)
+    // 3. UI HELPERS
     const getVisuals = (id: string) => {
-        // Deterministic pseudo-random numbers based on ID length so they don't change on refresh
         const seed = id.length;
         const images = [
             "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=3270&ixlib=rb-4.0.3",
@@ -45,8 +92,8 @@ export default function PropertySelector() {
         ];
         return {
             img: images[seed % images.length],
-            occupancy: 60 + (seed * 5) % 35, // Random % between 60-95
-            rooms: 50 + (seed * 10) // Random room count
+            occupancy: 60 + (seed * 5) % 35,
+            rooms: 50 + (seed * 10)
         };
     };
 
@@ -84,14 +131,17 @@ export default function PropertySelector() {
                                 className="pl-12 pr-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm focus:ring-4 focus:ring-slate-100 outline-none w-64 shadow-sm"
                             />
                         </div>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+                        >
                             <Plus size={18} />
                             New Property
                         </button>
                     </div>
                 </div>
 
-                {/* Global Stats Row (Calculated from Real Data) */}
+                {/* Global Stats Row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
                         <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
@@ -102,7 +152,6 @@ export default function PropertySelector() {
                             <p className="text-2xl font-black text-slate-900">{properties.length}</p>
                         </div>
                     </div>
-                    {/* These are currently static/mocked until we build aggregation queries */}
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
                         <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
                             <Users size={24} />
@@ -132,15 +181,14 @@ export default function PropertySelector() {
                     )}
 
                     {filteredProperties.map(property => {
-                        const visual = getVisuals(property.id); // Generate fake visuals for now
+                        const visual = getVisuals(property.id);
 
                         return (
                             <div
                                 key={property.id}
-                                onClick={() => navigate(`/dashboard/${property.id}`)} // Real Navigation
+                                onClick={() => navigate(`/dashboard/${property.id}`)}
                                 className="group bg-white rounded-[2.5rem] p-4 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                             >
-                                {/* Image Header */}
                                 <div className="w-full h-48 rounded-[2rem] bg-slate-100 overflow-hidden relative">
                                     <img src={visual.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={property.name} />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
@@ -157,7 +205,6 @@ export default function PropertySelector() {
                                     </div>
                                 </div>
 
-                                {/* Card Body */}
                                 <div className="p-4 pt-6 space-y-6">
                                     <div className="flex justify-between items-center px-2">
                                         <div>
@@ -180,6 +227,56 @@ export default function PropertySelector() {
                         );
                     })}
                 </div>
+
+                {/* Simple Modal */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+                        <div className="relative bg-white w-full max-w-lg rounded-[2rem] shadow-2xl p-8 animate-in fade-in zoom-in duration-200">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-black text-slate-800">Add New Property</h2>
+                                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleCreate} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] bg-white px-1 uppercase font-black tracking-widest text-slate-400">Property Chain / Name</label>
+                                    <input
+                                        required
+                                        autoFocus
+                                        type="text"
+                                        placeholder="e.g. Grand Plaza Hotel"
+                                        value={form.name}
+                                        onChange={e => setForm({ ...form, name: e.target.value })}
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] bg-white px-1 uppercase font-black tracking-widest text-slate-400">Full Address</label>
+                                    <input
+                                        type="text"
+                                        placeholder="123 Example Blvd, City, Country"
+                                        value={form.address}
+                                        onChange={e => setForm({ ...form, address: e.target.value })}
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isCreating}
+                                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {isCreating ? <Loader2 className="animate-spin" size={20} /> : "Create & Launch Dashboard"}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );
