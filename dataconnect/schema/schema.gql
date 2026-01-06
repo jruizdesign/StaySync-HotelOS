@@ -1,5 +1,4 @@
 
-
 # 1. Properties
 type Property @table(name: "properties") {
   id: UUID! @default(expr: "uuidV4()")
@@ -7,11 +6,10 @@ type Property @table(name: "properties") {
   address: String
   phoneNumber: String
   email: String
+  users: [User!]! @relation(name: "property_users")
+  bookings: [Booking!]! @relation(name: "property_bookings")
+  rooms: [Room!]! @relation(name: "property_rooms")
 }
-
-users: [User!]! 
-bookings: [Booking!]! 
-rooms: [Room!]!
 
 # 2. Users
 type User @table(name: "users") {
@@ -23,7 +21,7 @@ type User @table(name: "users") {
   propertyId: UUID
   
   # The Link (Data Connect infers this links to Property via propertyId)
-  property: Property 
+  property: Property @relation(name: "property_users")
 }
 
 # 3. Bookings
@@ -37,7 +35,7 @@ type Booking @table(name: "bookings") {
   # The Foreign Key
   propertyId: UUID!
   # The Link
-  property: Property!
+  property: Property! @relation(name: "property_bookings")
   
   # Link to Room
   roomId: UUID
@@ -56,5 +54,5 @@ type Room @table(name: "rooms") {
   # The Foreign Key
   propertyId: UUID!
   # The Link
-  property: Property!
+  property: Property! @relation(name: "property_rooms")
 }

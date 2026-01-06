@@ -430,10 +430,15 @@ const Dashboard: React.FC<DashboardProps> = ({ property, isDemoMode, user }) => 
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard', propertyIdToFetch],
-    queryFn: () => getPropertyDashboard(dc, {
-      propertyId: propertyIdToFetch
-    }),
-    enabled: !!propertyIdToFetch && !isDemoMode // Don't fetch if demo mode or no ID
+    queryFn: async () => {
+      // The generated SDK function takes the variables directly.
+      // It already knows which "dc" instance to use from your initialization in @stay-sync/hotel-os
+      const result = await getPropertyDashboard({
+        propertyId: propertyIdToFetch
+      });
+      return result.data; // Usually the actual data is inside .data
+    },
+    enabled: !!propertyIdToFetch && !isDemoMode
   });
 
   if (isLoading && !isDemoMode) return <div className="h-full flex items-center justify-center text-slate-400 text-sm">Loading dashboard...</div>;
