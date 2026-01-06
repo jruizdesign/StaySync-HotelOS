@@ -14,6 +14,7 @@ import Accounting from "./Accounting";
 import Bookings from "./Bookings";
 import FeatureRequests from "./FeatureRequests";
 import StaffTracker from "./StaffTracker";
+import Rooms from "./Rooms";
 import Settings from "./Settings";
 import SystemLogs from "./SystemLogs";
 import { User } from "../types"; // Import your custom type
@@ -135,6 +136,14 @@ export default function PropertyDashboard() {
             )}
 
             {activeTab === 'bookings' && <Bookings isDemoMode={isDemoMode} />}
+
+            {activeTab === 'rooms' && (
+                <Rooms
+                    isDemoMode={isDemoMode}
+                    user={appUser}
+                    propertyId={propertyId}
+                />
+            )}
 
             {activeTab === 'features' && (
                 <FeatureRequests
