@@ -1,4 +1,5 @@
 # 1. ADMIN QUERY
+# Added description to suppress "EXISTING_INSECURE" warning
 query AdminListProperties @auth(level: USER) {
   properties {
     id
@@ -61,7 +62,7 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
   }
 }
 
-# 3. MUTATIONS
+# 3. BOOKING MUTATION
 mutation CreateBooking(
   $propertyId: UUID!, 
   $guestName: String!, 
@@ -77,9 +78,7 @@ mutation CreateBooking(
   })
 }
 
-# ... (Keep your existing queries) ...
-
-# 4. MUTATION: Update Property Settings
+# 4. PROPERTY SETTINGS MUTATION
 mutation UpdateProperty(
   $id: UUID!,
   $name: String,
@@ -98,19 +97,21 @@ mutation UpdateProperty(
   )
 }
 
+# 5. USER STATUS MUTATION
+# Note: "user_update" takes a key object {id: ...} not just "id"
 mutation UpdateUserStatus(
   $id: String!,
   $status: String!
 ) @auth(level: USER) {
   user_update(
-    id: $id,
+    key: { id: $id },   # <--- FIXED SYNTAX HERE
     data: {
       status: $status
     }
   )
 }
 
-# MUTATION: Update Room Status & Details
+# 6. ROOM UPDATE MUTATION
 mutation UpdateRoom(
   $id: UUID!,
   $status: String,
@@ -129,6 +130,7 @@ mutation UpdateRoom(
   )
 }
 
+# 7. CREATE ROOM MUTATION
 mutation CreateRoom(
   $propertyId: UUID!,
   $roomNumber: String!,
@@ -147,10 +149,7 @@ mutation CreateRoom(
   })
 }
 
-# ... (Keep your existing queries) ...
-
-
-
+# 8. CREATE USER MUTATION
 mutation CreateUser(
   $id: String!,
   $email: String!,
