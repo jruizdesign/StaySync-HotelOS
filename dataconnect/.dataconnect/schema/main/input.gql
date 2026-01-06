@@ -609,42 +609,6 @@ input Room_Data {
   """
   property: Property_Key
   """
-  ✨ Generated from Field `Room`.`capacity` of type `Int`
-  """
-  capacity: Int
-  """
-  ✨ `_expr` server value variant of `capacity` (✨ Generated from Field `Room`.`capacity` of type `Int`)
-  """
-  capacity_expr: Int_Expr
-  """
-  ✨ `_update` server value variant of `capacity` (✨ Generated from Field `Room`.`capacity` of type `Int`)
-  """
-  capacity_update: [Int_Update!]
-  """
-  ✨ Generated from Field `Room`.`floor` of type `Int`
-  """
-  floor: Int
-  """
-  ✨ `_expr` server value variant of `floor` (✨ Generated from Field `Room`.`floor` of type `Int`)
-  """
-  floor_expr: Int_Expr
-  """
-  ✨ `_update` server value variant of `floor` (✨ Generated from Field `Room`.`floor` of type `Int`)
-  """
-  floor_update: [Int_Update!]
-  """
-  ✨ Generated from Field `Room`.`price` of type `Float`
-  """
-  price: Float
-  """
-  ✨ `_expr` server value variant of `price` (✨ Generated from Field `Room`.`price` of type `Float`)
-  """
-  price_expr: Float_Expr
-  """
-  ✨ `_update` server value variant of `price` (✨ Generated from Field `Room`.`price` of type `Float`)
-  """
-  price_update: [Float_Update!]
-  """
   ✨ Generated from Field `Room`.`roomNumber` of type `String!`
   """
   roomNumber: String
@@ -652,22 +616,6 @@ input Room_Data {
   ✨ `_expr` server value variant of `roomNumber` (✨ Generated from Field `Room`.`roomNumber` of type `String!`)
   """
   roomNumber_expr: String_Expr
-  """
-  ✨ Generated from Field `Room`.`roomStatus` of type `String`
-  """
-  roomStatus: String
-  """
-  ✨ `_expr` server value variant of `roomStatus` (✨ Generated from Field `Room`.`roomStatus` of type `String`)
-  """
-  roomStatus_expr: String_Expr
-  """
-  ✨ Generated from Field `Room`.`roomType` of type `String!`
-  """
-  roomType: String
-  """
-  ✨ `_expr` server value variant of `roomType` (✨ Generated from Field `Room`.`roomType` of type `String!`)
-  """
-  roomType_expr: String_Expr
 }
 """
 ✨ Generated filter input type for table 'Room'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
@@ -698,29 +646,9 @@ input Room_Filter {
   """
   property: Property_Filter
   """
-  ✨ Generated from Field `Room`.`capacity` of type `Int`
-  """
-  capacity: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`floor` of type `Int`
-  """
-  floor: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`price` of type `Float`
-  """
-  price: Float_Filter
-  """
   ✨ Generated from Field `Room`.`roomNumber` of type `String!`
   """
   roomNumber: String_Filter
-  """
-  ✨ Generated from Field `Room`.`roomStatus` of type `String`
-  """
-  roomStatus: String_Filter
-  """
-  ✨ Generated from Field `Room`.`roomType` of type `String!`
-  """
-  roomType: String_Filter
   """
   ✨ Generated from Field `Room`.`bookings_on_room` of type `[Booking!]!`
   """
@@ -764,21 +692,9 @@ input Room_Having {
   """
   _count: Int_Filter
   """
-  ✨ Generated from Field `Room`.`capacity_count` of type `Int!`
-  """
-  capacity_count: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`floor_count` of type `Int!`
-  """
-  floor_count: Int_Filter
-  """
   ✨ Generated from Field `Room`.`id_count` of type `Int!`
   """
   id_count: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`price_count` of type `Int!`
-  """
-  price_count: Int_Filter
   """
   ✨ Generated from Field `Room`.`propertyId_count` of type `Int!`
   """
@@ -787,62 +703,6 @@ input Room_Having {
   ✨ Generated from Field `Room`.`roomNumber_count` of type `Int!`
   """
   roomNumber_count: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`roomStatus_count` of type `Int!`
-  """
-  roomStatus_count: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`roomType_count` of type `Int!`
-  """
-  roomType_count: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`capacity_sum` of type `Int`
-  """
-  capacity_sum: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`floor_sum` of type `Int`
-  """
-  floor_sum: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`price_sum` of type `Float`
-  """
-  price_sum: Float_Filter
-  """
-  ✨ Generated from Field `Room`.`capacity_avg` of type `Float`
-  """
-  capacity_avg: Float_Filter
-  """
-  ✨ Generated from Field `Room`.`floor_avg` of type `Float`
-  """
-  floor_avg: Float_Filter
-  """
-  ✨ Generated from Field `Room`.`price_avg` of type `Float`
-  """
-  price_avg: Float_Filter
-  """
-  ✨ Generated from Field `Room`.`capacity_min` of type `Int`
-  """
-  capacity_min: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`floor_min` of type `Int`
-  """
-  floor_min: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`price_min` of type `Float`
-  """
-  price_min: Float_Filter
-  """
-  ✨ Generated from Field `Room`.`capacity_max` of type `Int`
-  """
-  capacity_max: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`floor_max` of type `Int`
-  """
-  floor_max: Int_Filter
-  """
-  ✨ Generated from Field `Room`.`price_max` of type `Float`
-  """
-  price_max: Float_Filter
 }
 """
 ✨ Generated key input type for table 'Room'. It represents the primary key fields used to uniquely identify a row in the table.
@@ -887,49 +747,17 @@ input Room_Order {
   """
   property: Property_Order
   """
-  ✨ Generated from Field `Room`.`capacity` of type `Int`
-  """
-  capacity: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor` of type `Int`
-  """
-  floor: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price` of type `Float`
-  """
-  price: OrderDirection
-  """
   ✨ Generated from Field `Room`.`roomNumber` of type `String!`
   """
   roomNumber: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`roomStatus` of type `String`
-  """
-  roomStatus: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`roomType` of type `String!`
-  """
-  roomType: OrderDirection
   """
   ✨ Generated from Field `Room`.`_count` of type `Int!`
   """
   _count: OrderDirection
   """
-  ✨ Generated from Field `Room`.`capacity_count` of type `Int!`
-  """
-  capacity_count: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor_count` of type `Int!`
-  """
-  floor_count: OrderDirection
-  """
   ✨ Generated from Field `Room`.`id_count` of type `Int!`
   """
   id_count: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price_count` of type `Int!`
-  """
-  price_count: OrderDirection
   """
   ✨ Generated from Field `Room`.`propertyId_count` of type `Int!`
   """
@@ -938,62 +766,6 @@ input Room_Order {
   ✨ Generated from Field `Room`.`roomNumber_count` of type `Int!`
   """
   roomNumber_count: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`roomStatus_count` of type `Int!`
-  """
-  roomStatus_count: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`roomType_count` of type `Int!`
-  """
-  roomType_count: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`capacity_sum` of type `Int`
-  """
-  capacity_sum: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor_sum` of type `Int`
-  """
-  floor_sum: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price_sum` of type `Float`
-  """
-  price_sum: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`capacity_avg` of type `Float`
-  """
-  capacity_avg: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor_avg` of type `Float`
-  """
-  floor_avg: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price_avg` of type `Float`
-  """
-  price_avg: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`capacity_min` of type `Int`
-  """
-  capacity_min: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor_min` of type `Int`
-  """
-  floor_min: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price_min` of type `Float`
-  """
-  price_min: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`capacity_max` of type `Int`
-  """
-  capacity_max: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`floor_max` of type `Int`
-  """
-  floor_max: OrderDirection
-  """
-  ✨ Generated from Field `Room`.`price_max` of type `Float`
-  """
-  price_max: OrderDirection
 }
 """
 ✨ Generated data input type for table 'User'. It includes all necessary fields for creating or upserting rows into table.

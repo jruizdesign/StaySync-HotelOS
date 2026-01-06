@@ -50,13 +50,7 @@ type Booking @table(name: "bookings") {
 type Room @table(name: "rooms") {
   id: UUID! @default(expr: "uuidV4()")
   roomNumber: String!
-  roomType: String!
-  floor: Int
-  roomStatus: String 
-  capacity: Int
-  price: Float
-  
+  # ... (other fields)
   propertyId: UUID!
   property: Property!
 }
- 

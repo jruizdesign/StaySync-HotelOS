@@ -296,24 +296,6 @@ extend type Room {
   """
   _count: Int! @fdc_generated(from: "Room.", purpose: QUERY_COUNT)
   """
-  ✨ Count the number of rows in the `Room` table where the `capacity` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  capacity_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.capacity", purpose: QUERY_COUNT)
-  """
-  ✨ Count the number of rows in the `Room` table where the `floor` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  floor_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.floor", purpose: QUERY_COUNT)
-  """
   ✨ Count the number of rows in the `Room` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   id_count(
@@ -322,15 +304,6 @@ extend type Room {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Room.id", purpose: QUERY_COUNT)
-  """
-  ✨ Count the number of rows in the `Room` table where the `price` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  price_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.price", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Room` table where the `propertyId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -349,102 +322,6 @@ extend type Room {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Room.roomNumber", purpose: QUERY_COUNT)
-  """
-  ✨ Count the number of rows in the `Room` table where the `roomStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  roomStatus_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.roomStatus", purpose: QUERY_COUNT)
-  """
-  ✨ Count the number of rows in the `Room` table where the `roomType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  roomType_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.roomType", purpose: QUERY_COUNT)
-  """
-  ✨ Sum the `capacity` field in the `Room` table.
-  """
-  capacity_sum(
-    """
-    Set to true to sum the distinct values.
-    """
-    distinct: Boolean = false
-  ): Int @fdc_generated(from: "Room.capacity", purpose: QUERY_SUM)
-  """
-  ✨ Sum the `floor` field in the `Room` table.
-  """
-  floor_sum(
-    """
-    Set to true to sum the distinct values.
-    """
-    distinct: Boolean = false
-  ): Int @fdc_generated(from: "Room.floor", purpose: QUERY_SUM)
-  """
-  ✨ Sum the `price` field in the `Room` table.
-  """
-  price_sum(
-    """
-    Set to true to sum the distinct values.
-    """
-    distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.price", purpose: QUERY_SUM)
-  """
-  ✨ Average the `capacity` field in the `Room` table.
-  """
-  capacity_avg(
-    """
-    Set to true to average the distinct values.
-    """
-    distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.capacity", purpose: QUERY_AVG)
-  """
-  ✨ Average the `floor` field in the `Room` table.
-  """
-  floor_avg(
-    """
-    Set to true to average the distinct values.
-    """
-    distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.floor", purpose: QUERY_AVG)
-  """
-  ✨ Average the `price` field in the `Room` table.
-  """
-  price_avg(
-    """
-    Set to true to average the distinct values.
-    """
-    distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.price", purpose: QUERY_AVG)
-  """
-  ✨ Minimum of the `capacity` field in the `Room` table.
-  """
-  capacity_min: Int @fdc_generated(from: "Room.capacity", purpose: QUERY_MIN)
-  """
-  ✨ Minimum of the `floor` field in the `Room` table.
-  """
-  floor_min: Int @fdc_generated(from: "Room.floor", purpose: QUERY_MIN)
-  """
-  ✨ Minimum of the `price` field in the `Room` table.
-  """
-  price_min: Float @fdc_generated(from: "Room.price", purpose: QUERY_MIN)
-  """
-  ✨ Maximum of the `capacity` field in the `Room` table.
-  """
-  capacity_max: Int @fdc_generated(from: "Room.capacity", purpose: QUERY_MAX)
-  """
-  ✨ Maximum of the `floor` field in the `Room` table.
-  """
-  floor_max: Int @fdc_generated(from: "Room.floor", purpose: QUERY_MAX)
-  """
-  ✨ Maximum of the `price` field in the `Room` table.
-  """
-  price_max: Float @fdc_generated(from: "Room.price", purpose: QUERY_MAX)
   """
   A generated field that is used for caching results in SDKs.
   """
