@@ -8,23 +8,25 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Sparkles,
-  Loader2,
+  Loader2, 
   AlertCircle,
   Wrench,
   AlertTriangle,
-  Receipt
+  Receipt,
+  Activity,
+  CheckCircle2,
+  Clock,
+  UserCheck
 } from 'lucide-react';
-import { Property, RoomStatus } from '../types';
+import { Property } from '../types';
 import { 
-  LineChart, 
-  Line, 
+  AreaChart,
+  Area,
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  AreaChart,
-  Area
+  ResponsiveContainer
 } from 'recharts';
 import { GoogleGenAI } from '@google/genai';
 
@@ -59,17 +61,54 @@ const StatCard = ({ title, value, icon: Icon, trend, color, subValue }: any) => 
   </div>
 );
 
-const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
+// Mock Live Events for Feed
+const MOCK_EVENTS = [
+  { id: 1, type: 'maintenance', message: 'Maintenance Request: Room 304 (AC Leak)', time: 'Just now', user: 'Maria G.' },
+  { id: 2, type: 'cleaning', message: 'Room 102 marked as Clean', time: '2 mins ago', user: 'Sarah W.' },
+  { id: 3, type: 'checkin', message: 'Guest Check-in: R. Wilson (Room 302)', time: '15 mins ago', user: 'Front Desk' },
+  { id: 4, type: 'system', message: 'Night Audit Completed Successfully', time: '4 hours ago', user: 'System' },
+];
+
+interface DashboardProps {
+  property: Property;
+  isDemoMode: boolean;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ property, isDemoMode }) => {
   const [insight, setInsight] = useState<string | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(true);
+  const [liveEvents, setLiveEvents] = useState(MOCK_EVENTS);
+
+  // Simulate Firestore Real-time Updates
+  useEffect(() => {
+    if (!isDemoMode) return;
+
+    const interval = setInterval(() => {
+      const newEvent = {
+        id: Math.random(),
+        type: Math.random() > 0.5 ? 'cleaning' : 'maintenance',
+        message: Math.random() > 0.5 ? `Room ${Math.floor(Math.random() * 300) + 100} inspection complete` : `Minibar restock: Room ${Math.floor(Math.random() * 300) + 100}`,
+        time: 'Just now',
+        user: 'Staff Mobile'
+      };
+      setLiveEvents(prev => [newEvent, ...prev].slice(0, 5));
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [isDemoMode]);
 
   useEffect(() => {
+    if (!isDemoMode) {
+        setInsight("System is in Production Mode. Awaiting live operational data to generate insights.");
+        setLoadingInsight(false);
+        return;
+    }
+
     const fetchInsight = async () => {
       setLoadingInsight(true);
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        // Context-specific data for the AI focused on Money Owed and Maintenance
         const contextData = {
           arrears: [
             { guest: "Marcus Thorne", amount: "$1,250", status: "Overdue 5 days", reason: "Property Damage Fee" },
@@ -77,8 +116,7 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
           ],
           maintenance: [
             { room: "104", issue: "Bathroom Leak", priority: "URGENT" },
-            { room: "203", issue: "AC Compressor Noise", priority: "MEDIUM" },
-            { room: "Suite 412", issue: "Smart Lock Battery Low", priority: "LOW" }
+            { room: "203", issue: "AC Compressor Noise", priority: "MEDIUM" }
           ]
         };
 
@@ -96,7 +134,7 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
 
         const response = await ai.models.generateContent({
           model: 'gemini-3-pro-preview',
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: prompt,
         });
 
         setInsight(response.text || "Operational health is stable. No critical arrears or maintenance alerts found.");
@@ -109,7 +147,7 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
     };
 
     fetchInsight();
-  }, [property]);
+  }, [property, isDemoMode]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -119,11 +157,15 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
           <p className="text-slate-500 text-sm">Managing risks, maintenance, and revenue for {property.name}.</p>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-          Sync Status: <span className="text-emerald-500">Live</span>
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          Firestore Sync: <span className="text-emerald-500">Connected</span>
         </div>
       </div>
 
-      {/* AI Strategic Brief - Refocused on Arrears & Maintenance */}
+      {/* AI Strategic Brief */}
       <div className="relative overflow-hidden bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl shadow-slate-200">
         <div className="absolute top-0 right-0 p-12 opacity-5">
           <AlertTriangle size={140} />
@@ -148,55 +190,56 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
             <div className="space-y-6">
               <div className="max-w-4xl">
                 <p className="text-slate-300 font-medium leading-relaxed text-lg italic">
-                  "{insight?.split('Action:')[0].replace('Summary:', '').trim()}"
+                  "{insight && insight.includes('Action:') ? insight.split('Action:')[0].replace('Summary:', '').trim() : insight}"
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="flex items-center gap-3 px-5 py-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/40">
-                  <AlertCircle size={18} className="text-white shrink-0" />
-                  <div>
-                    <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Manager Action Item</p>
-                    <p className="text-sm font-bold text-white">{insight?.split('Action:')[1]?.trim() || "Review open maintenance tickets."}</p>
+              {isDemoMode && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-3 px-5 py-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/40">
+                    <AlertCircle size={18} className="text-white shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Manager Action Item</p>
+                      <p className="text-sm font-bold text-white">{insight?.split('Action:')[1]?.trim() || "Review open maintenance tickets."}</p>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-4 border-l border-slate-800">
+                    Powered by Gemini 3 Pro
                   </div>
                 </div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-4 border-l border-slate-800">
-                  Powered by Gemini 3 Pro
-                </div>
-              </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Stats Realignment - Focusing on Risk */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Daily Revenue" 
-          value="$12,450.00" 
+          value={isDemoMode ? "$12,450.00" : "$0.00"} 
           icon={DollarSign} 
-          trend={12.5} 
+          trend={isDemoMode ? 12.5 : 0} 
           color="bg-blue-600" 
           subValue="Revenue Today"
         />
         <StatCard 
           title="Occupancy" 
-          value="78.2%" 
+          value={isDemoMode ? "78.2%" : "0%"} 
           icon={DoorOpen} 
-          trend={-4.2} 
+          trend={isDemoMode ? -4.2 : 0} 
           color="bg-emerald-600" 
           subValue="Room Utilization"
         />
         <StatCard 
           title="Outstanding Arrears" 
-          value="$1,700.00" 
+          value={isDemoMode ? "$1,700.00" : "$0.00"} 
           icon={Receipt} 
-          trend={15.4} 
+          trend={isDemoMode ? 15.4 : 0} 
           color="bg-rose-600" 
           subValue="Unpaid Guest Balances"
         />
         <StatCard 
           title="Maintenance Tasks" 
-          value="5 Active" 
+          value={isDemoMode ? "5 Active" : "0 Active"} 
           icon={Wrench} 
           color="bg-amber-600" 
           subValue="Open Work Orders"
@@ -204,29 +247,36 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Arrears List */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Unpaid Balances</h3>
-            <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-1 rounded font-bold">Risk Alert</span>
+        {/* Live Operations Feed */}
+        <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <Activity size={16} className="text-blue-500" /> Live Operations
+            </h3>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
           </div>
-          <div className="space-y-4">
-            {[
-              { name: 'Marcus Thorne', amount: '$1,250', days: '5d', reason: 'Damage' },
-              { name: 'Sarah Marshall', amount: '$450', days: '1d', reason: 'Incidentals' }
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div>
-                  <p className="text-sm font-bold text-slate-800">{item.name}</p>
-                  <p className="text-[10px] text-slate-400 font-bold">{item.reason}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-black text-rose-600">{item.amount}</p>
-                  <p className="text-[10px] text-slate-400 font-bold">Late: {item.days}</p>
-                </div>
-              </div>
-            ))}
-            <button className="w-full py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors">View All Accounts Receivable</button>
+          <div className="p-2 max-h-[400px] overflow-y-auto">
+             {liveEvents.map((event) => (
+               <div key={event.id} className="p-4 hover:bg-slate-50 rounded-xl transition-colors flex items-start gap-3 animate-in slide-in-from-left-2 duration-300">
+                  <div className={`p-2 rounded-full shrink-0 ${
+                    event.type === 'maintenance' ? 'bg-amber-100 text-amber-600' :
+                    event.type === 'cleaning' ? 'bg-emerald-100 text-emerald-600' :
+                    event.type === 'checkin' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {event.type === 'maintenance' ? <Wrench size={14} /> :
+                     event.type === 'cleaning' ? <Sparkles size={14} /> :
+                     event.type === 'checkin' ? <UserCheck size={14} /> : <CheckCircle2 size={14} />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-700 leading-tight">{event.message}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] text-slate-400 font-medium">{event.user}</span>
+                      <span className="text-[10px] text-slate-300">•</span>
+                      <span className="text-[10px] text-slate-400 font-medium">{event.time}</span>
+                    </div>
+                  </div>
+               </div>
+             ))}
           </div>
         </div>
 
@@ -237,7 +287,7 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
             <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded font-bold">3 Urgent</span>
           </div>
           <div className="space-y-4">
-            {[
+            {isDemoMode ? [
               { room: '104', task: 'Bathroom Leak', level: 'Urgent' },
               { room: '203', task: 'AC Unit Check', level: 'High' },
               { room: '412', task: 'Door Lock', level: 'Low' }
@@ -255,7 +305,9 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
                   {item.level}
                 </span>
               </div>
-            ))}
+            )) : (
+              <div className="py-8 text-center text-slate-400 text-xs italic">No active maintenance tickets.</div>
+            )}
             <button className="w-full py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors">Manage All Work Orders</button>
           </div>
         </div>
@@ -265,7 +317,7 @@ const Dashboard: React.FC<{ property: Property }> = ({ property }) => {
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6">Revenue Pulse</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={REVENUE_DATA}>
+              <AreaChart data={isDemoMode ? REVENUE_DATA : REVENUE_DATA.map(d => ({...d, revenue: 0}))}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>

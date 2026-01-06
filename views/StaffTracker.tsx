@@ -38,9 +38,14 @@ const MOCK_TIME_ENTRIES: TimeEntry[] = [
   { id: 'te1', userId: 'u-1', userName: 'Sarah Wilson', date: '2023-10-27', clockIn: '09:00 AM', clockOut: '05:30 PM', breakStart: '12:30 PM', breakEnd: '01:15 PM', totalHours: '7h 45m', status: 'Completed' },
 ];
 
-const StaffTracker: React.FC<{ user: any }> = ({ user }) => {
-  const [staffList, setStaffList] = useState(MOCK_STAFF_MEMBERS);
-  const [entries, setEntries] = useState<TimeEntry[]>(MOCK_TIME_ENTRIES);
+interface StaffTrackerProps {
+  user: any;
+  isDemoMode: boolean;
+}
+
+const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode }) => {
+  const [staffList, setStaffList] = useState(isDemoMode ? MOCK_STAFF_MEMBERS : []);
+  const [entries, setEntries] = useState<TimeEntry[]>(isDemoMode ? MOCK_TIME_ENTRIES : []);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -174,7 +179,7 @@ const StaffTracker: React.FC<{ user: any }> = ({ user }) => {
 
       {/* Staff Kiosk Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredStaff.map(staff => (
+        {filteredStaff.length > 0 ? filteredStaff.map(staff => (
           <div 
             key={staff.id}
             className={`group bg-white rounded-[3rem] p-8 border transition-all duration-300 relative overflow-hidden ${
@@ -256,7 +261,13 @@ const StaffTracker: React.FC<{ user: any }> = ({ user }) => {
               )}
             </div>
           </div>
-        ))}
+        )) : (
+            <div className="col-span-full py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+              <Users size={48} className="text-slate-300 mb-4" />
+              <h3 className="text-lg font-bold text-slate-400">No Staff Records</h3>
+              <p className="text-xs text-slate-400 mt-2 max-w-xs">{isDemoMode ? "No staff match your search." : "Production mode is active. Add staff members to the roster to begin tracking."}</p>
+            </div>
+        )}
       </div>
 
       {/* PIN AUTH OVERLAY */}
@@ -344,7 +355,7 @@ const StaffTracker: React.FC<{ user: any }> = ({ user }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {entries.map(entry => (
+                {entries.length > 0 ? entries.map(entry => (
                   <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
@@ -377,7 +388,13 @@ const StaffTracker: React.FC<{ user: any }> = ({ user }) => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                    <tr>
+                        <td colSpan={5} className="px-10 py-12 text-center text-slate-400">
+                            {isDemoMode ? "No entries found." : "No entries recorded. Ledger is clean."}
+                        </td>
+                    </tr>
+                )}
               </tbody>
             </table>
           </div>

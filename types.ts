@@ -75,11 +75,27 @@ export interface Booking {
   id: string;
   guestId?: string; // Linked for automated doc creation
   guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  numberOfGuests: number;
   roomNumber: string;
   checkIn: string;
-  checkOut: string;
+  checkOut?: string; // Optional for indefinite stays
   status: 'Confirmed' | 'Checked-In' | 'Completed' | 'Cancelled';
   totalAmount: number;
+}
+
+export interface MaintenanceTask {
+  id: string;
+  roomNumber: string;
+  description: string;
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  status: 'Pending' | 'In Progress' | 'Completed';
+  reportedDate: string;
+  completedDate?: string;
+  assignedTo?: string;
+  cost: number;
+  notes?: string;
 }
 
 export interface Transaction {
@@ -102,4 +118,26 @@ export interface TimeEntry {
   breakEnd: string | null;
   totalHours: string;
   status: 'Completed' | 'Active' | 'On-Break';
+}
+
+export interface FeatureRequest {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'Low' | 'Medium' | 'High';
+  status: 'New' | 'Planned' | 'In Progress' | 'Implemented';
+  votes: number;
+  requester: string;
+  date: string;
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR' | 'SUCCESS';
+  module: 'AUTH' | 'DATABASE' | 'SYSTEM' | 'PAYMENT' | 'IOT';
+  action: string;
+  message: string;
+  ip?: string;
+  latency?: string;
 }

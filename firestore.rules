@@ -1,0 +1,59 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------
+    // HELPER FUNCTIONS
+    // ---------------------------------------------------------
+
+    // Check if the user is a Super Admin based on Custom Claim
+    function isSuperAdmin() {
+      return request.auth.token.role == 'SYSTEM_ADMIN';
+    }
+
+    // Check if the user's token belongs to the requested Property Path
+    function belongsToProperty(propertyId) {
+      return request.auth.token.propertyId == propertyId;
+    }
+
+    // Check if the user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ---------------------------------------------------------
+    // TENANCY RULES
+    // ---------------------------------------------------------
+
+    // The Root Property Collection
+    // Structure: /properties/{propertyId}
+    match /properties/{propertyId} {
+      
+      // READ: Allow if Super Admin OR if it matches the user's assigned property
+      allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+      
+      // WRITE: Only Super Admins can create/delete properties
+      allow write: if isSignedIn() && isSuperAdmin();
+
+      // Sub-collection: Time Clocks (High Frequency Real-time Data)
+      // Structure: /properties/{propertyId}/time_clocks/{clockId}
+      match /time_clocks/{clockId} {
+        // READ/WRITE: 
+        // 1. Super Admin has "God View" (can see/edit all clocks)
+        // 2. Managers/Staff can only see/edit clocks within their own property
+        allow read, write: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+      }
+
+      // Sub-collection: Live Operations Feed (for Dashboard)
+      match /live_events/{eventId} {
+        allow read, write: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+      }
+    }
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

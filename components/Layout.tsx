@@ -11,7 +11,10 @@ import {
   ChevronDown,
   Clock,
   BedDouble,
-  UserCircle
+  UserCircle,
+  Wrench,
+  Lightbulb,
+  Terminal
 } from 'lucide-react';
 import { User, Property, UserRole } from '../types';
 
@@ -41,18 +44,20 @@ const Layout: React.FC<LayoutProps> = ({
     { id: 'bookings', label: 'Bookings', icon: CalendarCheck },
     { id: 'rooms', label: 'Rooms', icon: BedDouble },
     { id: 'guests', label: 'Guests', icon: UserCircle },
+    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'accounting', label: 'Accounting', icon: Wallet },
   ];
 
   const systemMenuItems = [
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'staff', label: 'Staff Tracker', icon: Clock },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'users', label: 'User Management', icon: Users, restricted: false },
+    { id: 'staff', label: 'Staff Tracker', icon: Clock, restricted: false },
+    { id: 'logs', label: 'System Logs', icon: Terminal, restricted: true }, // Restricted to Admin/Manager
+    { id: 'features', label: 'Feature Roadmap', icon: Lightbulb, restricted: false },
+    { id: 'settings', label: 'Settings', icon: Settings, restricted: false },
   ];
 
-  const NavItem = ({ item }: { item: typeof mainMenuItems[0] }) => (
+  const NavItem: React.FC<{ item: any }> = ({ item }) => (
     <button
-      key={item.id}
       onClick={() => setActiveTab(item.id)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
         activeTab === item.id 
@@ -86,7 +91,11 @@ const Layout: React.FC<LayoutProps> = ({
 
         <div className="px-4 py-4 space-y-1 border-t border-slate-800">
           <div className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">System</div>
-          {systemMenuItems.map((item) => <NavItem key={item.id} item={item} />)}
+          {systemMenuItems.filter(item => {
+             // Hide restricted items from regular STAFF
+             if (item.restricted && user.role === UserRole.STAFF) return false;
+             return true;
+          }).map((item) => <NavItem key={item.id} item={item} />)}
           
           <button 
             onClick={onLogout}

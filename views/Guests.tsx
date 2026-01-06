@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
   UserPlus, 
   Search, 
@@ -31,9 +31,13 @@ import {
   Building2,
   FileCode,
   Image as ImageIcon,
-  File
+  File,
+  Sparkles,
+  Loader2,
+  Check
 } from 'lucide-react';
 import { Guest, GuestDocument, GuestHistory } from '../types';
+import { GoogleGenAI } from '@google/genai';
 
 const MOCK_GUESTS: Guest[] = [
   {
@@ -98,15 +102,26 @@ const MOCK_GUESTS: Guest[] = [
   }
 ];
 
-const Guests: React.FC = () => {
-  const [guests, setGuests] = useState<Guest[]>(MOCK_GUESTS);
+interface GuestsProps {
+  isDemoMode: boolean;
+}
+
+const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
+  const [guests, setGuests] = useState<Guest[]>(isDemoMode ? MOCK_GUESTS : []);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'all' | 'dnr'>('all');
   const [profileTab, setProfileTab] = useState<'overview' | 'documents' | 'history'>('overview');
   const [viewingDoc, setViewingDoc] = useState<GuestDocument | null>(null);
+
+  // Upload Flow State
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStep, setUploadStep] = useState<'select' | 'analyzing' | 'review'>('select');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [aiCategory, setAiCategory] = useState<GuestDocument['type']>('Other');
+  const [aiReasoning, setAiReasoning] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredGuests = useMemo(() => {
     return guests.filter(g => {
@@ -142,6 +157,85 @@ const Guests: React.FC = () => {
     setIsAddingNew(false);
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const startAiAnalysis = async () => {
+    if (!selectedFile) return;
+    
+    setUploadStep('analyzing');
+    
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      // Simulate file content analysis by using filename and type since we are in browser
+      const prompt = `You are a document classification AI for a hotel management system.
+      Analyze the following file metadata and categorize it into exactly one of these categories: 
+      'Passport', 'Driver License', 'ID Card', 'Invoice', 'Receipt', 'Other'.
+      
+      Filename: "${selectedFile.name}"
+      MIME Type: "${selectedFile.type}"
+
+      If the filename contains words like "contract", "agreement", or "waiver", categorize as "Other" but mention it in the reason.
+      
+      Return a JSON object with this structure:
+      {
+        "category": "The selected category string",
+        "reason": "A short, 10-word explanation of why you chose this category based on the filename."
+      }`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+      });
+
+      const result = JSON.parse(response.text || '{}');
+      setAiCategory(result.category || 'Other');
+      setAiReasoning(result.reason || 'Manual review recommended.');
+      setUploadStep('review');
+
+    } catch (error) {
+      console.error("AI Analysis Failed", error);
+      setAiCategory('Other');
+      setAiReasoning('AI analysis unavailable. Please categorize manually.');
+      setUploadStep('review');
+    }
+  };
+
+  const finalizeUpload = () => {
+    if (!selectedGuest || !selectedFile) return;
+
+    const newDoc: GuestDocument = {
+      id: 'd-' + Math.random().toString(36).substr(2, 9),
+      type: aiCategory,
+      fileName: selectedFile.name,
+      uploadDate: new Date().toISOString().split('T')[0],
+      amount: aiCategory === 'Invoice' || aiCategory === 'Receipt' ? 0 : undefined 
+    };
+
+    const updatedGuests = guests.map(g => {
+      if (g.id === selectedGuest.id) {
+        return { ...g, documents: [newDoc, ...g.documents] };
+      }
+      return g;
+    });
+
+    setGuests(updatedGuests);
+    resetUploadModal();
+  };
+
+  const resetUploadModal = () => {
+    setIsUploading(false);
+    setUploadStep('select');
+    setSelectedFile(null);
+    setAiCategory('Other');
+    setAiReasoning('');
+  };
+
   const categorizedDocs = useMemo(() => {
     if (!selectedGuest) return { identity: [], invoices: [], receipts: [], other: [] };
     return {
@@ -152,7 +246,7 @@ const Guests: React.FC = () => {
     };
   }, [selectedGuest]);
 
-  const DocumentCard = ({ doc, onClick }: { doc: GuestDocument; onClick: () => void }) => {
+  const DocumentCard: React.FC<{ doc: GuestDocument; onClick: () => void }> = ({ doc, onClick }) => {
     const isPDF = doc.fileName.toLowerCase().endsWith('.pdf');
     return (
       <div 
@@ -515,45 +609,131 @@ const Guests: React.FC = () => {
           </div>
         )}
 
-        {/* Upload Modal */}
+        {/* Upload Modal with AI Workflow */}
         {isUploading && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsUploading(false)}></div>
+             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={resetUploadModal}></div>
              <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                
+                {/* Modal Header */}
                 <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                    <div>
                       <h2 className="text-xl font-bold text-slate-800">Secure Document Upload</h2>
                       <p className="text-xs text-slate-500 font-medium">Add records to the profile vault.</p>
                    </div>
-                   <button onClick={() => setIsUploading(false)} className="p-2 text-slate-400">
+                   <button onClick={resetUploadModal} className="p-2 text-slate-400 hover:text-slate-600">
                       <X size={24} />
                    </button>
                 </div>
-                <form className="p-8 space-y-6" onSubmit={(e) => { e.preventDefault(); setIsUploading(false); }}>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Document Type</label>
-                      <select className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold appearance-none">
-                         <option value="Passport">Passport (Identity)</option>
-                         <option value="Driver License">Driver License (Identity)</option>
-                         <option value="ID Card">ID Card (Identity)</option>
-                         <option value="Invoice">Invoice</option>
-                         <option value="Receipt">Receipt</option>
-                         <option value="Other">Other Document</option>
-                      </select>
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select File</label>
-                      <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer group">
-                         <Upload size={32} className="mx-auto text-slate-300 mb-2 group-hover:text-blue-500" />
-                         <p className="text-xs font-bold text-slate-500">Drag files here or click to browse</p>
-                         <p className="text-[10px] text-slate-300 mt-1">PDF, JPG, PNG (Max 10MB)</p>
+
+                {/* Step 1: Select File */}
+                {uploadStep === 'select' && (
+                  <div className="p-8 space-y-6">
+                     <div className="space-y-4">
+                        <div 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="border-2 border-dashed border-slate-200 rounded-[1.5rem] p-10 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group"
+                        >
+                           {selectedFile ? (
+                             <div className="flex flex-col items-center">
+                                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                                  <FileText size={32} />
+                                </div>
+                                <p className="font-bold text-slate-800">{selectedFile.name}</p>
+                                <p className="text-xs text-slate-400 mt-1">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                             </div>
+                           ) : (
+                             <>
+                               <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                  <Upload size={24} />
+                               </div>
+                               <p className="text-sm font-bold text-slate-500">Click to select a document</p>
+                               <p className="text-[10px] text-slate-300 mt-1">PDF, JPG, PNG (Max 10MB)</p>
+                             </>
+                           )}
+                           <input 
+                             type="file" 
+                             ref={fileInputRef} 
+                             className="hidden" 
+                             onChange={handleFileSelect} 
+                             accept=".pdf,.jpg,.jpeg,.png"
+                           />
+                        </div>
+                     </div>
+                     <div className="flex gap-4">
+                        <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Cancel</button>
+                        <button 
+                          onClick={startAiAnalysis}
+                          disabled={!selectedFile}
+                          className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Sparkles size={16} />
+                          Analyze & Upload
+                        </button>
+                     </div>
+                  </div>
+                )}
+
+                {/* Step 2: Analyzing */}
+                {uploadStep === 'analyzing' && (
+                  <div className="p-12 flex flex-col items-center text-center space-y-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl animate-pulse"></div>
+                      <div className="relative w-20 h-20 bg-white border-4 border-blue-50 rounded-full flex items-center justify-center">
+                         <Loader2 size={32} className="text-blue-600 animate-spin" />
                       </div>
-                   </div>
-                   <div className="flex gap-4 pt-4">
-                      <button type="button" onClick={() => setIsUploading(false)} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Cancel</button>
-                      <button type="submit" className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200">Start Upload</button>
-                   </div>
-                </form>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Lumina Intelligence Analyzing</h3>
+                      <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
+                        Classifying document content and extracting metadata...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Review */}
+                {uploadStep === 'review' && (
+                  <div className="p-8 space-y-6">
+                     <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex items-start gap-4">
+                        <div className="p-2 bg-white rounded-xl text-blue-600 shrink-0">
+                          <Sparkles size={20} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1">AI Suggestion</p>
+                          <p className="text-sm font-bold text-slate-700">Categorized as <span className="text-blue-700">{aiCategory}</span></p>
+                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">"{aiReasoning}"</p>
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm Category</label>
+                        <select 
+                          value={aiCategory} 
+                          onChange={(e) => setAiCategory(e.target.value as any)}
+                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold appearance-none transition-all"
+                        >
+                           <option value="Passport">Passport</option>
+                           <option value="Driver License">Driver License</option>
+                           <option value="ID Card">ID Card</option>
+                           <option value="Invoice">Invoice</option>
+                           <option value="Receipt">Receipt</option>
+                           <option value="Other">Other</option>
+                        </select>
+                     </div>
+
+                     <div className="flex gap-4 pt-2">
+                        <button onClick={resetUploadModal} className="flex-1 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Discard</button>
+                        <button 
+                          onClick={finalizeUpload}
+                          className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Check size={16} />
+                          Confirm & Save
+                        </button>
+                     </div>
+                  </div>
+                )}
              </div>
           </div>
         )}
@@ -621,7 +801,7 @@ const Guests: React.FC = () => {
       </div>
 
       <div className={`grid grid-cols-1 md:grid-cols-2 ${activeSubTab === 'dnr' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-6`}>
-        {filteredGuests.map(guest => (
+        {filteredGuests.length > 0 ? filteredGuests.map(guest => (
           <div 
             key={guest.id}
             onClick={() => setSelectedGuestId(guest.id)}
@@ -671,7 +851,13 @@ const Guests: React.FC = () => {
               </button>
             </div>
           </div>
-        ))}
+        )) : (
+           <div className="col-span-full py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+              <Users size={48} className="text-slate-300 mb-4" />
+              <h3 className="text-lg font-bold text-slate-400">Guest Database Empty</h3>
+              <p className="text-xs text-slate-400 mt-2 max-w-xs">{isDemoMode ? "Adjust search filters." : "You are in production mode. Add guests to populate the system."}</p>
+           </div>
+        )}
       </div>
 
       {isAddingNew && (

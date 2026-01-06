@@ -15,23 +15,46 @@ import {
   CheckCircle2,
   Receipt,
   FileText,
-  Loader2
+  Loader2,
+  Mail,
+  Phone,
+  Users,
+  Sparkles,
+  Infinity
 } from 'lucide-react';
 import { Booking } from '../types';
 
 const INITIAL_BOOKINGS: Booking[] = [
-  { id: 'b1', guestName: 'Emma Thompson', roomNumber: '204', checkIn: '2023-10-27', checkOut: '2023-10-30', status: 'Checked-In', totalAmount: 450 },
-  { id: 'b2', guestName: 'James Miller', roomNumber: '105', checkIn: '2023-10-28', checkOut: '2023-11-01', status: 'Confirmed', totalAmount: 820 },
-  { id: 'b3', guestName: 'Sophia Garcia', roomNumber: '412', checkIn: '2023-10-25', checkOut: '2023-10-27', status: 'Completed', totalAmount: 340 },
-  { id: 'b4', guestName: 'Robert Wilson', roomNumber: '302', checkIn: '2023-10-29', checkOut: '2023-10-31', status: 'Cancelled', totalAmount: 0 },
+  { id: 'b1', guestName: 'Emma Thompson', guestEmail: 'emma.t@example.com', guestPhone: '+1 555-010-9988', numberOfGuests: 2, roomNumber: '204', checkIn: '2023-10-27', checkOut: '2023-10-30', status: 'Checked-In', totalAmount: 450 },
+  { id: 'b2', guestName: 'James Miller', guestEmail: 'james.m@example.com', guestPhone: '+1 555-012-3344', numberOfGuests: 1, roomNumber: '105', checkIn: '2023-10-28', checkOut: '2023-11-01', status: 'Confirmed', totalAmount: 820 },
+  { id: 'b3', guestName: 'Sophia Garcia', guestEmail: 'sophia.g@example.com', guestPhone: '+1 555-019-2211', numberOfGuests: 3, roomNumber: '412', checkIn: '2023-10-25', checkOut: '2023-10-27', status: 'Completed', totalAmount: 340 },
+  { id: 'b4', guestName: 'Robert Wilson', guestEmail: 'robert.w@example.com', guestPhone: '+1 555-018-7766', numberOfGuests: 1, roomNumber: '302', checkIn: '2023-10-29', checkOut: undefined, status: 'Checked-In', totalAmount: 1200 },
 ];
 
-const Bookings: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+// Simulated Database for Autocomplete Linking
+const MOCK_GUEST_DATABASE = [
+  { name: 'Sarah Marshall', email: 'sarah.m@example.com', phone: '+1 555-010-2345' },
+  { name: 'David Chen', email: 'david.chen@techcorp.com', phone: '+1 555-010-8877' },
+  { name: 'Marcus Thorne', email: 'mthorne@consulting.co', phone: '+1 555-011-9922' },
+  { name: 'Emma Thompson', email: 'emma.t@example.com', phone: '+1 555-010-9988' },
+  { name: 'James Miller', email: 'james.m@example.com', phone: '+1 555-012-3344' },
+  { name: 'Sophia Garcia', email: 'sophia.g@example.com', phone: '+1 555-019-2211' }
+];
+
+interface BookingsProps {
+  isDemoMode: boolean;
+}
+
+const Bookings: React.FC<BookingsProps> = ({ isDemoMode }) => {
+  const [bookings, setBookings] = useState<Booking[]>(isDemoMode ? INITIAL_BOOKINGS : []);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Partial<Booking> | null>(null);
   const [isGeneratingDocs, setIsGeneratingDocs] = useState(false);
+  
+  // Autocomplete State
+  const [guestSuggestions, setGuestSuggestions] = useState<typeof MOCK_GUEST_DATABASE>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const filteredBookings = useMemo(() => {
     return bookings.filter(b => 
@@ -43,13 +66,55 @@ const Bookings: React.FC = () => {
   const openModal = (booking: Booking | null = null) => {
     setCurrentBooking(booking || {
       guestName: '',
+      guestEmail: '',
+      guestPhone: '',
+      numberOfGuests: 1,
       roomNumber: '',
       checkIn: new Date().toISOString().split('T')[0],
       checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
       status: 'Confirmed',
       totalAmount: 0
     });
+    setGuestSuggestions([]);
+    setShowSuggestions(false);
     setIsModalOpen(true);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCurrentBooking(prev => prev ? ({ ...prev, guestName: val }) : null);
+    
+    if (val.length > 1) {
+        const matches = MOCK_GUEST_DATABASE.filter(g => g.name.toLowerCase().includes(val.toLowerCase()));
+        setGuestSuggestions(matches);
+        setShowSuggestions(true);
+    } else {
+        setGuestSuggestions([]);
+        setShowSuggestions(false);
+    }
+  };
+
+  const selectGuest = (guest: typeof MOCK_GUEST_DATABASE[0]) => {
+      setCurrentBooking(prev => prev ? ({
+          ...prev,
+          guestName: guest.name,
+          guestEmail: guest.email,
+          guestPhone: guest.phone
+      }) : null);
+      setShowSuggestions(false);
+  };
+
+  const toggleIndefiniteStay = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentBooking) return;
+    if (e.target.checked) {
+      // Switch to indefinite
+      setCurrentBooking({ ...currentBooking, checkOut: undefined });
+    } else {
+      // Switch back to date, default to 1 day after checkin or tomorrow
+      const baseDate = currentBooking.checkIn ? new Date(currentBooking.checkIn) : new Date();
+      baseDate.setDate(baseDate.getDate() + 1);
+      setCurrentBooking({ ...currentBooking, checkOut: baseDate.toISOString().split('T')[0] });
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -137,6 +202,7 @@ const Bookings: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 font-bold">Guest</th>
                 <th className="px-6 py-4 font-bold">Room</th>
+                <th className="px-6 py-4 font-bold">Occupancy</th>
                 <th className="px-6 py-4 font-bold">Check In/Out</th>
                 <th className="px-6 py-4 font-bold">Amount</th>
                 <th className="px-6 py-4 font-bold">Status</th>
@@ -151,7 +217,21 @@ const Bookings: React.FC = () => {
                       <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
                         {booking.guestName.split(' ').map(n => n[0]).join('')}
                       </div>
-                      <span className="font-semibold text-slate-700">{booking.guestName}</span>
+                      <div>
+                        <span className="font-semibold text-slate-700 block">{booking.guestName}</span>
+                        <div className="flex flex-col gap-0.5 mt-0.5">
+                            {booking.guestEmail && (
+                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                                    <Mail size={10} /> {booking.guestEmail}
+                                </span>
+                            )}
+                            {booking.guestPhone && (
+                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                                    <Phone size={10} /> {booking.guestPhone}
+                                </span>
+                            )}
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -160,9 +240,21 @@ const Bookings: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <Users size={14} className="text-slate-400" />
+                      <span className="text-xs font-bold">{booking.numberOfGuests}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
                     <div className="flex flex-col text-sm">
                       <span className="text-slate-700 font-medium">{booking.checkIn}</span>
-                      <span className="text-slate-400 text-xs">to {booking.checkOut}</span>
+                      {booking.checkOut ? (
+                        <span className="text-slate-400 text-xs">to {booking.checkOut}</span>
+                      ) : (
+                        <span className="text-blue-600 text-xs font-bold flex items-center gap-1 mt-0.5">
+                          <Infinity size={12} /> Indefinite
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">
@@ -201,8 +293,8 @@ const Bookings: React.FC = () => {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                    No bookings found matching your search.
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                    {isDemoMode ? "No bookings found matching your search." : "No bookings in production database. Click 'New Booking' to start."}
                   </td>
                 </tr>
               )}
@@ -214,7 +306,7 @@ const Bookings: React.FC = () => {
       {isModalOpen && currentBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-visible animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center px-8 py-6 border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-800">
                 {currentBooking.id ? 'Modify Stay' : 'New Reservation'}
@@ -225,43 +317,148 @@ const Bookings: React.FC = () => {
             </div>
             
             <form onSubmit={handleSave} className="p-8 space-y-5">
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <User size={14} /> Guest Name
                 </label>
-                <input 
-                  required
-                  type="text"
-                  value={currentBooking.guestName}
-                  onChange={e => setCurrentBooking({...currentBooking, guestName: e.target.value})}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  placeholder="Search Guest..."
-                />
+                <div className="relative">
+                    <input 
+                    required
+                    type="text"
+                    value={currentBooking.guestName}
+                    onChange={handleNameChange}
+                    onFocus={() => { if(currentBooking.guestName && currentBooking.guestName.length > 1) setShowSuggestions(true); }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="Search Guest..."
+                    autoComplete="off"
+                    />
+                    {showSuggestions && guestSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50 max-h-48 overflow-y-auto">
+                            {guestSuggestions.map((g, idx) => (
+                                <div 
+                                    key={idx}
+                                    onClick={() => selectGuest(g)}
+                                    className="p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between group border-b border-slate-50 last:border-0"
+                                >
+                                    <div>
+                                        <p className="font-bold text-slate-700 text-sm">{g.name}</p>
+                                        <p className="text-[10px] text-slate-400">{g.email}</p>
+                                    </div>
+                                    <div className="hidden group-hover:flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase">
+                                        <Sparkles size={10} /> Link
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
               </div>
 
+              {/* Contact Info Row */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Hash size={14} /> Room No
+                    <Mail size={14} /> Email
+                  </label>
+                  <input 
+                    type="email"
+                    value={currentBooking.guestEmail || ''}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, guestEmail: e.target.value} : null)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="guest@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Phone size={14} /> Phone
+                  </label>
+                  <input 
+                    type="tel"
+                    value={currentBooking.guestPhone || ''}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, guestPhone: e.target.value} : null)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="+1 (555) 000-0000"
+                  />
+                </div>
+              </div>
+
+              {/* Date Selection & Indefinite Stay */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Calendar size={14} /> Check In
+                  </label>
+                  <input 
+                    required
+                    type="date"
+                    value={currentBooking.checkIn}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, checkIn: e.target.value} : null)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                   <div className="flex justify-between items-center">
+                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                      <Calendar size={14} /> Check Out
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer group">
+                       <input 
+                         type="checkbox" 
+                         checked={currentBooking.checkOut === undefined} 
+                         onChange={toggleIndefiniteStay}
+                         className="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                       />
+                       <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest group-hover:text-blue-700">Indefinite</span>
+                    </label>
+                   </div>
+                  <input 
+                    required={currentBooking.checkOut !== undefined}
+                    disabled={currentBooking.checkOut === undefined}
+                    type="date"
+                    value={currentBooking.checkOut || ''}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, checkOut: e.target.value} : null)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Hash size={14} /> Room
                   </label>
                   <input 
                     required
                     type="text"
                     value={currentBooking.roomNumber}
-                    onChange={e => setCurrentBooking({...currentBooking, roomNumber: e.target.value})}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, roomNumber: e.target.value} : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="101"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <DollarSign size={14} /> Total Amount
+                    <Users size={14} /> Guests
+                  </label>
+                  <input 
+                    required
+                    type="number"
+                    min="1"
+                    value={currentBooking.numberOfGuests}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, numberOfGuests: parseInt(e.target.value) || 1} : null)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <DollarSign size={14} /> Amount
                   </label>
                   <input 
                     required
                     type="number"
                     value={currentBooking.totalAmount}
-                    onChange={e => setCurrentBooking({...currentBooking, totalAmount: parseFloat(e.target.value)})}
+                    onChange={e => setCurrentBooking(prev => prev ? {...prev, totalAmount: parseFloat(e.target.value)} : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="0.00"
                   />
@@ -274,7 +471,7 @@ const Bookings: React.FC = () => {
                 </label>
                 <select 
                   value={currentBooking.status}
-                  onChange={e => setCurrentBooking({...currentBooking, status: e.target.value as any})}
+                  onChange={e => setCurrentBooking(prev => prev ? {...prev, status: e.target.value as any} : null)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
                 >
                   <option value="Confirmed">Confirmed</option>
