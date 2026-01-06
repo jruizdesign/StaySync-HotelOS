@@ -14,6 +14,7 @@ import Bookings from "./Bookings";
 import FeatureRequests from "./FeatureRequests";
 import StaffTracker from "./StaffTracker";
 import Settings from "./Settings";
+import SystemLogs from "./SystemLogs";
 import { User } from "../types"; // Import your custom type
 
 const MOCK_PROPERTIES = [
@@ -127,6 +128,13 @@ export default function PropertyDashboard() {
                     isDemoMode={isDemoMode}
                     propertyId={propertyId}
                     staffList={isDemoMode ? undefined : dashboardData?.users}
+                />
+            )}
+
+            {activeTab === 'logs' && (
+                <SystemLogs
+                    isDemoMode={isDemoMode}
+                    property={currentProperty as any}
                 />
             )}
 
