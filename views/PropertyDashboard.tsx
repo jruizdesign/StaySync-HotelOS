@@ -134,6 +134,7 @@ export default function PropertyDashboard() {
                 <Settings
                     property={currentProperty as any}
                     isDemoMode={isDemoMode}
+                    dashboardData={dashboardData}
                 />
             )}
         </Layout>
