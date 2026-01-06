@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createRoom } from '@firebasegen/default';
-import { Check, ChevronRight, Hash, Layers, Loader2, BedDouble, AlertCircle } from 'lucide-react';
+import { Check, ChevronRight, Hash, Layers, Loader2, BedDouble, AlertCircle, DollarSign } from 'lucide-react';
 
 interface RoomSetupWizardProps {
     propertyId: string;
@@ -13,6 +13,7 @@ interface FloorConfig {
     roomCount: number;
     startNumber: number; // e.g., 101
     roomType: string;
+    price: number;
 }
 
 const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplete }) => {
@@ -21,6 +22,7 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
     const [totalFloors, setTotalFloors] = useState(1);
     const [roomsPerFloor, setRoomsPerFloor] = useState(10);
     const [defaultType, setDefaultType] = useState('Double');
+    const [defaultPrice, setDefaultPrice] = useState(150);
     const [configs, setConfigs] = useState<FloorConfig[]>([]);
 
     // Batch Creation Mutation
@@ -40,8 +42,10 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
             newConfigs.push({
                 floorNumber: f,
                 roomCount: roomsPerFloor,
+                roomCount: roomsPerFloor,
                 startNumber: f * 100 + 1, // Floor 1 start 101, Floor 2 start 201
-                roomType: defaultType
+                roomType: defaultType,
+                price: defaultPrice
             });
         }
         setConfigs(newConfigs);
@@ -62,7 +66,10 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                     roomNumber: (config.startNumber + i).toString(),
                     roomType: config.roomType,
                     floor: config.floorNumber,
-                    pricePerNight: config.roomType === 'Suite' ? 250 : config.roomType === 'Double' ? 150 : 100, // Simple default pricing
+                    roomNumber: (config.startNumber + i).toString(),
+                    roomType: config.roomType,
+                    floor: config.floorNumber,
+                    pricePerNight: config.price,
                     status: 'AVAILABLE'
                 }));
             });
@@ -72,6 +79,7 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
             const chunkSize = 5;
             for (let i = 0; i < allRooms.length; i += chunkSize) {
                 const chunk = allRooms.slice(i, i + chunkSize);
+                console.log("Creating rooms chunk:", chunk);
                 await Promise.all(chunk.map(room => createRoomMutation.mutateAsync(room)));
 
                 completed += chunk.length;
@@ -150,6 +158,19 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                             </select>
                             <p className="text-[10px] text-slate-400 font-medium ml-1">You can customize individual floors in the next step.</p>
                         </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <DollarSign size={14} /> Base Price
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={defaultPrice}
+                                onChange={e => setDefaultPrice(parseFloat(e.target.value) || 0)}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
                     </div>
 
                     <button
@@ -169,7 +190,7 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                                 <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm font-black text-slate-300 text-lg">
                                     {config.floorNumber}
                                 </div>
-                                <div className="flex-1 grid grid-cols-3 gap-4">
+                                <div className="flex-1 grid grid-cols-4 gap-4">
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Start #</label>
                                         <input
@@ -212,6 +233,19 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                                             <option value="Suite">Suite</option>
                                             <option value="Penthouse">Penthouse</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Price</label>
+                                        <input
+                                            type="number"
+                                            value={config.price}
+                                            onChange={e => {
+                                                const newC = [...configs];
+                                                newC[idx].price = parseFloat(e.target.value) || 0;
+                                                setConfigs(newC);
+                                            }}
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                        />
                                     </div>
                                 </div>
                             </div>
