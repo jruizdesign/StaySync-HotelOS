@@ -75,6 +75,9 @@ mutation CreateBooking(
   })
 }
 
+# ... (Keep your existing queries) ...
+
+# 4. MUTATION: Update Property Settings
 mutation UpdateProperty(
   $id: UUID!,
   $name: String,
@@ -83,7 +86,7 @@ mutation UpdateProperty(
   $phoneNumber: String
 ) @auth(level: USER) {
   property_update(
-    id: $id, 
+    key: { id: $id },
     data: {
       name: $name,
       address: $address,
@@ -104,3 +107,7 @@ mutation UpdateUserStatus(
     }
   )
 }
+
+# ... (Keep your existing queries) ...
+
+
