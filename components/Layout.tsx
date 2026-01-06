@@ -60,8 +60,8 @@ const Layout: React.FC<LayoutProps> = ({
     <button
       onClick={() => setActiveTab(item.id)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === item.id
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-          : 'hover:bg-slate-800 hover:text-white'
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+        : 'hover:bg-slate-800 hover:text-white'
         }`}
     >
       <item.icon size={20} />
@@ -114,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="relative group">
               <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors">
                 <Building2 size={18} className="text-blue-600" />
-                <span className="font-semibold text-slate-700">{currentProperty.name}</span>
+                <span className="font-semibold text-slate-700">{currentProperty?.name || "No Property Selected"}</span>
                 <ChevronDown size={16} className="text-slate-400" />
               </button>
 

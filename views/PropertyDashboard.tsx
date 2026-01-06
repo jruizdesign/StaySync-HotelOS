@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Building2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
@@ -71,7 +72,32 @@ export default function PropertyDashboard() {
         ? { ...dashboardData.property, rooms: dashboardData.rooms?.length || 0 }
         : null;
 
-    if (!currentProperty && !isLoadingData && !isDemoMode) return <div>Property Not Found</div>;
+    if (!currentProperty && !isLoadingData) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-500">
+                <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-xl shadow-blue-200">
+                    <Building2 size={48} />
+                </div>
+                <h1 className="text-3xl font-black text-slate-900 mb-2">Welcome to StaySync</h1>
+                <p className="text-slate-500 font-medium max-w-md mx-auto mb-10">
+                    Your account is active but not yet linked to a property. Create your first hotel property to get started.
+                </p>
+
+                <button
+                    onClick={() => navigate('/admin/properties')}
+                    className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl shadow-slate-900/20 hover:scale-105 transition-all text-sm uppercase tracking-widest"
+                >
+                    View Property Portfolio
+                </button>
+                <button
+                    onClick={() => navigate('/login')}
+                    className="mt-6 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600"
+                >
+                    Switch Account
+                </button>
+            </div>
+        );
+    }
 
     return (
         <Layout
