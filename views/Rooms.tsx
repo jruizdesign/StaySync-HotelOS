@@ -5,6 +5,7 @@ import {
   ToggleLeft, ToggleRight, History, Package, Clock, AlertTriangle
 } from 'lucide-react';
 import { RoomStatus, User } from '../types';
+import RoomSetupWizard from './RoomSetupWizard';
 
 // Backend Imports
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +23,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   const db = getFirestore();
 
   // 1. FETCH REAL DATA
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['dashboard', propertyId],
     queryFn: async () => {
       // Direct call to generated SDK function
@@ -154,6 +155,27 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
     setQuickReportIssue('');
     setViewingRoom(null);
   };
+
+  if (isLoading) return <div className="p-12 text-center text-slate-400 font-bold">Loading Rooms...</div>;
+
+  // --- WIZARD LOGIC ---
+  const showWizard = !isDemoMode && !isLoading && data && (!data.rooms || data.rooms.length === 0);
+
+  if (showWizard) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Room Management</h1>
+            <p className="text-slate-500 text-sm">Welcome! Let's set up your property.</p>
+          </div>
+        </div>
+        <div className="py-12">
+          <RoomSetupWizard propertyId={propertyId} onComplete={() => refetch()} />
+        </div>
+      </div>
+    );
+  }
 
   const filteredRooms = rooms.filter((room: any) => {
     const matchesStatus = filterStatus === 'ALL' || room.status === filterStatus;
