@@ -213,7 +213,7 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
   const bookingsCount = data?.bookings?.length || 0;
   const roomsCount = data?.rooms?.length || 0;
   // Calculate simple occupancy from data if available
-  const occupiedRooms = data?.rooms?.filter((r: any) => r.status === 'Occupied').length || 0;
+  const occupiedRooms = data?.rooms?.filter((r: any) => r.roomStatus === 'OCCUPIED').length || 0;
   const occupancyRate = roomsCount > 0 ? ((occupiedRooms / roomsCount) * 100).toFixed(1) : (isDemoMode ? "78.2" : "0");
 
 

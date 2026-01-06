@@ -49,7 +49,8 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
         number: room.roomNumber, // Map SQL 'roomNumber' to UI 'number'
         floor: room.floor || 1,  // Default if missing
         type: room.roomType,     // Map SQL 'roomType' to UI 'type'
-        status: room.status || 'AVAILABLE',
+        status: room.roomStatus || 'AVAILABLE', // Map SQL 'roomStatus' to UI 'status'
+        price: room.price,
         guestName: activeBooking ? activeBooking.guestName : null,
         checkoutDate: activeBooking ? activeBooking.checkOutDate : null
       };

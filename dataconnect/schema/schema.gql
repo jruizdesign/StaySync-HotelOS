@@ -47,9 +47,9 @@ type Room @table(name: "rooms") {
   roomNumber: String!
   roomType: String!
   floor: Int
-  status: String # AVAILABLE, OCCUPIED, DIRTY, MAINTENANCE
+  roomStatus: String # AVAILABLE, OCCUPIED, DIRTY, MAINTENANCE
   capacity: Int
-  pricePerNight: Float
+  price: Float
   
   # Link to Property
   propertyId: UUID!

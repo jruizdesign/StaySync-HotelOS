@@ -69,7 +69,7 @@ const RoomSetupWizard: React.FC<RoomSetupWizardProps> = ({ propertyId, onComplet
                     roomNumber: (config.startNumber + i).toString(),
                     roomType: config.roomType,
                     floor: config.floorNumber,
-                    pricePerNight: config.price,
+                    price: config.price,
                     status: 'AVAILABLE'
                 }));
             });

@@ -53,7 +53,7 @@ export interface CreateRoomVariables {
   roomNumber: string;
   roomType: string;
   floor?: number | null;
-  pricePerNight?: number | null;
+  price?: number | null;
   status?: string | null;
 }
 
@@ -91,8 +91,8 @@ export interface GetPropertyDashboardData {
         roomNumber: string;
         roomType: string;
         floor?: number | null;
-        status?: string | null;
-        pricePerNight?: number | null;
+        roomStatus?: string | null;
+        price?: number | null;
       } & Room_Key)[];
         users: ({
           id: string;

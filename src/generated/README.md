@@ -224,8 +224,8 @@ export interface GetPropertyDashboardData {
         roomNumber: string;
         roomType: string;
         floor?: number | null;
-        status?: string | null;
-        pricePerNight?: number | null;
+        roomStatus?: string | null;
+        price?: number | null;
       } & Room_Key)[];
         users: ({
           id: string;
@@ -837,7 +837,7 @@ export interface CreateRoomVariables {
   roomNumber: string;
   roomType: string;
   floor?: number | null;
-  pricePerNight?: number | null;
+  price?: number | null;
   status?: string | null;
 }
 ```
@@ -862,7 +862,7 @@ const createRoomVars: CreateRoomVariables = {
   roomNumber: ..., 
   roomType: ..., 
   floor: ..., // optional
-  pricePerNight: ..., // optional
+  price: ..., // optional
   status: ..., // optional
 };
 
@@ -870,7 +870,7 @@ const createRoomVars: CreateRoomVariables = {
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await createRoom(createRoomVars);
 // Variables can be defined inline as well.
-const { data } = await createRoom({ propertyId: ..., roomNumber: ..., roomType: ..., floor: ..., pricePerNight: ..., status: ..., });
+const { data } = await createRoom({ propertyId: ..., roomNumber: ..., roomType: ..., floor: ..., price: ..., status: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -897,14 +897,14 @@ const createRoomVars: CreateRoomVariables = {
   roomNumber: ..., 
   roomType: ..., 
   floor: ..., // optional
-  pricePerNight: ..., // optional
+  price: ..., // optional
   status: ..., // optional
 };
 
 // Call the `createRoomRef()` function to get a reference to the mutation.
 const ref = createRoomRef(createRoomVars);
 // Variables can be defined inline as well.
-const ref = createRoomRef({ propertyId: ..., roomNumber: ..., roomType: ..., floor: ..., pricePerNight: ..., status: ..., });
+const ref = createRoomRef({ propertyId: ..., roomNumber: ..., roomType: ..., floor: ..., price: ..., status: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);

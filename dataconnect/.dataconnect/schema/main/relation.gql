@@ -323,14 +323,14 @@ extend type Room {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Room.id", purpose: QUERY_COUNT)
   """
-  ✨ Count the number of rows in the `Room` table where the `pricePerNight` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  ✨ Count the number of rows in the `Room` table where the `price` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
-  pricePerNight_count(
+  price_count(
     """
     Set to true to count the number of distinct values.
     """
     distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.pricePerNight", purpose: QUERY_COUNT)
+  ): Int! @fdc_generated(from: "Room.price", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Room` table where the `propertyId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -350,6 +350,15 @@ extend type Room {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Room.roomNumber", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Room` table where the `roomStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  roomStatus_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Room.roomStatus", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Room` table where the `roomType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   roomType_count(
@@ -358,15 +367,6 @@ extend type Room {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Room.roomType", purpose: QUERY_COUNT)
-  """
-  ✨ Count the number of rows in the `Room` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
-  """
-  status_count(
-    """
-    Set to true to count the number of distinct values.
-    """
-    distinct: Boolean = false
-  ): Int! @fdc_generated(from: "Room.status", purpose: QUERY_COUNT)
   """
   ✨ Sum the `capacity` field in the `Room` table.
   """
@@ -386,14 +386,14 @@ extend type Room {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "Room.floor", purpose: QUERY_SUM)
   """
-  ✨ Sum the `pricePerNight` field in the `Room` table.
+  ✨ Sum the `price` field in the `Room` table.
   """
-  pricePerNight_sum(
+  price_sum(
     """
     Set to true to sum the distinct values.
     """
     distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.pricePerNight", purpose: QUERY_SUM)
+  ): Float @fdc_generated(from: "Room.price", purpose: QUERY_SUM)
   """
   ✨ Average the `capacity` field in the `Room` table.
   """
@@ -413,14 +413,14 @@ extend type Room {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "Room.floor", purpose: QUERY_AVG)
   """
-  ✨ Average the `pricePerNight` field in the `Room` table.
+  ✨ Average the `price` field in the `Room` table.
   """
-  pricePerNight_avg(
+  price_avg(
     """
     Set to true to average the distinct values.
     """
     distinct: Boolean = false
-  ): Float @fdc_generated(from: "Room.pricePerNight", purpose: QUERY_AVG)
+  ): Float @fdc_generated(from: "Room.price", purpose: QUERY_AVG)
   """
   ✨ Minimum of the `capacity` field in the `Room` table.
   """
@@ -430,9 +430,9 @@ extend type Room {
   """
   floor_min: Int @fdc_generated(from: "Room.floor", purpose: QUERY_MIN)
   """
-  ✨ Minimum of the `pricePerNight` field in the `Room` table.
+  ✨ Minimum of the `price` field in the `Room` table.
   """
-  pricePerNight_min: Float @fdc_generated(from: "Room.pricePerNight", purpose: QUERY_MIN)
+  price_min: Float @fdc_generated(from: "Room.price", purpose: QUERY_MIN)
   """
   ✨ Maximum of the `capacity` field in the `Room` table.
   """
@@ -442,9 +442,9 @@ extend type Room {
   """
   floor_max: Int @fdc_generated(from: "Room.floor", purpose: QUERY_MAX)
   """
-  ✨ Maximum of the `pricePerNight` field in the `Room` table.
+  ✨ Maximum of the `price` field in the `Room` table.
   """
-  pricePerNight_max: Float @fdc_generated(from: "Room.pricePerNight", purpose: QUERY_MAX)
+  price_max: Float @fdc_generated(from: "Room.price", purpose: QUERY_MAX)
   """
   A generated field that is used for caching results in SDKs.
   """
