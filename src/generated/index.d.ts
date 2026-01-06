@@ -35,6 +35,15 @@ export interface CreateBookingVariables {
   checkOut: DateString;
 }
 
+export interface CreatePropertyData {
+  property_insert: Property_Key;
+}
+
+export interface CreatePropertyVariables {
+  name: string;
+  address?: string | null;
+}
+
 export interface CreateRoomData {
   room_insert: Room_Key;
 }
@@ -96,6 +105,15 @@ export interface GetPropertyDashboardData {
 }
 
 export interface GetPropertyDashboardVariables {
+  propertyId: UUIDString;
+}
+
+export interface LinkUserToPropertyData {
+  user_update?: User_Key | null;
+}
+
+export interface LinkUserToPropertyVariables {
+  id: string;
   propertyId: UUIDString;
 }
 
@@ -230,6 +248,30 @@ export const createRoomRef: CreateRoomRef;
 
 export function createRoom(vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
 export function createRoom(dc: DataConnect, vars: CreateRoomVariables): MutationPromise<CreateRoomData, CreateRoomVariables>;
+
+interface CreatePropertyRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreatePropertyVariables): MutationRef<CreatePropertyData, CreatePropertyVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreatePropertyVariables): MutationRef<CreatePropertyData, CreatePropertyVariables>;
+  operationName: string;
+}
+export const createPropertyRef: CreatePropertyRef;
+
+export function createProperty(vars: CreatePropertyVariables): MutationPromise<CreatePropertyData, CreatePropertyVariables>;
+export function createProperty(dc: DataConnect, vars: CreatePropertyVariables): MutationPromise<CreatePropertyData, CreatePropertyVariables>;
+
+interface LinkUserToPropertyRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: LinkUserToPropertyVariables): MutationRef<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: LinkUserToPropertyVariables): MutationRef<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+  operationName: string;
+}
+export const linkUserToPropertyRef: LinkUserToPropertyRef;
+
+export function linkUserToProperty(vars: LinkUserToPropertyVariables): MutationPromise<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+export function linkUserToProperty(dc: DataConnect, vars: LinkUserToPropertyVariables): MutationPromise<LinkUserToPropertyData, LinkUserToPropertyVariables>;
 
 interface CreateUserRef {
   /* Allow users to create refs without passing in DataConnect */

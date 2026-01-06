@@ -91,6 +91,30 @@ exports.createRoom = function createRoom(dcOrVars, vars) {
   return executeMutation(createRoomRef(dcOrVars, vars));
 };
 
+const createPropertyRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateProperty', inputVars);
+}
+createPropertyRef.operationName = 'CreateProperty';
+exports.createPropertyRef = createPropertyRef;
+
+exports.createProperty = function createProperty(dcOrVars, vars) {
+  return executeMutation(createPropertyRef(dcOrVars, vars));
+};
+
+const linkUserToPropertyRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'LinkUserToProperty', inputVars);
+}
+linkUserToPropertyRef.operationName = 'LinkUserToProperty';
+exports.linkUserToPropertyRef = linkUserToPropertyRef;
+
+exports.linkUserToProperty = function linkUserToProperty(dcOrVars, vars) {
+  return executeMutation(linkUserToPropertyRef(dcOrVars, vars));
+};
+
 const createUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();

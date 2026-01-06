@@ -16,6 +16,8 @@ This README will guide you through the process of using the generated JavaScript
   - [*UpdateUserStatus*](#updateuserstatus)
   - [*UpdateRoom*](#updateroom)
   - [*CreateRoom*](#createroom)
+  - [*CreateProperty*](#createproperty)
+  - [*LinkUserToProperty*](#linkusertoproperty)
   - [*CreateUser*](#createuser)
 
 # Accessing the connector
@@ -918,6 +920,230 @@ console.log(data.room_insert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.room_insert);
+});
+```
+
+## CreateProperty
+You can execute the `CreateProperty` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [generated/index.d.ts](./index.d.ts):
+```typescript
+createProperty(vars: CreatePropertyVariables): MutationPromise<CreatePropertyData, CreatePropertyVariables>;
+
+interface CreatePropertyRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreatePropertyVariables): MutationRef<CreatePropertyData, CreatePropertyVariables>;
+}
+export const createPropertyRef: CreatePropertyRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+createProperty(dc: DataConnect, vars: CreatePropertyVariables): MutationPromise<CreatePropertyData, CreatePropertyVariables>;
+
+interface CreatePropertyRef {
+  ...
+  (dc: DataConnect, vars: CreatePropertyVariables): MutationRef<CreatePropertyData, CreatePropertyVariables>;
+}
+export const createPropertyRef: CreatePropertyRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createPropertyRef:
+```typescript
+const name = createPropertyRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `CreateProperty` mutation requires an argument of type `CreatePropertyVariables`, which is defined in [generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface CreatePropertyVariables {
+  name: string;
+  address?: string | null;
+}
+```
+### Return Type
+Recall that executing the `CreateProperty` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `CreatePropertyData`, which is defined in [generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface CreatePropertyData {
+  property_insert: Property_Key;
+}
+```
+### Using `CreateProperty`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, createProperty, CreatePropertyVariables } from '@firebasegen/default';
+
+// The `CreateProperty` mutation requires an argument of type `CreatePropertyVariables`:
+const createPropertyVars: CreatePropertyVariables = {
+  name: ..., 
+  address: ..., // optional
+};
+
+// Call the `createProperty()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await createProperty(createPropertyVars);
+// Variables can be defined inline as well.
+const { data } = await createProperty({ name: ..., address: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await createProperty(dataConnect, createPropertyVars);
+
+console.log(data.property_insert);
+
+// Or, you can use the `Promise` API.
+createProperty(createPropertyVars).then((response) => {
+  const data = response.data;
+  console.log(data.property_insert);
+});
+```
+
+### Using `CreateProperty`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, createPropertyRef, CreatePropertyVariables } from '@firebasegen/default';
+
+// The `CreateProperty` mutation requires an argument of type `CreatePropertyVariables`:
+const createPropertyVars: CreatePropertyVariables = {
+  name: ..., 
+  address: ..., // optional
+};
+
+// Call the `createPropertyRef()` function to get a reference to the mutation.
+const ref = createPropertyRef(createPropertyVars);
+// Variables can be defined inline as well.
+const ref = createPropertyRef({ name: ..., address: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = createPropertyRef(dataConnect, createPropertyVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.property_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.property_insert);
+});
+```
+
+## LinkUserToProperty
+You can execute the `LinkUserToProperty` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [generated/index.d.ts](./index.d.ts):
+```typescript
+linkUserToProperty(vars: LinkUserToPropertyVariables): MutationPromise<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+
+interface LinkUserToPropertyRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: LinkUserToPropertyVariables): MutationRef<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+}
+export const linkUserToPropertyRef: LinkUserToPropertyRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+linkUserToProperty(dc: DataConnect, vars: LinkUserToPropertyVariables): MutationPromise<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+
+interface LinkUserToPropertyRef {
+  ...
+  (dc: DataConnect, vars: LinkUserToPropertyVariables): MutationRef<LinkUserToPropertyData, LinkUserToPropertyVariables>;
+}
+export const linkUserToPropertyRef: LinkUserToPropertyRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the linkUserToPropertyRef:
+```typescript
+const name = linkUserToPropertyRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `LinkUserToProperty` mutation requires an argument of type `LinkUserToPropertyVariables`, which is defined in [generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface LinkUserToPropertyVariables {
+  id: string;
+  propertyId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `LinkUserToProperty` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `LinkUserToPropertyData`, which is defined in [generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface LinkUserToPropertyData {
+  user_update?: User_Key | null;
+}
+```
+### Using `LinkUserToProperty`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, linkUserToProperty, LinkUserToPropertyVariables } from '@firebasegen/default';
+
+// The `LinkUserToProperty` mutation requires an argument of type `LinkUserToPropertyVariables`:
+const linkUserToPropertyVars: LinkUserToPropertyVariables = {
+  id: ..., 
+  propertyId: ..., 
+};
+
+// Call the `linkUserToProperty()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await linkUserToProperty(linkUserToPropertyVars);
+// Variables can be defined inline as well.
+const { data } = await linkUserToProperty({ id: ..., propertyId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await linkUserToProperty(dataConnect, linkUserToPropertyVars);
+
+console.log(data.user_update);
+
+// Or, you can use the `Promise` API.
+linkUserToProperty(linkUserToPropertyVars).then((response) => {
+  const data = response.data;
+  console.log(data.user_update);
+});
+```
+
+### Using `LinkUserToProperty`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, linkUserToPropertyRef, LinkUserToPropertyVariables } from '@firebasegen/default';
+
+// The `LinkUserToProperty` mutation requires an argument of type `LinkUserToPropertyVariables`:
+const linkUserToPropertyVars: LinkUserToPropertyVariables = {
+  id: ..., 
+  propertyId: ..., 
+};
+
+// Call the `linkUserToPropertyRef()` function to get a reference to the mutation.
+const ref = linkUserToPropertyRef(linkUserToPropertyVars);
+// Variables can be defined inline as well.
+const ref = linkUserToPropertyRef({ id: ..., propertyId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = linkUserToPropertyRef(dataConnect, linkUserToPropertyVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.user_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.user_update);
 });
 ```
 

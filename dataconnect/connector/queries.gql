@@ -145,8 +145,29 @@ mutation CreateRoom(
     roomType: $roomType,
     floor: $floor,
     pricePerNight: $pricePerNight,
-    status: $status
   })
+}
+
+# 9. CREATE PROPERTY MUTATION
+mutation CreateProperty(
+  $name: String!,
+  $address: String
+) @auth(level: USER) {
+  property_insert(data: {
+    name: $name,
+    address: $address
+  })
+}
+
+# 10. UPDATE USER PROPERTY MUTATION (Linking)
+mutation LinkUserToProperty(
+  $id: String!,
+  $propertyId: UUID!
+) @auth(level: USER) {
+  user_update(
+    key: { id: $id },
+    data: { propertyId: $propertyId }
+  )
 }
 
 # 8. CREATE USER MUTATION
