@@ -47,10 +47,20 @@ type Booking @table(name: "bookings") {
 # 4. Rooms
 # schema/schema.gql
 
+
+
 type Room @table(name: "rooms") {
   id: UUID! @default(expr: "uuidV4()")
   roomNumber: String!
-  # ... (other fields)
+  
+  # These are the fields your connector is looking for:
+  roomType: String!
+  floor: Int
+  roomStatus: String 
+  capacity: Int
+  price: Float
+  
+  # Relationships
   propertyId: UUID!
   property: Property!
 }
