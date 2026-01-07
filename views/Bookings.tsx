@@ -69,7 +69,6 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
     }));
   }, [dashboardData]);
 
-  const [localBookings, setLocalBookings] = useState<Booking[]>([]);
   const bookings = realBookings;
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +179,8 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
 
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this booking?')) {
-      setBookings(prev => prev.filter(b => b.id !== id));
+      // setBookings(prev => prev.filter(b => b.id !== id));
+      alert("Delete not yet implemented on backend");
     }
   };
 
