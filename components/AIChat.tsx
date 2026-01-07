@@ -84,7 +84,7 @@ const AIChat: React.FC = () => {
       });
 
       // Handle function calls loop
-      let part = response.candidates?.[0]?.content?.parts?.[0];
+      let part = response.candidates?.[0]?.content?.parts?.[0] as any;
 
       while (part?.functionCall) {
         const { name, args } = part.functionCall;
@@ -102,7 +102,7 @@ const AIChat: React.FC = () => {
         // 1. Model's Function Call
         currentContents.push({
           role: 'model',
-          parts: [{ functionCall: { name, args } }]
+          parts: [{ functionCall: { name, args } } as any]
         });
 
         // 2. The Result
@@ -113,7 +113,7 @@ const AIChat: React.FC = () => {
               name: name,
               response: { result: toolResult } // SDK expects wrapped response usually
             }
-          }]
+          } as any]
         });
 
         // Call AI again with updated history
@@ -126,7 +126,7 @@ const AIChat: React.FC = () => {
           }
         });
 
-        part = response.candidates?.[0]?.content?.parts?.[0];
+        part = response.candidates?.[0]?.content?.parts?.[0] as any;
       }
 
       // Final Text Response

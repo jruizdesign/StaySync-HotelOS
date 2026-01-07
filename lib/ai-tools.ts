@@ -2,7 +2,7 @@ import { getPropertyDashboard } from "@firebasegen/default";
 
 // --- Tool Schemas for Gemini ---
 
-export const toolDefinitions = [
+export const toolDefinitions: any = [
     {
         name: "get_property_stats",
         description: "Get real-time operational statistics for a property (Occupancy, RevPAR, Total Rooms).",
