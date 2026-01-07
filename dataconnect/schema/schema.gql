@@ -44,27 +44,7 @@ type Booking @table(name: "bookings") {
   room: Room
 }
 
-# 4. Rooms
-# schema/schema.gql
 
-
-
-# schema/schema.gql
-
-# Users
-type User @table(name: "users") {
-  id: String! @col(name: "uid")
-  email: String!
-  role: String!
-  name: String
-  pin: String
-  status: String # Active, On-Break, Out
-  lastActive: Date
-  
-  # Link to Property
-  propertyId: UUID
-  property: Property
-}
 
 # Properties
 type Property @table(name: "properties") {
@@ -75,20 +55,6 @@ type Property @table(name: "properties") {
   email: String
 }
 
-# Bookings
-type Booking @table(name: "bookings") {
-  id: UUID! @default(expr: "uuidV4()")
-  guestName: String!
-  checkInDate: Date!
-  checkOutDate: Date!
-  status: String!
-  
-  propertyId: UUID!
-  property: Property!
-  
-  roomId: UUID
-  room: Room
-}
 
 # Rooms (Fixed)
 type Room @table(name: "rooms") {
