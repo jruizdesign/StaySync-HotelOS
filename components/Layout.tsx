@@ -1,6 +1,5 @@
 
-import React from 'react';
-import {
+import React, { useState } from 'react'; import {
   LayoutDashboard,
   CalendarCheck,
   Wallet,
@@ -15,7 +14,8 @@ import {
   Wrench,
   Lightbulb,
   Terminal
-} from 'lucide-react';
+}
+  from 'lucide-react';
 import { User, Property, UserRole } from '../types';
 
 interface LayoutProps {
@@ -55,19 +55,26 @@ const Layout: React.FC<LayoutProps> = ({
     { id: 'features', label: 'Feature Roadmap', icon: Lightbulb, restricted: false },
     { id: 'settings', label: 'Settings', icon: Settings, restricted: false },
   ];
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  const NavItem: React.FC<{ item: any }> = ({ item }) => (
-    <button
-      onClick={() => setActiveTab(item.id)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === item.id
-        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-        : 'hover:bg-slate-800 hover:text-white'
-        }`}
-    >
-      <item.icon size={20} />
-      {item.label}
-    </button>
-  );
+  const canSwitchProperty =
+    user.role === 'SUPER_ADMIN' ||
+    user.role === 'SYSTEM_ADMIN' ||
+    user.role === UserRole.SUPER_ADMIN;
+
+  function NavItem({ item }) {
+    return (
+      <button
+        onClick={() => setActiveTab(item.id)}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === item.id
+          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+          : 'hover:bg-slate-800 hover:text-white'}`}
+      >
+        <item.icon size={20} />
+        {item.label}
+      </button>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
@@ -75,11 +82,11 @@ const Layout: React.FC<LayoutProps> = ({
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0">
         <div className="p-6 flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-            L
+            SS
           </div>
-          <div>
-            <h1 className="text-white font-bold tracking-tight">STAYSYNC OS</h1>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Management</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-white font-bold tracking-tight truncate">{currentProperty?.name || 'StaySync'}</h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">StaySync OS</p>
           </div>
         </div>
 

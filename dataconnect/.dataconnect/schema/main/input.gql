@@ -91,6 +91,38 @@ input Booking_Data {
   """
   checkOutDate_update: [Date_Update!]
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount` of type `Float`
+  """
+  currentStayTotalAmount: Float
+  """
+  ✨ `_expr` server value variant of `currentStayTotalAmount` (✨ Generated from Field `Booking`.`currentStayTotalAmount` of type `Float`)
+  """
+  currentStayTotalAmount_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `currentStayTotalAmount` (✨ Generated from Field `Booking`.`currentStayTotalAmount` of type `Float`)
+  """
+  currentStayTotalAmount_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Booking`.`dailyRate` of type `Float`
+  """
+  dailyRate: Float
+  """
+  ✨ `_expr` server value variant of `dailyRate` (✨ Generated from Field `Booking`.`dailyRate` of type `Float`)
+  """
+  dailyRate_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `dailyRate` (✨ Generated from Field `Booking`.`dailyRate` of type `Float`)
+  """
+  dailyRate_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Booking`.`guestEmail` of type `String`
+  """
+  guestEmail: String
+  """
+  ✨ `_expr` server value variant of `guestEmail` (✨ Generated from Field `Booking`.`guestEmail` of type `String`)
+  """
+  guestEmail_expr: String_Expr
+  """
   ✨ Generated from Field `Booking`.`guestName` of type `String!`
   """
   guestName: String
@@ -98,6 +130,26 @@ input Booking_Data {
   ✨ `_expr` server value variant of `guestName` (✨ Generated from Field `Booking`.`guestName` of type `String!`)
   """
   guestName_expr: String_Expr
+  """
+  ✨ Generated from Field `Booking`.`guestPhone` of type `String`
+  """
+  guestPhone: String
+  """
+  ✨ `_expr` server value variant of `guestPhone` (✨ Generated from Field `Booking`.`guestPhone` of type `String`)
+  """
+  guestPhone_expr: String_Expr
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests` of type `Int`
+  """
+  numberOfGuests: Int
+  """
+  ✨ `_expr` server value variant of `numberOfGuests` (✨ Generated from Field `Booking`.`numberOfGuests` of type `Int`)
+  """
+  numberOfGuests_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `numberOfGuests` (✨ Generated from Field `Booking`.`numberOfGuests` of type `Int`)
+  """
+  numberOfGuests_update: [Int_Update!]
   """
   ✨ Generated from Field `Booking`.`status` of type `String!`
   """
@@ -152,9 +204,29 @@ input Booking_Filter {
   """
   checkOutDate: Date_Filter
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount` of type `Float`
+  """
+  currentStayTotalAmount: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate` of type `Float`
+  """
+  dailyRate: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`guestEmail` of type `String`
+  """
+  guestEmail: String_Filter
+  """
   ✨ Generated from Field `Booking`.`guestName` of type `String!`
   """
   guestName: String_Filter
+  """
+  ✨ Generated from Field `Booking`.`guestPhone` of type `String`
+  """
+  guestPhone: String_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests` of type `Int`
+  """
+  numberOfGuests: Int_Filter
   """
   ✨ Generated from Field `Booking`.`status` of type `String!`
   """
@@ -206,13 +278,33 @@ input Booking_Having {
   """
   checkOutDate_count: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_count` of type `Int!`
+  """
+  currentStayTotalAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_count` of type `Int!`
+  """
+  dailyRate_count: Int_Filter
+  """
+  ✨ Generated from Field `Booking`.`guestEmail_count` of type `Int!`
+  """
+  guestEmail_count: Int_Filter
+  """
   ✨ Generated from Field `Booking`.`guestName_count` of type `Int!`
   """
   guestName_count: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`guestPhone_count` of type `Int!`
+  """
+  guestPhone_count: Int_Filter
+  """
   ✨ Generated from Field `Booking`.`id_count` of type `Int!`
   """
   id_count: Int_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_count` of type `Int!`
+  """
+  numberOfGuests_count: Int_Filter
   """
   ✨ Generated from Field `Booking`.`propertyId_count` of type `Int!`
   """
@@ -226,6 +318,30 @@ input Booking_Having {
   """
   status_count: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_sum` of type `Float`
+  """
+  currentStayTotalAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_sum` of type `Float`
+  """
+  dailyRate_sum: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_sum` of type `Int`
+  """
+  numberOfGuests_sum: Int_Filter
+  """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_avg` of type `Float`
+  """
+  currentStayTotalAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_avg` of type `Float`
+  """
+  dailyRate_avg: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_avg` of type `Float`
+  """
+  numberOfGuests_avg: Float_Filter
+  """
   ✨ Generated from Field `Booking`.`checkInDate_min` of type `Date`
   """
   checkInDate_min: Date_Filter
@@ -234,6 +350,18 @@ input Booking_Having {
   """
   checkOutDate_min: Date_Filter
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_min` of type `Float`
+  """
+  currentStayTotalAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_min` of type `Float`
+  """
+  dailyRate_min: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_min` of type `Int`
+  """
+  numberOfGuests_min: Int_Filter
+  """
   ✨ Generated from Field `Booking`.`checkInDate_max` of type `Date`
   """
   checkInDate_max: Date_Filter
@@ -241,6 +369,18 @@ input Booking_Having {
   ✨ Generated from Field `Booking`.`checkOutDate_max` of type `Date`
   """
   checkOutDate_max: Date_Filter
+  """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_max` of type `Float`
+  """
+  currentStayTotalAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_max` of type `Float`
+  """
+  dailyRate_max: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_max` of type `Int`
+  """
+  numberOfGuests_max: Int_Filter
 }
 """
 ✨ Generated key input type for table 'Booking'. It represents the primary key fields used to uniquely identify a row in the table.
@@ -301,9 +441,29 @@ input Booking_Order {
   """
   checkOutDate: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount` of type `Float`
+  """
+  currentStayTotalAmount: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate` of type `Float`
+  """
+  dailyRate: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`guestEmail` of type `String`
+  """
+  guestEmail: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`guestName` of type `String!`
   """
   guestName: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`guestPhone` of type `String`
+  """
+  guestPhone: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests` of type `Int`
+  """
+  numberOfGuests: OrderDirection
   """
   ✨ Generated from Field `Booking`.`status` of type `String!`
   """
@@ -321,13 +481,33 @@ input Booking_Order {
   """
   checkOutDate_count: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_count` of type `Int!`
+  """
+  currentStayTotalAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_count` of type `Int!`
+  """
+  dailyRate_count: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`guestEmail_count` of type `Int!`
+  """
+  guestEmail_count: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`guestName_count` of type `Int!`
   """
   guestName_count: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`guestPhone_count` of type `Int!`
+  """
+  guestPhone_count: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`id_count` of type `Int!`
   """
   id_count: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_count` of type `Int!`
+  """
+  numberOfGuests_count: OrderDirection
   """
   ✨ Generated from Field `Booking`.`propertyId_count` of type `Int!`
   """
@@ -341,6 +521,30 @@ input Booking_Order {
   """
   status_count: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_sum` of type `Float`
+  """
+  currentStayTotalAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_sum` of type `Float`
+  """
+  dailyRate_sum: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_sum` of type `Int`
+  """
+  numberOfGuests_sum: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_avg` of type `Float`
+  """
+  currentStayTotalAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_avg` of type `Float`
+  """
+  dailyRate_avg: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_avg` of type `Float`
+  """
+  numberOfGuests_avg: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`checkInDate_min` of type `Date`
   """
   checkInDate_min: OrderDirection
@@ -349,6 +553,18 @@ input Booking_Order {
   """
   checkOutDate_min: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_min` of type `Float`
+  """
+  currentStayTotalAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_min` of type `Float`
+  """
+  dailyRate_min: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_min` of type `Int`
+  """
+  numberOfGuests_min: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`checkInDate_max` of type `Date`
   """
   checkInDate_max: OrderDirection
@@ -356,6 +572,18 @@ input Booking_Order {
   ✨ Generated from Field `Booking`.`checkOutDate_max` of type `Date`
   """
   checkOutDate_max: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`currentStayTotalAmount_max` of type `Float`
+  """
+  currentStayTotalAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`dailyRate_max` of type `Float`
+  """
+  dailyRate_max: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`numberOfGuests_max` of type `Int`
+  """
+  numberOfGuests_max: OrderDirection
 }
 """
 ✨ Generated data input type for table 'Property'. It includes all necessary fields for creating or upserting rows into table.

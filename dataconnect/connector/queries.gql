@@ -26,6 +26,11 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
   ) {
     id
     guestName
+    guestEmail
+    guestPhone
+    numberOfGuests
+    dailyRate
+    currentStayTotalAmount
     status
     checkInDate
     checkOutDate
@@ -66,12 +71,22 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
 mutation CreateBooking(
   $propertyId: UUID!, 
   $guestName: String!, 
+  $guestEmail: String,
+  $guestPhone: String,
+  $numberOfGuests: Int,
+  $dailyRate: Float,
+  $currentStayTotalAmount: Float,
   $checkIn: Date!, 
   $checkOut: Date!
 ) @auth(level: USER) {
   booking_insert(data: {
     propertyId: $propertyId,
     guestName: $guestName,
+    guestEmail: $guestEmail,
+    guestPhone: $guestPhone,
+    numberOfGuests: $numberOfGuests,
+    dailyRate: $dailyRate,
+    currentStayTotalAmount: $currentStayTotalAmount,
     checkInDate: $checkIn,
     checkOutDate: $checkOut,
     status: "CONFIRMED"

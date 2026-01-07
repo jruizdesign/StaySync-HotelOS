@@ -31,6 +31,11 @@ export interface CreateBookingData {
 export interface CreateBookingVariables {
   propertyId: UUIDString;
   guestName: string;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
+  numberOfGuests?: number | null;
+  dailyRate?: number | null;
+  currentStayTotalAmount?: number | null;
   checkIn: DateString;
   checkOut: DateString;
 }
@@ -93,6 +98,11 @@ export interface GetPropertyDashboardData {
     bookings: ({
       id: UUIDString;
       guestName: string;
+      guestEmail?: string | null;
+      guestPhone?: string | null;
+      numberOfGuests?: number | null;
+      dailyRate?: number | null;
+      currentStayTotalAmount?: number | null;
       status: string;
       checkInDate: DateString;
       checkOutDate: DateString;
@@ -188,18 +198,6 @@ export interface User_Key {
   id: string;
   __typename?: 'User_Key';
 }
-
-interface CreateRoomEntryRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
-  operationName: string;
-}
-export const createRoomEntryRef: CreateRoomEntryRef;
-
-export function createRoomEntry(vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
-export function createRoomEntry(dc: DataConnect, vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
 
 interface AdminListPropertiesRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -332,4 +330,16 @@ export const upsertUserRef: UpsertUserRef;
 
 export function upsertUser(vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
 export function upsertUser(dc: DataConnect, vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
+
+interface CreateRoomEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateRoomEntryVariables): MutationRef<CreateRoomEntryData, CreateRoomEntryVariables>;
+  operationName: string;
+}
+export const createRoomEntryRef: CreateRoomEntryRef;
+
+export function createRoomEntry(vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
+export function createRoomEntry(dc: DataConnect, vars: CreateRoomEntryVariables): MutationPromise<CreateRoomEntryData, CreateRoomEntryVariables>;
 

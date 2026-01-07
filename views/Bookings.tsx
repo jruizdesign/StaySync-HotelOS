@@ -58,14 +58,15 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
     return dashboardData.bookings.map(b => ({
       id: b.id,
       guestName: b.guestName,
-      guestEmail: '', // Not in schema yet
-      guestPhone: '', // Not in schema yet
-      numberOfGuests: 1, // Not in schema yet
+      guestEmail: b.guestEmail || '',
+      guestPhone: b.guestPhone || '',
+      numberOfGuests: b.numberOfGuests || 1,
       roomNumber: b.room?.roomNumber || 'Unknown',
       checkIn: b.checkInDate,
       checkOut: b.checkOutDate,
       status: b.status as any,
-      totalAmount: 0 // Not in schema yet
+      dailyRate: b.dailyRate || 0,
+      currentStayTotalAmount: b.currentStayTotalAmount || 0
     }));
   }, [dashboardData]);
 
@@ -114,7 +115,8 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
       checkIn: new Date().toISOString().split('T')[0],
       checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
       status: 'Confirmed',
-      totalAmount: 0
+      dailyRate: 0, 
+      currentStayTotalAmount: 0
     });
     setGuestSuggestions([]);
     setShowSuggestions(false);
@@ -170,6 +172,11 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
       createBookingMutation.mutate({
         propertyId: propertyId!,
         guestName: currentBooking.guestName || 'Guest',
+        guestEmail: currentBooking.guestEmail,
+        guestPhone: currentBooking.guestPhone,
+        numberOfGuests: currentBooking.numberOfGuests,
+        dailyRate: currentBooking.dailyRate,
+        currentStayTotalAmount: currentBooking.currentStayTotalAmount,
         checkIn: currentBooking.checkIn || new Date().toISOString(),
         checkOut: currentBooking.checkOut || new Date().toISOString()
       });
@@ -294,7 +301,10 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">
-                    ${booking.totalAmount.toFixed(2)}
+                    <div>
+                      ${booking.currentStayTotalAmount.toFixed(2)}
+                      <p className="text-[10px] text-slate-400 font-medium">${booking.dailyRate}/night</p>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatusStyle(booking.status)}`}>
@@ -488,13 +498,25 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <DollarSign size={14} /> Amount
+                    <DollarSign size={14} /> Daily Rate
                   </label>
                   <input
                     required
                     type="number"
-                    value={currentBooking.totalAmount}
-                    onChange={e => setCurrentBooking(prev => prev ? { ...prev, totalAmount: parseFloat(e.target.value) } : null)}
+                    value={currentBooking.dailyRate}
+                    onChange={e => {
+                      const rate = parseFloat(e.target.value) || 0;
+                      // Simple auto-calc
+                      const start = new Date(currentBooking.checkIn || '');
+                      const end = currentBooking.checkOut ? new Date(currentBooking.checkOut) : new Date();
+                      const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)));
+
+                      setCurrentBooking(prev => prev ? {
+                        ...prev,
+                        dailyRate: rate,
+                        currentStayTotalAmount: rate * nights
+                      } : null)
+                    }}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="0.00"
                   />

@@ -31,10 +31,10 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { GoogleGenAI } from '@google/genai';
-
 import { useQuery } from "@tanstack/react-query";
+import { httpsCallable } from 'firebase/functions';
 import { adminListProperties, getPropertyDashboard } from "@firebasegen/default";
-import { dc } from '../lib/firebase';
+import { dc, functions } from '../lib/firebase';
 
 // --- Types ---
 
@@ -163,8 +163,7 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
     const fetchInsight = async () => {
       setLoadingInsight(true);
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'demo-key' });
-        // Mock context data
+        // Mock context data (In production, this could be fetched from DB or passed to function to fetch)
         const contextData = {
           arrears: [
             { guest: "Marcus Thorne", amount: "$1,250", status: "Overdue 5 days", reason: "Property Damage Fee" },
@@ -176,32 +175,24 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
           ]
         };
 
-        const prompt = `Perform a high-priority operational analysis for ${property.name}.
-            Focus EXCLUSIVELY on these two categories:
-            1. DEBT/ARREARS (Who owes money): ${JSON.stringify(contextData.arrears)}
-            2. MAINTENANCE (What needs repair): ${JSON.stringify(contextData.maintenance)}
-    
-            Provide a 2-sentence executive strategic summary highlighting the biggest financial or physical risk. 
-            Then, provide one single 'Priority Action' for the manager to execute immediately.
-            
-            Format your response exactly like this:
-            Summary: [analysis text]
-            Action: [immediate task]`;
+        const generateOpInsight = httpsCallable(functions, 'generateOpInsight');
 
-        // Just simulate response in demo mode if no key (or error) to prevent crash
-        // const response = await ai.models.generateContent({ ... });
+        const result: any = await generateOpInsight({
+          propertyName: property.name,
+          contextData: contextData
+        });
 
-        // Simulating delay for effect
-        setTimeout(() => {
-          setInsight("Summary: Critical attention needed on Room 104's active leak preventing occupancy, alongside monitoring Marcus Thorne's overdue balance. Action: Dispatch maintenance team to Room 104 immediately to mitigate water damage.");
-          setLoadingInsight(false);
-        }, 1500);
+        if (result.data.success) {
+          setInsight(result.data.insight);
+        } else {
+          setInsight("Unable to generate insight.");
+        }
 
       } catch (error) {
         console.error("Insight Error:", error);
-        setInsight("Unable to generate AI brief.");
+        setInsight("Unable to generate AI brief (Service Unavailable).");
       } finally {
-        // setLoadingInsight(false);
+        setLoadingInsight(false);
       }
     };
 

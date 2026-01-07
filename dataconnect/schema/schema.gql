@@ -35,6 +35,11 @@ type User @table(name: "users") {
 type Booking @table(name: "bookings") {
   id: UUID! @default(expr: "uuidV4()")
   guestName: String!
+  guestEmail: String
+  guestPhone: String
+  numberOfGuests: Int
+  dailyRate: Float
+  currentStayTotalAmount: Float
   checkInDate: Date!
   checkOutDate: Date!
   status: String!

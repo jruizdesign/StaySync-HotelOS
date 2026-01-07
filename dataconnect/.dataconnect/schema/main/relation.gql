@@ -26,6 +26,33 @@ extend type Booking {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Booking.checkOutDate", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Booking` table where the `currentStayTotalAmount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  currentStayTotalAmount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.currentStayTotalAmount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Booking` table where the `dailyRate` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  dailyRate_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.dailyRate", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Booking` table where the `guestEmail` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  guestEmail_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.guestEmail", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Booking` table where the `guestName` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   guestName_count(
@@ -35,6 +62,15 @@ extend type Booking {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Booking.guestName", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Booking` table where the `guestPhone` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  guestPhone_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.guestPhone", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Booking` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   id_count(
@@ -43,6 +79,15 @@ extend type Booking {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Booking.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Booking` table where the `numberOfGuests` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  numberOfGuests_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Booking` table where the `propertyId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -71,6 +116,60 @@ extend type Booking {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Booking.status", purpose: QUERY_COUNT)
   """
+  ✨ Sum the `currentStayTotalAmount` field in the `Booking` table.
+  """
+  currentStayTotalAmount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.currentStayTotalAmount", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `dailyRate` field in the `Booking` table.
+  """
+  dailyRate_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.dailyRate", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `numberOfGuests` field in the `Booking` table.
+  """
+  numberOfGuests_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_SUM)
+  """
+  ✨ Average the `currentStayTotalAmount` field in the `Booking` table.
+  """
+  currentStayTotalAmount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.currentStayTotalAmount", purpose: QUERY_AVG)
+  """
+  ✨ Average the `dailyRate` field in the `Booking` table.
+  """
+  dailyRate_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.dailyRate", purpose: QUERY_AVG)
+  """
+  ✨ Average the `numberOfGuests` field in the `Booking` table.
+  """
+  numberOfGuests_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_AVG)
+  """
   ✨ Minimum of the `checkInDate` field in the `Booking` table.
   """
   checkInDate_min: Date @fdc_generated(from: "Booking.checkInDate", purpose: QUERY_MIN)
@@ -79,6 +178,18 @@ extend type Booking {
   """
   checkOutDate_min: Date @fdc_generated(from: "Booking.checkOutDate", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `currentStayTotalAmount` field in the `Booking` table.
+  """
+  currentStayTotalAmount_min: Float @fdc_generated(from: "Booking.currentStayTotalAmount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `dailyRate` field in the `Booking` table.
+  """
+  dailyRate_min: Float @fdc_generated(from: "Booking.dailyRate", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `numberOfGuests` field in the `Booking` table.
+  """
+  numberOfGuests_min: Int @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_MIN)
+  """
   ✨ Maximum of the `checkInDate` field in the `Booking` table.
   """
   checkInDate_max: Date @fdc_generated(from: "Booking.checkInDate", purpose: QUERY_MAX)
@@ -86,6 +197,18 @@ extend type Booking {
   ✨ Maximum of the `checkOutDate` field in the `Booking` table.
   """
   checkOutDate_max: Date @fdc_generated(from: "Booking.checkOutDate", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `currentStayTotalAmount` field in the `Booking` table.
+  """
+  currentStayTotalAmount_max: Float @fdc_generated(from: "Booking.currentStayTotalAmount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `dailyRate` field in the `Booking` table.
+  """
+  dailyRate_max: Float @fdc_generated(from: "Booking.dailyRate", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `numberOfGuests` field in the `Booking` table.
+  """
+  numberOfGuests_max: Int @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_MAX)
   """
   A generated field that is used for caching results in SDKs.
   """

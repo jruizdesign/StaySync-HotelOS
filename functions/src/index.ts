@@ -84,3 +84,62 @@ export const createTenantUser = onCall(async (request) => {
   }
 });
 
+
+import { defineSecret } from "firebase-functions/params";
+import { GoogleGenAI } from "@google/genai";
+
+const geminiApiKey = defineSecret("GEMINI_API_KEY");
+
+/**
+ * Generates an operational insight using Google Gemini.
+ * Securely access the API Key on the server side.
+ */
+export const generateOpInsight = onCall({ secrets: [geminiApiKey] }, async (request) => {
+  // 1. Authenticate Request
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'User must be logged in.');
+  }
+
+  const { contextData, propertyName } = request.data;
+  const apiKey = geminiApiKey.value();
+
+  if (!apiKey) {
+    throw new HttpsError('internal', 'AI Service not configured.');
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+
+    // This 'gemini-2.0-flash-exp' is a placeholder. 
+    // Use 'gemini-1.5-flash' or similar for production stability if needed.
+    // But per your code, we will stick to a standard model name if one wasn't specified.
+    // Let's use 'gemini-1.5-flash' as a safe default for production.
+    const model = "gemini-1.5-flash";
+
+    const prompt = `Perform a high-priority operational analysis for ${propertyName}.
+            Focus EXCLUSIVELY on these two categories:
+            1. DEBT/ARREARS (Who owes money): ${JSON.stringify(contextData.arrears)}
+            2. MAINTENANCE (What needs repair): ${JSON.stringify(contextData.maintenance)}
+    
+            Provide a 2-sentence executive strategic summary highlighting the biggest financial or physical risk. 
+            Then, provide one single 'Priority Action' for the manager to execute immediately.
+            
+            Format your response exactly like this:
+            Summary: [analysis text]
+            Action: [immediate task]`;
+
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: [{ parts: [{ text: prompt }] }]
+    });
+
+    // Extract text safely
+    const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to generate insight.";
+
+    return { success: true, insight: text };
+
+  } catch (error: any) {
+    console.error("AI Error:", error);
+    throw new HttpsError('internal', "AI generation failed.");
+  }
+});

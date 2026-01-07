@@ -1,8 +1,10 @@
 
 export enum UserRole {
   SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-  PROPERTY_MANAGER = 'PROPERTY_MANAGER',
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
   STAFF = 'STAFF',
+  SUPER_ADMIN = 'SUPER_ADMIN'
 }
 
 export enum RoomStatus {
@@ -86,9 +88,10 @@ export interface Booking {
   numberOfGuests: number;
   roomNumber: string;
   checkIn: string;
-  checkOut?: string; // Optional for indefinite stays
+  checkOut?: string;
   status: 'Confirmed' | 'Checked-In' | 'Completed' | 'Cancelled';
-  totalAmount: number;
+  dailyRate: number;
+  currentStayTotalAmount: number;
 }
 
 export interface MaintenanceTask {
