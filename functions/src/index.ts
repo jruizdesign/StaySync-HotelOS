@@ -1,68 +1,66 @@
+import { onCall, HttpsError } from "firebase-functions/v2/https";
+import * as admin from "firebase-admin";
+import { gql, GraphQLClient } from "graphql-request";
+import { GoogleAuth } from "google-auth-library";
 
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import { gql, GraphQLClient } from 'graphql-request';
-
-// Initialize Firebase Admin
 admin.initializeApp();
 
-// Configuration for Data Connect (Postgres)
-// In production, this URL comes from your Data Connect service
-const DATA_CONNECT_ENDPOINT = process.env.DATA_CONNECT_ENDPOINT || 'https://api.firebasedataconnect.com/v1/projects/...';
-const client = new GraphQLClient(DATA_CONNECT_ENDPOINT);
+// Configuration
+const DATA_CONNECT_ENDPOINT = process.env.DATA_CONNECT_ENDPOINT ||
+  'https://firebasedataconnect.googleapis.com/v1/projects/staysync-hotelos/locations/us-central1/services/staysync-hotelos-service:executeGraphql';
+
 
 /**
  * Creates a new Tenant User (Manager or Staff).
- * 
- * ACTIONS:
- * 1. Creates Authentication User
- * 2. Sets Custom Claims (propertyId, role) - CRITICAL FOR SECURITY
- * 3. Inserts record into Cloud SQL via Data Connect
  */
-export const createTenantUser = functions.https.onCall(async (data, context) => {
-  // 1. SECURITY: Only Super Admins can create new users
-  // This prevents unauthorized account creation
-  if (context.auth?.token.role !== 'SYSTEM_ADMIN') {
-    throw new functions.https.HttpsError(
-      'permission-denied', 
-      'Only System Administrators can onboard new users.'
-    );
+export const createTenantUser = onCall(async (request) => {
+  // -------------------------------------------------------------
+  // FIX 1: Extract 'data' and 'auth' from the single 'request' object
+  // -------------------------------------------------------------
+  const { data, auth } = request;
+
+  // 1. SECURITY: Check 'auth.token' (formerly context.auth.token)
+  if (auth?.token.role !== 'SYSTEM_ADMIN' && auth?.token.role !== 'MANAGER') {
+    throw new HttpsError('permission-denied', 'Not authorized to create users.');
   }
 
+  // FIX 2: Read inputs from 'data'
   const { email, password, name, role, propertyId } = data;
 
-  // Validate inputs
   if (!email || !password || !role || !propertyId) {
-    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields.');
+    throw new HttpsError('invalid-argument', 'Missing required fields.');
   }
 
   try {
-    // 2. Create User in Firebase Auth
+    // --- STEP 1: Create User in Firebase Auth ---
     const userRecord = await admin.auth().createUser({
       email,
       password,
       displayName: name,
     });
 
-    // 3. Set Custom Claims (The "Bridge" between Auth and DBs)
-    // By baking propertyId into the token, Firestore rules and Data Connect
-    // can instantly validate tenancy without extra database lookups.
-    const customClaims = {
-      role: role,         // 'PROPERTY_MANAGER' or 'STAFF'
-      propertyId: propertyId 
-    };
-    
-    await admin.auth().setCustomUserClaims(userRecord.uid, customClaims);
+    // --- STEP 2: Set Custom Claims ---
+    await admin.auth().setCustomUserClaims(userRecord.uid, {
+      role,
+      propertyId
+    });
 
-    // 4. Insert into Cloud SQL via Data Connect Mutation
-    // We maintain a User table in SQL for relational queries (e.g., Bookings linked to User)
+    // --- STEP 3: Data Connect Request ---
+    const googleAuth = new GoogleAuth();
+    const client_credentials = await googleAuth.getIdTokenClient(DATA_CONNECT_ENDPOINT);
+    const tokenHeaders = await client_credentials.getRequestHeaders();
+
+    const client = new GraphQLClient(DATA_CONNECT_ENDPOINT, {
+      headers: tokenHeaders,
+    });
+
     const mutation = gql`
       mutation CreateUserInSql($id: String!, $email: String!, $name: String, $role: String!, $propertyId: UUID!) {
         user_insert(data: {
-          id: $id,
-          email: $email,
-          name: $name,
-          role: $role,
+          id: $id, 
+          email: $email, 
+          name: $name, 
+          role: $role, 
           propertyId: $propertyId
         }) {
           id
@@ -70,26 +68,19 @@ export const createTenantUser = functions.https.onCall(async (data, context) => 
       }
     `;
 
-    // Execute GraphQL mutation
     await client.request(mutation, {
       id: userRecord.uid,
-      email: email,
-      name: name,
-      role: role,
-      propertyId: propertyId
+      email,
+      name,
+      role,
+      propertyId
     });
 
-    console.log(`User ${userRecord.uid} created for property ${propertyId}`);
+    return { success: true, uid: userRecord.uid };
 
-    return { 
-      success: true, 
-      uid: userRecord.uid,
-      message: 'User created and synced to SQL successfully.' 
-    };
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Onboarding Error:', error);
-    // If SQL fails, we might want to rollback Auth, but for now just throw error
-    throw new functions.https.HttpsError('internal', 'Failed to create user or sync data.');
+    throw new HttpsError('internal', error.message || 'Failed to create user.');
   }
 });
+
