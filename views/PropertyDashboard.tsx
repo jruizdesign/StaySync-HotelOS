@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
 import { useQuery } from '@tanstack/react-query';
-import { getPropertyDashboard } from '@firebasegen/default';
+import { getPropertyDashboard, adminListProperties } from '@firebasegen/default';
 
 // Import your views
 import Dashboard from "./Dashboard";
@@ -58,6 +58,17 @@ export default function PropertyDashboard() {
         enabled: !!propertyId && !isDemoMode
     });
 
+    // Fetch Properties List for Admin Selector
+    const { data: propertiesList } = useQuery({
+        queryKey: ['admin-properties'],
+        queryFn: async () => {
+            const res = await adminListProperties();
+            return res.data.properties;
+        },
+        // Only fetch if user is admin (and we have the user object)
+        enabled: !!appUser && appUser.role === 'SYSTEM_ADMIN'
+    });
+
     if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
     if (!appUser) {
@@ -104,9 +115,9 @@ export default function PropertyDashboard() {
         <Layout
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            user={appUser} // Passing the converted appUser
+            user={appUser}
             currentProperty={currentProperty as any}
-            properties={[]} // No mock list
+            properties={(propertiesList as any[]) || []}
             onPropertyChange={(p) => navigate(`/dashboard/${p.id}`)}
             onLogout={() => navigate('/login')}
         >
@@ -118,7 +129,6 @@ export default function PropertyDashboard() {
                 />
             )}
 
-            {/* 2. THE FIX: Guests only takes isDemoMode, removed 'user' prop */}
             {activeTab === 'guests' && <Guests isDemoMode={isDemoMode} />}
 
             {activeTab === 'maintenance' && (
