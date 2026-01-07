@@ -75,7 +75,7 @@ const AIChat: React.FC = () => {
 
       // Initial Call
       let response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash-exp',
         contents: currentContents,
         config: {
           systemInstruction: SYSTEM_PROMPT + (propertyId ? `\nActive Property ID: ${propertyId}` : ''),
@@ -118,7 +118,7 @@ const AIChat: React.FC = () => {
 
         // Call AI again with updated history
         response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash-exp',
           contents: currentContents,
           config: {
             systemInstruction: SYSTEM_PROMPT + (propertyId ? `\nActive Property ID: ${propertyId}` : ''),
