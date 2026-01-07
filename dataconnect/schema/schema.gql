@@ -51,20 +51,56 @@ type Booking @table(name: "bookings") {
 
 # schema/schema.gql
 
-type Room @table(name: "rooms") {
-  # You must allow public access to the ID to read the result back
-  id: UUID! @default(expr: "uuidV4()") @auth(level: PUBLIC)
-
-  # Add @auth(level: PUBLIC) to EVERY field you are inserting
-  roomNumber: String! @auth(level: PUBLIC)
-  roomType: String! @auth(level: PUBLIC)
-  floor: Int @auth(level: PUBLIC)
-  roomStatus: String @auth(level: PUBLIC)
-  capacity: Int @auth(level: PUBLIC)
-  price: Float @auth(level: PUBLIC)
+# Users
+type User @table(name: "users") {
+  id: String! @col(name: "uid")
+  email: String!
+  role: String!
+  name: String
+  pin: String
+  status: String # Active, On-Break, Out
+  lastActive: Date
   
-  # Crucial: You must allow access to the foreign key too
-  propertyId: UUID! @auth(level: PUBLIC)
+  # Link to Property
+  propertyId: UUID
+  property: Property
+}
+
+# Properties
+type Property @table(name: "properties") {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  address: String
+  phoneNumber: String
+  email: String
+}
+
+# Bookings
+type Booking @table(name: "bookings") {
+  id: UUID! @default(expr: "uuidV4()")
+  guestName: String!
+  checkInDate: Date!
+  checkOutDate: Date!
+  status: String!
+  
+  propertyId: UUID!
+  property: Property!
+  
+  roomId: UUID
+  room: Room
+}
+
+# Rooms (Fixed)
+type Room @table(name: "rooms") {
+  id: UUID! @default(expr: "uuidV4()")
+  roomNumber: String!
+  roomType: String!
+  floor: Int
+  roomStatus: String 
+  capacity: Int
+  price: Float
+  
+  propertyId: UUID!
   property: Property!
 }
 
