@@ -16,8 +16,9 @@ type Property
 
 # 2. Users
 type User @table(name: "users") {
-  @auth(level: USER, allow: { owner: { field: "id" } })
+  # ⚠️ Auth removed: This table will rely on your connector's default security level
   id: String! @col(name: "uid") 
+  
   email: String!
   role: String!
   name: String
@@ -27,7 +28,7 @@ type User @table(name: "users") {
   
   # Link to Property
   propertyId: UUID
-  property: Property 
+  property: Property
 }
 
 # 3. Bookings

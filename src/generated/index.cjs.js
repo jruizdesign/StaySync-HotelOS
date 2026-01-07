@@ -138,3 +138,15 @@ exports.createUserRef = createUserRef;
 exports.createUser = function createUser(dcOrVars, vars) {
   return executeMutation(createUserRef(dcOrVars, vars));
 };
+
+const upsertUserRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertUser', inputVars);
+}
+upsertUserRef.operationName = 'UpsertUser';
+exports.upsertUserRef = upsertUserRef;
+
+exports.upsertUser = function upsertUser(dcOrVars, vars) {
+  return executeMutation(upsertUserRef(dcOrVars, vars));
+};

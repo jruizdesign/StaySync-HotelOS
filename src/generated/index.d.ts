@@ -174,6 +174,16 @@ export interface UpdateUserStatusVariables {
   status: string;
 }
 
+export interface UpsertUserData {
+  user_upsert: User_Key;
+}
+
+export interface UpsertUserVariables {
+  id: string;
+  email: string;
+  role: string;
+}
+
 export interface User_Key {
   id: string;
   __typename?: 'User_Key';
@@ -310,4 +320,16 @@ export const createUserRef: CreateUserRef;
 
 export function createUser(vars: CreateUserVariables): MutationPromise<CreateUserData, CreateUserVariables>;
 export function createUser(dc: DataConnect, vars: CreateUserVariables): MutationPromise<CreateUserData, CreateUserVariables>;
+
+interface UpsertUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
+  operationName: string;
+}
+export const upsertUserRef: UpsertUserRef;
+
+export function upsertUser(vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
+export function upsertUser(dc: DataConnect, vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
 
