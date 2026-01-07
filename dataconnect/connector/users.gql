@@ -1,0 +1,14 @@
+# File: dataconnect/connector/users.gql
+
+# This tells Data Connect to generate a function named "upsertUser"
+mutation UpsertUser($id: String!, $email: String!, $role: String!) @auth(level: USER) {
+  user_upsert(
+    data: {
+      id: $id,
+      email: $email,
+      role: $role,
+      status: "Active"
+      # You can add lastActive: "NOW" or similar if needed
+    }
+  )
+}
