@@ -42,7 +42,7 @@ const DEMO_STEPS = [
     id: 'dashboard',
     label: 'AI Operations Center',
     description: 'Real-time revenue tracking and Gemini AI-powered operational insights.',
-    component: <Dashboard property={DEMO_PROPERTY} isDemoMode={true} />,
+    component: <Dashboard property={DEMO_PROPERTY} user={DEMO_USER} isDemoMode={true} />,
     icon: LayoutDashboard,
     highlight: "AI analyzes arrears & maintenance risks instantly."
   },
@@ -50,7 +50,7 @@ const DEMO_STEPS = [
     id: 'rooms',
     label: 'Live Inventory',
     description: 'Visual room grid with one-click status updates for housekeeping.',
-    component: <Rooms isDemoMode={true} user={DEMO_USER} />,
+    component: <Rooms isDemoMode={true} user={DEMO_USER} propertyId={DEMO_PROPERTY.id} />,
     icon: BedDouble,
     highlight: "Interactive grid with drag-and-drop status changes."
   },
