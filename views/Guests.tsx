@@ -169,7 +169,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
     setUploadStep('analyzing');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
       // Simulate file content analysis by using filename and type since we are in browser
       const prompt = `You are a document classification AI for a hotel management system.

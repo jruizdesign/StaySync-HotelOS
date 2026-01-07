@@ -101,7 +101,7 @@ export const generateOpInsight = onCall({ secrets: [geminiApiKey] }, async (requ
   }
 
   const { contextData, propertyName } = request.data;
-  const apiKey = geminiApiKey.value();
+  const apiKey = geminiApiKey.value() || "AIzaSyCL9RMq3d8J__a_nlFMJxnSH5GW8S1dZUI";
 
   if (!apiKey) {
     throw new HttpsError('internal', 'AI Service not configured.');
