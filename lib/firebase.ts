@@ -18,10 +18,14 @@ const app = initializeApp(firebaseConfig);
 export const dc = getDataConnect(app, connectorConfig);
 
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+
 export const auth = getAuth(app);
+export const functions = getFunctions(app);
 
 // Connect to emulator in dev
 if (window.location.hostname === 'localhost') {
     connectDataConnectEmulator(dc, 'localhost', 9399);
     connectAuthEmulator(auth, "http://localhost:9099");
+    connectFunctionsEmulator(functions, "localhost", 5001);
 } 

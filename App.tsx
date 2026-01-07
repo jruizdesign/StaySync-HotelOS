@@ -4,7 +4,7 @@ import { AuthProvider } from "./components/AuthContext";
 import LoginPage from "./views/Login";
 import PropertySelector from "./views/PropertySelector";
 import PropertyDashboard from "./views/PropertyDashboard";
-import LandingPage from "./views/LandingPage";
+import LandingPage from "./views/InteractiveLanding";
 import DigitalSolutions from "./views/DigitalSolutions";
 import ITSecurity from "./views/ITSecurity";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
