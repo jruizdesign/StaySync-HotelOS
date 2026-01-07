@@ -8,5 +8,6 @@ schema:
       database: "staysync-hotelos-3-database"
       cloudSql:
         instanceId: "staysync-hotelos"
-        # schemaValidation: "STRICT" 
+        schemaValidation: "STRICT"
+      
 connectorDirs: ["./connector"]
