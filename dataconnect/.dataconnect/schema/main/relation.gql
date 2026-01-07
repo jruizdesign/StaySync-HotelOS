@@ -8,6 +8,15 @@ extend type Booking {
   """
   _count: Int! @fdc_generated(from: "Booking.", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Booking` table where the `amountPaid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  amountPaid_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Booking.amountPaid", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Booking` table where the `checkInDate` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   checkInDate_count(
@@ -116,6 +125,15 @@ extend type Booking {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Booking.status", purpose: QUERY_COUNT)
   """
+  ✨ Sum the `amountPaid` field in the `Booking` table.
+  """
+  amountPaid_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.amountPaid", purpose: QUERY_SUM)
+  """
   ✨ Sum the `currentStayTotalAmount` field in the `Booking` table.
   """
   currentStayTotalAmount_sum(
@@ -142,6 +160,15 @@ extend type Booking {
     """
     distinct: Boolean = false
   ): Int @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_SUM)
+  """
+  ✨ Average the `amountPaid` field in the `Booking` table.
+  """
+  amountPaid_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Booking.amountPaid", purpose: QUERY_AVG)
   """
   ✨ Average the `currentStayTotalAmount` field in the `Booking` table.
   """
@@ -170,6 +197,10 @@ extend type Booking {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_AVG)
   """
+  ✨ Minimum of the `amountPaid` field in the `Booking` table.
+  """
+  amountPaid_min: Float @fdc_generated(from: "Booking.amountPaid", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `checkInDate` field in the `Booking` table.
   """
   checkInDate_min: Date @fdc_generated(from: "Booking.checkInDate", purpose: QUERY_MIN)
@@ -189,6 +220,10 @@ extend type Booking {
   ✨ Minimum of the `numberOfGuests` field in the `Booking` table.
   """
   numberOfGuests_min: Int @fdc_generated(from: "Booking.numberOfGuests", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `amountPaid` field in the `Booking` table.
+  """
+  amountPaid_max: Float @fdc_generated(from: "Booking.amountPaid", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `checkInDate` field in the `Booking` table.
   """

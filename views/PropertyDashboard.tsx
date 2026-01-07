@@ -17,6 +17,7 @@ import StaffTracker from "./StaffTracker";
 import Rooms from "./Rooms";
 import Settings from "./Settings";
 import SystemLogs from "./SystemLogs";
+import DailyOverview from "./DailyOverview";
 import { User } from "../types"; // Import your custom type
 
 // MOCK_PROPERTIES removed for production
@@ -127,6 +128,10 @@ export default function PropertyDashboard() {
                     isDemoMode={isDemoMode}
                     user={appUser}
                 />
+            )}
+
+            {activeTab === 'daily-overview' && (
+                <DailyOverview propertyId={propertyId || ''} />
             )}
 
             {activeTab === 'guests' && <Guests isDemoMode={isDemoMode} />}

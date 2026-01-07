@@ -74,14 +74,23 @@ export default function PropertySelector() {
         },
     });
 
-    // 2. SEARCH FILTERING
+    // 2. SEARCH FILTERING & DATA JOIN
     const properties = data?.properties || [];
+    const allRooms = data?.rooms || [];
+    const allBookings = data?.bookings || [];
+
     const filteredProperties = properties.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.address && p.address.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    ).map(p => ({
+        ...p,
+        rooms: allRooms.filter(r => r.propertyId === p.id),
+        bookings: allBookings.filter(b => b.propertyId === p.id)
+    }));
 
-
+    // 3. UI HELPERS & STATS
+    const totalRoomsCount = allRooms.length;
+    const totalBookingsCount = allBookings.length;
 
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -145,7 +154,7 @@ export default function PropertySelector() {
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Bookings</p>
                             <p className="text-2xl font-black text-slate-900">
-                                {properties.reduce((acc, p) => acc + (p.bookings?.length || 0), 0)}
+                                {totalBookingsCount}
                             </p>
                         </div>
                     </div>
@@ -156,7 +165,7 @@ export default function PropertySelector() {
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Rooms</p>
                             <p className="text-2xl font-black text-slate-900">
-                                {properties.reduce((acc, p) => acc + (p.rooms?.length || 0), 0)}
+                                {totalRoomsCount}
                             </p>
                         </div>
                     </div>
@@ -170,7 +179,7 @@ export default function PropertySelector() {
                         </div>
                     )}
 
-                    {filteredProperties.map(property => {
+                    {filteredProperties.map((property: any) => {
                         // Calculate Real Stats
                         const rooms = property.rooms || [];
                         const totalRooms = rooms.length;

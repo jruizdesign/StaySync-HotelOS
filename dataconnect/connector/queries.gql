@@ -6,14 +6,16 @@ query AdminListProperties @auth(level: USER) {
     name
     address
     email
-    rooms {
-      id
-      roomStatus
-    }
-    bookings {
-      id
-      status
-    }
+  }
+  rooms {
+    id
+    propertyId
+    roomStatus
+  }
+  bookings {
+    id
+    propertyId
+    status
   }
 }
 
@@ -39,6 +41,7 @@ query GetPropertyDashboard($propertyId: UUID!) @auth(level: USER) {
     numberOfGuests
     dailyRate
     currentStayTotalAmount
+    amountPaid
     status
     checkInDate
     checkOutDate

@@ -59,6 +59,18 @@ input Booking_Data {
   """
   room: Room_Key
   """
+  ✨ Generated from Field `Booking`.`amountPaid` of type `Float`
+  """
+  amountPaid: Float
+  """
+  ✨ `_expr` server value variant of `amountPaid` (✨ Generated from Field `Booking`.`amountPaid` of type `Float`)
+  """
+  amountPaid_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `amountPaid` (✨ Generated from Field `Booking`.`amountPaid` of type `Float`)
+  """
+  amountPaid_update: [Float_Update!]
+  """
   ✨ Generated from Field `Booking`.`checkInDate` of type `Date!`
   """
   checkInDate: Date
@@ -196,6 +208,10 @@ input Booking_Filter {
   """
   room: Room_Filter
   """
+  ✨ Generated from Field `Booking`.`amountPaid` of type `Float`
+  """
+  amountPaid: Float_Filter
+  """
   ✨ Generated from Field `Booking`.`checkInDate` of type `Date!`
   """
   checkInDate: Date_Filter
@@ -270,6 +286,10 @@ input Booking_Having {
   """
   _count: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`amountPaid_count` of type `Int!`
+  """
+  amountPaid_count: Int_Filter
+  """
   ✨ Generated from Field `Booking`.`checkInDate_count` of type `Int!`
   """
   checkInDate_count: Int_Filter
@@ -318,6 +338,10 @@ input Booking_Having {
   """
   status_count: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`amountPaid_sum` of type `Float`
+  """
+  amountPaid_sum: Float_Filter
+  """
   ✨ Generated from Field `Booking`.`currentStayTotalAmount_sum` of type `Float`
   """
   currentStayTotalAmount_sum: Float_Filter
@@ -330,6 +354,10 @@ input Booking_Having {
   """
   numberOfGuests_sum: Int_Filter
   """
+  ✨ Generated from Field `Booking`.`amountPaid_avg` of type `Float`
+  """
+  amountPaid_avg: Float_Filter
+  """
   ✨ Generated from Field `Booking`.`currentStayTotalAmount_avg` of type `Float`
   """
   currentStayTotalAmount_avg: Float_Filter
@@ -341,6 +369,10 @@ input Booking_Having {
   ✨ Generated from Field `Booking`.`numberOfGuests_avg` of type `Float`
   """
   numberOfGuests_avg: Float_Filter
+  """
+  ✨ Generated from Field `Booking`.`amountPaid_min` of type `Float`
+  """
+  amountPaid_min: Float_Filter
   """
   ✨ Generated from Field `Booking`.`checkInDate_min` of type `Date`
   """
@@ -361,6 +393,10 @@ input Booking_Having {
   ✨ Generated from Field `Booking`.`numberOfGuests_min` of type `Int`
   """
   numberOfGuests_min: Int_Filter
+  """
+  ✨ Generated from Field `Booking`.`amountPaid_max` of type `Float`
+  """
+  amountPaid_max: Float_Filter
   """
   ✨ Generated from Field `Booking`.`checkInDate_max` of type `Date`
   """
@@ -433,6 +469,10 @@ input Booking_Order {
   """
   room: Room_Order
   """
+  ✨ Generated from Field `Booking`.`amountPaid` of type `Float`
+  """
+  amountPaid: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`checkInDate` of type `Date!`
   """
   checkInDate: OrderDirection
@@ -472,6 +512,10 @@ input Booking_Order {
   ✨ Generated from Field `Booking`.`_count` of type `Int!`
   """
   _count: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`amountPaid_count` of type `Int!`
+  """
+  amountPaid_count: OrderDirection
   """
   ✨ Generated from Field `Booking`.`checkInDate_count` of type `Int!`
   """
@@ -521,6 +565,10 @@ input Booking_Order {
   """
   status_count: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`amountPaid_sum` of type `Float`
+  """
+  amountPaid_sum: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`currentStayTotalAmount_sum` of type `Float`
   """
   currentStayTotalAmount_sum: OrderDirection
@@ -533,6 +581,10 @@ input Booking_Order {
   """
   numberOfGuests_sum: OrderDirection
   """
+  ✨ Generated from Field `Booking`.`amountPaid_avg` of type `Float`
+  """
+  amountPaid_avg: OrderDirection
+  """
   ✨ Generated from Field `Booking`.`currentStayTotalAmount_avg` of type `Float`
   """
   currentStayTotalAmount_avg: OrderDirection
@@ -544,6 +596,10 @@ input Booking_Order {
   ✨ Generated from Field `Booking`.`numberOfGuests_avg` of type `Float`
   """
   numberOfGuests_avg: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`amountPaid_min` of type `Float`
+  """
+  amountPaid_min: OrderDirection
   """
   ✨ Generated from Field `Booking`.`checkInDate_min` of type `Date`
   """
@@ -564,6 +620,10 @@ input Booking_Order {
   ✨ Generated from Field `Booking`.`numberOfGuests_min` of type `Int`
   """
   numberOfGuests_min: OrderDirection
+  """
+  ✨ Generated from Field `Booking`.`amountPaid_max` of type `Float`
+  """
+  amountPaid_max: OrderDirection
   """
   ✨ Generated from Field `Booking`.`checkInDate_max` of type `Date`
   """

@@ -40,6 +40,7 @@ type Booking @table(name: "bookings") {
   numberOfGuests: Int
   dailyRate: Float
   currentStayTotalAmount: Float
+  amountPaid: Float
   checkInDate: Date!
   checkOutDate: Date!
   status: String!

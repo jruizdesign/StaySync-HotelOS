@@ -12,7 +12,7 @@ import React, { useState } from 'react'; import {
   BedDouble,
   UserCircle,
   Wrench,
-  Lightbulb,
+  NotebookPen,
   Terminal
 }
   from 'lucide-react';
@@ -41,6 +41,7 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const mainMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'daily-overview', label: 'Daily Overview', icon: NotebookPen },
     { id: 'bookings', label: 'Bookings', icon: CalendarCheck },
     { id: 'rooms', label: 'Rooms', icon: BedDouble },
     { id: 'guests', label: 'Guests', icon: UserCircle },
@@ -58,9 +59,8 @@ const Layout: React.FC<LayoutProps> = ({
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   const canSwitchProperty =
-    user.role === 'SUPER_ADMIN' ||
     user.role === 'SYSTEM_ADMIN' ||
-    user.role === UserRole.SUPER_ADMIN;
+    user.role === UserRole.ADMIN;
 
   function NavItem({ item }) {
     return (
