@@ -115,7 +115,7 @@ export default function DailyOverview({ propertyId }: DailyOverviewProps) {
                             onClick={() => setFilterType('LONG_TERM')}
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filterType === 'LONG_TERM' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
-               Long Term (>14 Days)
+                            Long Term (&gt;14 Days)
                         </button>
                         <button
                             onClick={() => setFilterType('ALL')}

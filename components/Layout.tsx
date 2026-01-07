@@ -13,6 +13,7 @@ import React, { useState } from 'react'; import {
   UserCircle,
   Wrench,
   NotebookPen,
+  Lightbulb,
   Terminal
 }
   from 'lucide-react';

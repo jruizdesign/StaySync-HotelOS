@@ -134,7 +134,7 @@ export const generateOpInsight = onCall({ secrets: [geminiApiKey] }, async (requ
     });
 
     // Extract text safely
-    const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to generate insight.";
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to generate insight.";
 
     return { success: true, insight: text };
 
