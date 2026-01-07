@@ -151,7 +151,7 @@ export default function PropertyDashboard() {
                 <Accounting isDemoMode={isDemoMode} maintenanceTasks={maintenanceTasks} />
             )}
 
-            {activeTab === 'bookings' && <Bookings isDemoMode={isDemoMode} />}
+            {activeTab === 'bookings' && <Bookings isDemoMode={isDemoMode} propertyId={propertyId} />}
 
             {activeTab === 'rooms' && (
                 <Rooms

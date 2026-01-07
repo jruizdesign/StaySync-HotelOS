@@ -7,7 +7,7 @@ admin.initializeApp({
 });
 
 // 👇 REPLACE THIS WITH THE EMAIL YOU USE TO LOGIN
-const USER_EMAIL = "admin@staysync.space";
+const USER_EMAIL = "jruizdesign@gmail.com";
 
 async function setAdmin() {
     try {
@@ -17,7 +17,7 @@ async function setAdmin() {
 
         // 2. STAMP THE PASSPORT (Set Custom Claims)
         await admin.auth().setCustomUserClaims(user.uid, {
-            role: "SUPER_ADMIN",
+            role: "SUPER_ADMIN", // Or 'MANAGER'
             propertyId: null  // Super Admins are not locked to a specific hotel
         });
 

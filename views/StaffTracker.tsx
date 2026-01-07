@@ -114,7 +114,7 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
 
     // A. Listen for currently ACTIVE shifts (endTime == null)
     const activeQ = query(
-      collection(db, `properties / ${propertyId}/time_clocks`),
+      collection(db, `properties/${propertyId}/time_clocks`),
       where("endTime", "==", null)
     );
 

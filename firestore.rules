@@ -46,17 +46,21 @@ service cloud.firestore {
         );
 
         // CREATE: Staff can only create for themselves.
-        allow create: if isSignedIn() && belongsToProperty(propertyId) && (
+        allow create: if isSignedIn() && (
           isSuperAdmin() || 
-          isManager() || 
-          request.resource.data.userId == request.auth.uid
+          (belongsToProperty(propertyId) && (
+            isManager() || 
+            request.resource.data.userId == request.auth.uid
+          ))
         );
 
         // UPDATE: Users can clock out (update their own doc). Managers can edit any.
-        allow update: if isSignedIn() && belongsToProperty(propertyId) && (
+        allow update: if isSignedIn() && (
           isSuperAdmin() || 
-          isManager() || 
-          (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid)
+          (belongsToProperty(propertyId) && (
+            isManager() || 
+            (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid)
+          ))
         );
       }
 
@@ -71,11 +75,13 @@ service cloud.firestore {
         allow create: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
 
         // UPDATE: Managers can do anything. Staff can only update if assigned or created by them.
-        allow update: if isSignedIn() && belongsToProperty(propertyId) && (
+        allow update: if isSignedIn() && (
           isSuperAdmin() || 
-          isManager() || 
-          resource.data.assignedTo == request.auth.uid || 
-          resource.data.createdBy == request.auth.uid
+          (belongsToProperty(propertyId) && (
+            isManager() || 
+            resource.data.assignedTo == request.auth.uid || 
+            resource.data.createdBy == request.auth.uid
+          ))
         );
       }
     }

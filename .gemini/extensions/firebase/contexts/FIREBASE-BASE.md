@@ -27,7 +27,7 @@ firebase init firestore
 
 firebase deploy
 firebase deploy --only hosting
-firebase deploy --only functions:processOrder,functions:sendEmail
+firebase deploy --only functions:processOrder,ffirebase use productionunctions:sendEmail
 firebase deploy --except functions
 
 # Switch between projects
