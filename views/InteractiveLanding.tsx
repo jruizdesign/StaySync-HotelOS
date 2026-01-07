@@ -13,7 +13,11 @@ import {
   BedDouble,
   Wrench,
   Users,
-  Copyright
+  Users,
+  Copyright,
+  GitCommit,
+  ExternalLink,
+  Code2
 } from 'lucide-react';
 import Dashboard from './Dashboard';
 import Rooms from './Rooms';
@@ -76,6 +80,24 @@ const LandingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [latestCommit, setLatestCommit] = useState<any>(null);
+
+  // GitHub Fetch
+  useEffect(() => {
+    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=1')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLatestCommit({
+            message: data[0].commit.message,
+            date: new Date(data[0].commit.author.date).toLocaleDateString(),
+            sha: data[0].sha.substring(0, 7),
+            author: data[0].commit.author.name
+          });
+        }
+      })
+      .catch(err => console.log('GitHub fetch failed', err));
+  }, []);
 
   // Auto-advance logic
   useEffect(() => {
@@ -268,14 +290,39 @@ const LandingPage: React.FC = () => {
       {/* Social Proof / Footer */}
       <div className="border-t border-white/5 bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-slate-400">
-              <Copyright size={14} />
-              <span className="text-sm font-medium">2024 StaySyncOS</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Copyright size={14} />
+                <span className="text-sm font-medium">2024 StaySyncOS</span>
+              </div>
+              <p className="text-slate-500 text-xs flex items-center gap-1.5">
+                Built & Designed by <span className="text-slate-300 font-bold">Jason Ruiz</span>
+              </p>
             </div>
-            <p className="text-slate-500 text-xs flex items-center gap-1.5">
-              Built & Designed by <span className="text-slate-300 font-bold">Jason Ruiz</span>
-            </p>
+
+            {/* Mini GitHub Tracker for Public View */}
+            <a href="https://github.com/jruizdesign/StaySync-HotelOS" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors group">
+              <div className="p-2 bg-slate-800 rounded-lg text-white group-hover:text-blue-400 transition-colors">
+                <Code2 size={16} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-bold text-slate-300">Open Source Development</p>
+                  <div className="p-1 bg-emerald-500/10 rounded-md">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  </div>
+                </div>
+                {latestCommit ? (
+                  <p className="text-[10px] text-slate-500 font-mono mt-0.5 max-w-[200px] truncate">
+                    Latest: <span className="text-blue-400">{latestCommit.sha}</span> - {latestCommit.message}
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-slate-500 mt-0.5">View real-time commits</p>
+                )}
+              </div>
+              <ExternalLink size={12} className="text-slate-600 group-hover:text-white ml-2" />
+            </a>
           </div>
 
           <div className="flex gap-6 text-slate-500 grayscale opacity-50">

@@ -18,7 +18,10 @@ import {
   Clock,
   UserCheck,
   Building2,
-  MapPin
+  MapPin,
+  GitCommit,
+  ExternalLink,
+  Code2
 } from 'lucide-react';
 import { Property, User, UserRole } from '../types';
 import {
@@ -133,6 +136,24 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
   const [insight, setInsight] = useState<string | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(true);
   const [liveEvents, setLiveEvents] = useState(MOCK_EVENTS);
+  const [latestCommit, setLatestCommit] = useState<any>(null);
+
+  // GitHub Fetch
+  useEffect(() => {
+    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=1')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLatestCommit({
+            message: data[0].commit.message,
+            date: new Date(data[0].commit.author.date).toLocaleDateString(),
+            sha: data[0].sha.substring(0, 7),
+            author: data[0].commit.author.name
+          });
+        }
+      })
+      .catch(err => console.log('GitHub fetch failed', err));
+  }, []);
 
   // Simulate Firestore Real-time Updates (Keep demo logic for visual flare)
   useEffect(() => {
@@ -397,6 +418,40 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
             <span className="text-emerald-500">+12% vs LW</span>
           </div>
         </div>
+      </div>
+
+      {/* GitHub Project Tracker */}
+      <div className="bg-slate-900 rounded-2xl p-6 text-slate-300 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/10 rounded-xl text-white">
+            <Code2 size={24} />
+          </div>
+          <div>
+            <h3 className="text-white font-bold text-lg flex items-center gap-2">
+              StaySync OS Development
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] uppercase rounded-full font-bold">Active</span>
+            </h3>
+            {latestCommit ? (
+              <div className="flex items-center gap-2 mt-1">
+                <GitCommit size={14} className="text-slate-500" />
+                <span className="font-mono text-xs text-blue-400">{latestCommit.sha}</span>
+                <span className="text-xs text-slate-400">— {latestCommit.message}</span>
+                <span className="text-[10px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded ml-2">{latestCommit.date}</span>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 mt-1">Latest Version: v1.0.4-beta (Production)</p>
+            )}
+          </div>
+        </div>
+        <a
+          href="https://github.com/jruizdesign/StaySync-HotelOS"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-sm hover:bg-blue-50 transition-colors shrink-0"
+        >
+          <ExternalLink size={16} />
+          Track Progress
+        </a>
       </div>
     </div>
   );
