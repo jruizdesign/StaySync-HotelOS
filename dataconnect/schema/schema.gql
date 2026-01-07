@@ -12,6 +12,18 @@ type Property
   email: String 
 }
 
+type User 
+  @table 
+  @auth(
+    level: USER, 
+    # This says: "You can create/update/delete ONLY if the row's 'id' matches your Auth UID"
+    allow: { owner: { field: "id" } } 
+  ) {
+  id: UUID! 
+  email: String!
+  # ...
+  }
+  
 # 2. Users
 type User @table(name: "users") {
   id: String! @col(name: "uid") 
