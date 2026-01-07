@@ -49,18 +49,22 @@ type Booking @table(name: "bookings") {
 
 
 
+# schema/schema.gql
+
 type Room @table(name: "rooms") {
-  id: UUID! @default(expr: "uuidV4()")
-  roomNumber: String!
+  # You must allow public access to the ID to read the result back
+  id: UUID! @default(expr: "uuidV4()") @auth(level: PUBLIC)
+
+  # Add @auth(level: PUBLIC) to EVERY field you are inserting
+  roomNumber: String! @auth(level: PUBLIC)
+  roomType: String! @auth(level: PUBLIC)
+  floor: Int @auth(level: PUBLIC)
+  roomStatus: String @auth(level: PUBLIC)
+  capacity: Int @auth(level: PUBLIC)
+  price: Float @auth(level: PUBLIC)
   
-  # These are the fields your connector is looking for:
-  roomType: String!
-  floor: Int
-  roomStatus: String 
-  capacity: Int
-  price: Float
-  
-  # Relationships
-  propertyId: UUID!
+  # Crucial: You must allow access to the foreign key too
+  propertyId: UUID! @auth(level: PUBLIC)
   property: Property!
 }
+
