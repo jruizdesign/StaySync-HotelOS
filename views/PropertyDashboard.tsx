@@ -18,6 +18,7 @@ import Rooms from "./Rooms";
 import Settings from "./Settings";
 import SystemLogs from "./SystemLogs";
 import DailyOverview from "./DailyOverview";
+import AIChat from "../components/AIChat";
 import { User } from "../types"; // Import your custom type
 
 // MOCK_PROPERTIES removed for production
@@ -192,6 +193,8 @@ export default function PropertyDashboard() {
                     dashboardData={dashboardData}
                 />
             )}
+
+            <AIChat />
         </Layout>
     );
 }

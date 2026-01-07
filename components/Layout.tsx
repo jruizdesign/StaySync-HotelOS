@@ -87,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-white font-bold tracking-tight truncate">{currentProperty?.name || 'StaySync'}</h1>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">StaySync OS</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">StaySync OS v1.0</p>
           </div>
         </div>
 

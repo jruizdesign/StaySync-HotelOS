@@ -347,7 +347,7 @@ const LandingPage: React.FC = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-slate-400">
                 <Copyright size={14} />
-                <span className="text-sm font-medium">2024 StaySyncOS</span>
+                <span className="text-sm font-medium">2026 StaySyncOS v1.0</span>
               </div>
               <p className="text-slate-500 text-xs flex items-center gap-1.5">
                 Built & Designed by <span className="text-slate-300 font-bold">Jason Ruiz</span>
