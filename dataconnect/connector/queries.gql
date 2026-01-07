@@ -6,6 +6,14 @@ query AdminListProperties @auth(level: USER) {
     name
     address
     email
+    rooms {
+      id
+      roomStatus
+    }
+    bookings {
+      id
+      status
+    }
   }
 }
 

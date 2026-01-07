@@ -13,7 +13,6 @@ import {
   BedDouble,
   Wrench,
   Users,
-  Users,
   Copyright,
   GitCommit,
   ExternalLink,
@@ -80,20 +79,21 @@ const LandingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [latestCommit, setLatestCommit] = useState<any>(null);
+  const [latestCommits, setLatestCommits] = useState<any[]>([]);
 
   // GitHub Fetch
   useEffect(() => {
-    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=1')
+    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=3')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setLatestCommit({
-            message: data[0].commit.message,
-            date: new Date(data[0].commit.author.date).toLocaleDateString(),
-            sha: data[0].sha.substring(0, 7),
-            author: data[0].commit.author.name
-          });
+          const commits = data.map((d: any) => ({
+            message: d.commit.message,
+            date: new Date(d.commit.author.date).toLocaleDateString() + ' ' + new Date(d.commit.author.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sha: d.sha.substring(0, 7),
+            author: d.commit.author.name
+          }));
+          setLatestCommits(commits);
         }
       })
       .catch(err => console.log('GitHub fetch failed', err));
@@ -289,8 +289,61 @@ const LandingPage: React.FC = () => {
 
       {/* Social Proof / Footer */}
       <div className="border-t border-white/5 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col gap-4">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+
+          {/* Centered GitHub Tracker */}
+          <div className="flex flex-col items-center justify-center mb-16">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg">
+                <Code2 size={24} />
+              </div>
+              <h2 className="text-xl font-bold text-white tracking-tight">Open Source Development</h2>
+            </div>
+
+            <a
+              href="https://github.com/jruizdesign/StaySync-HotelOS"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full max-w-2xl bg-white/5 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/10 transition-colors group relative"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Active Development</span>
+                    </div>
+                    <span className="text-sm text-slate-500 font-mono">public/main</span>
+                  </div>
+                  <ExternalLink size={16} className="text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+
+                <div className="space-y-4">
+                  {latestCommits.length > 0 ? latestCommits.map((commit, i) => (
+                    <div key={i} className="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                      <div className="mt-1">
+                        <GitCommit size={16} className="text-slate-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-200 truncate">{commit.message}</p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">{commit.sha}</span>
+                          <span className="text-[10px] text-slate-500 font-medium">{commit.author}</span>
+                          <span className="text-[10px] text-slate-600">•</span>
+                          <span className="text-[10px] text-slate-500">{commit.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-center py-8 text-slate-500 text-sm">Loading recent activity...</div>
+                  )}
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-white/5">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-slate-400">
                 <Copyright size={14} />
@@ -301,39 +354,14 @@ const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Mini GitHub Tracker for Public View */}
-            <a href="https://github.com/jruizdesign/StaySync-HotelOS" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors group">
-              <div className="p-2 bg-slate-800 rounded-lg text-white group-hover:text-blue-400 transition-colors">
-                <Code2 size={16} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs font-bold text-slate-300">Open Source Development</p>
-                  <div className="p-1 bg-emerald-500/10 rounded-md">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  </div>
-                </div>
-                {latestCommit ? (
-                  <p className="text-[10px] text-slate-500 font-mono mt-0.5 max-w-[200px] truncate">
-                    Latest: <span className="text-blue-400">{latestCommit.sha}</span> - {latestCommit.message}
-                  </p>
-                ) : (
-                  <p className="text-[10px] text-slate-500 mt-0.5">View real-time commits</p>
-                )}
-              </div>
-              <ExternalLink size={12} className="text-slate-600 group-hover:text-white ml-2" />
-            </a>
-          </div>
-
-          <div className="flex gap-6 text-slate-500 grayscale opacity-50">
-            <span className="font-bold text-xl">Hilton</span>
-            <span className="font-bold text-xl">Marriott</span>
-            <span className="font-bold text-xl">Hyatt</span>
+            <div className="flex gap-6 text-slate-500 grayscale opacity-50">
+              <span className="font-bold text-xl">Hilton</span>
+              <span className="font-bold text-xl">Marriott</span>
+              <span className="font-bold text-xl">Hyatt</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
 
 export default LandingPage;

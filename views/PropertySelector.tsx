@@ -81,21 +81,7 @@ export default function PropertySelector() {
         (p.address && p.address.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    // 3. UI HELPERS
-    const getVisuals = (id: string) => {
-        const seed = id.length;
-        const images = [
-            "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=3270&ixlib=rb-4.0.3",
-            "https://images.unsplash.com/photo-1590490360182-f33efe29a77d?auto=format&fit=crop&q=80&w=2670&ixlib=rb-4.0.3",
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2670&ixlib=rb-4.0.3",
-            "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=3270&ixlib=rb-4.0.3"
-        ];
-        return {
-            img: images[seed % images.length],
-            occupancy: 60 + (seed * 5) % 35,
-            rooms: 50 + (seed * 10)
-        };
-    };
+
 
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -157,8 +143,10 @@ export default function PropertySelector() {
                             <Users size={24} />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Guests</p>
-                            <p className="text-2xl font-black text-slate-900">--</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Bookings</p>
+                            <p className="text-2xl font-black text-slate-900">
+                                {properties.reduce((acc, p) => acc + (p.bookings?.length || 0), 0)}
+                            </p>
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
@@ -166,8 +154,10 @@ export default function PropertySelector() {
                             <TrendingUp size={24} />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Portfolio RevPAR</p>
-                            <p className="text-2xl font-black text-slate-900">$184.20</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Rooms</p>
+                            <p className="text-2xl font-black text-slate-900">
+                                {properties.reduce((acc, p) => acc + (p.rooms?.length || 0), 0)}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -181,7 +171,21 @@ export default function PropertySelector() {
                     )}
 
                     {filteredProperties.map(property => {
-                        const visual = getVisuals(property.id);
+                        // Calculate Real Stats
+                        const rooms = property.rooms || [];
+                        const totalRooms = rooms.length;
+                        const occupiedRooms = rooms.filter((r: any) => r.roomStatus === 'OCCUPIED').length;
+                        const occupancy = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+                        // Deterministic Image
+                        const seed = property.id.length;
+                        const images = [
+                            "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=3270&ixlib=rb-4.0.3",
+                            "https://images.unsplash.com/photo-1590490360182-f33efe29a77d?auto=format&fit=crop&q=80&w=2670&ixlib=rb-4.0.3",
+                            "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2670&ixlib=rb-4.0.3",
+                            "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=3270&ixlib=rb-4.0.3"
+                        ];
+                        const img = images[seed % images.length];
 
                         return (
                             <div
@@ -190,7 +194,7 @@ export default function PropertySelector() {
                                 className="group bg-white rounded-[2.5rem] p-4 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
                             >
                                 <div className="w-full h-48 rounded-[2rem] bg-slate-100 overflow-hidden relative">
-                                    <img src={visual.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={property.name} />
+                                    <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={property.name} />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
 
                                     <div className="absolute bottom-4 left-4 text-white">
@@ -201,7 +205,7 @@ export default function PropertySelector() {
                                     </div>
 
                                     <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full">
-                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">{visual.rooms} ROOMS</span>
+                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">{totalRooms} ROOMS</span>
                                     </div>
                                 </div>
 
@@ -210,11 +214,11 @@ export default function PropertySelector() {
                                         <div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Occupancy</p>
                                             <div className="flex items-end gap-2">
-                                                <span className={`text-2xl font-black ${visual.occupancy >= 80 ? 'text-emerald-600' : visual.occupancy >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>
-                                                    {visual.occupancy}%
+                                                <span className={`text-2xl font-black ${occupancy >= 80 ? 'text-emerald-600' : occupancy >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>
+                                                    {occupancy}%
                                                 </span>
                                                 <div className="h-1.5 flex-1 w-24 bg-slate-100 rounded-full overflow-hidden mt-2 mb-2">
-                                                    <div className={`h-full rounded-full ${visual.occupancy >= 80 ? 'bg-emerald-500' : visual.occupancy >= 60 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${visual.occupancy}%` }}></div>
+                                                    <div className={`h-full rounded-full ${occupancy >= 80 ? 'bg-emerald-500' : occupancy >= 60 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${occupancy}%` }}></div>
                                                 </div>
                                             </div>
                                         </div>
