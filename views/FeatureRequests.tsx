@@ -1,5 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { User, FeatureRequest } from '../types';
 import {
   Lightbulb,
   Plus,
@@ -14,6 +15,8 @@ import {
   Zap,
   Layout,
   GitPullRequest
+} from 'lucide-react';
+
 // Backend Imports
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
@@ -176,8 +179,8 @@ const FeatureRequests: React.FC<FeatureRequestsProps> = ({ user }) => {
                   key={status}
                   onClick={() => setStatusFilter(status as any)}
                   className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-between ${statusFilter === status
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
                     }`}
                 >
                   {status}
@@ -217,7 +220,7 @@ const FeatureRequests: React.FC<FeatureRequestsProps> = ({ user }) => {
                       {req.status}
                     </span>
                     <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-lg ${req.priority === 'High' ? 'text-rose-600 bg-rose-50' :
-                        req.priority === 'Medium' ? 'text-amber-600 bg-amber-50' : 'text-slate-500 bg-slate-100'
+                      req.priority === 'Medium' ? 'text-amber-600 bg-amber-50' : 'text-slate-500 bg-slate-100'
                       }`}>
                       {req.priority}
                     </span>
