@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js" // FIX 1: Correct provider name
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -7,78 +7,77 @@ datasource db {
   provider = "postgresql"
 }
 
-// --- MODELS ---
-
 model Property {
-  id          String    @id @default(uuid()) @db.Uuid // FIX 3: Native UUID
-  name        String
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   address     String?
   email       String?
-  phoneNumber String?   @map("phone_number") // JS: phoneNumber, DB: phone_number
-  
+  name        String
+  phoneNumber String?   @map("phone_number")
+  isDemoMode  Boolean   @default(false) @map("is_demo_mode")
+
   bookings    Booking[]
   rooms       Room[]
   users       User[]
   maintenanceRequests MaintenanceRequest[]
 
-  @@map("properties") // Keeps your DB table named 'properties'
+  @@map("properties")
 }
 
 model Room {
-  id         String     @id @default(uuid()) @db.Uuid
-  roomNumber String     @map("room_number")
-  roomType   String     @map("room_type")
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  propertyId String    @map("property_id") @db.Uuid
   capacity   Int?
+  roomNumber String    @map("room_number")
+  roomType   String    @map("room_type")
   floor      Int?
-  price      Decimal?   @db.Decimal(10, 2) // FIX 4: Decimal for money
-  status     String?    @map("room_status")
-
-  // Tenancy
-  propertyId String     @map("property_id") @db.Uuid
-  property   Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  price      Decimal?  @db.Decimal(10, 2)
+  status     String?   @map("room_status")
   
   bookings   Booking[]
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([propertyId])
+  @@index([propertyId], map: "rooms_propertyId_idx")
   @@map("rooms")
 }
 
 model Booking {
-  id           String    @id @default(uuid()) @db.Uuid
-  checkInDate  DateTime  @map("check_in_date") @db.Date
-  checkOutDate DateTime  @map("check_out_date") @db.Date
-  guestName    String    @map("guest_name")
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  propertyId   String   @map("property_id") @db.Uuid
+  roomId       String?  @map("room_id") @db.Uuid
+  checkInDate  DateTime @map("check_in_date") @db.Date
+  checkOutDate DateTime @map("check_out_date") @db.Date
+  guestName    String   @map("guest_name")
   status       String
-
-  // Tenancy
-  propertyId   String    @map("property_id") @db.Uuid
-  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  roomId       String?   @map("room_id") @db.Uuid
-  room         Room?     @relation(fields: [roomId], references: [id])
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room         Room?    @relation(fields: [roomId], references: [id], onUpdate: NoAction)
 
   guestId      String?   @map("guest_id") @db.Uuid
   guest        Guest?    @relation(fields: [guestId], references: [id])
-
   invoices     Invoice[]
 
-  @@index([propertyId])
-  @@index([roomId])
+  @@index([propertyId], map: "bookings_propertyId_idx")
+  @@index([roomId], map: "bookings_roomId_idx")
   @@index([guestId])
   @@map("bookings")
 }
 
 model User {
-  id         String     @id
-  email      String     @unique
-  name       String?
-  role       String     @default("STAFF")
+  id          String    @id @map("uid")
+  propertyId  String?   @map("property_id") @db.Uuid
+  email       String    @unique
+  role        String
+  lastActive  DateTime? @map("last_active") @db.Date
+  name        String?
+  pin         String?
+  status      String?
+  
+  property    Property? @relation(fields: [propertyId], references: [id], onUpdate: NoAction)
 
-  properties Property[]
   maintenanceRequests MaintenanceRequest[] @relation("assigned_user")
   reportedMaintenance MaintenanceRequest[] @relation("reporter")
-  featureRequests FeatureRequest[]
+  featureRequests     FeatureRequest[]
 
+  @@index([propertyId], map: "users_propertyId_idx")
   @@map("users")
 }
 
@@ -89,7 +88,7 @@ model Guest {
   phoneNumber String?  @map("phone_number")
   address     String?
   idNumber    String?  @map("id_number")
-  status      String   @default("Regular") // Regular, VIP, Restricted
+  status      String   @default("Regular")
   isDNR       Boolean  @default(false)     @map("is_dnr")
   dnrReason   String?  @map("dnr_reason")
   photoUrl    String?  @map("photo_url")
@@ -106,11 +105,11 @@ model Guest {
 
 model GuestDocument {
   id         String   @id @default(uuid()) @db.Uuid
-  type       String   // Passport, ID Card, Invoice, Receipt, Other
+  type       String
   fileName   String   @map("file_name")
   fileUrl    String   @map("file_url")
   uploadDate DateTime @default(now()) @map("upload_date")
-  amount     Decimal? @db.Decimal(10, 2) // Optional, for invoices/receipts
+  amount     Decimal? @db.Decimal(10, 2)
   
   guestId    String   @map("guest_id") @db.Uuid
   guest      Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
@@ -133,8 +132,8 @@ model GuestNote {
 model MaintenanceRequest {
   id           String    @id @default(uuid()) @db.Uuid
   description  String
-  priority     String    @default("Medium") // Low, Medium, High, Critical
-  status       String    @default("Pending") // Pending, In Progress, Completed
+  priority     String    @default("Medium")
+  status       String    @default("Pending")
   roomNumber   String    @map("room_number")
   reportedDate DateTime  @default(now()) @map("reported_date") @db.Date
   completedDate DateTime? @map("completed_date") @db.Date
@@ -172,7 +171,7 @@ model FeatureRequest {
 model Invoice {
   id            String   @id @default(uuid()) @db.Uuid
   totalAmount   Decimal  @map("total_amount") @db.Decimal(10, 2)
-  status        String   @default("UNPAID") // UNPAID, PAID, CANCELLED
+  status        String   @default("UNPAID")
   generatedAt   DateTime @default(now()) @map("generated_at")
   
   guestId       String   @map("guest_id") @db.Uuid
@@ -189,7 +188,7 @@ model Invoice {
 model Payment {
   id            String   @id @default(uuid()) @db.Uuid
   amount        Decimal  @db.Decimal(10, 2)
-  method        String   // CREDIT_CARD, CASH, TRANSFER
+  method        String
   status        String   @default("COMPLETED")
   transactionId String?  @map("transaction_id")
   processedAt   DateTime @default(now()) @map("processed_at")

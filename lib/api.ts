@@ -41,7 +41,12 @@ export const api = {
         },
         update: async (id: string, data: any) => {
             return authenticatedFetch(`/properties/${id}`, data, 'PUT');
-        }
+        },
+        // Advanced Data Management
+        backup: async (id: string) => authenticatedFetch(`/properties/${id}/backup`, undefined, 'POST'),
+        restore: async (id: string, data: any) => authenticatedFetch(`/properties/${id}/restore`, { data }, 'POST'),
+        wipe: async (id: string) => authenticatedFetch(`/properties/${id}/wipe`, undefined, 'DELETE'),
+        toggleDemo: async (id: string, enabled: boolean) => authenticatedFetch(`/properties/${id}/demo`, { enabled }, 'POST'),
     },
 
     rooms: {
