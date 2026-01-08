@@ -10,7 +10,7 @@ import RoomSetupWizard from './RoomSetupWizard';
 // Backend Imports
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // import { getPropertyDashboard } from '@firebasegen/default'; // REMOVED
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { api } from '../lib/api';
 
 interface RoomsProps {
@@ -24,7 +24,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   const db = getFirestore();
 
   // 1. FETCH REAL DATA
-  const { data, isLoading, refetch } = useQuery({
+  const { data: initialData, isLoading, refetch } = useQuery({
     queryKey: ['dashboard', propertyId],
     queryFn: async () => {
       if (!propertyId || isDemoMode) return null;
@@ -35,14 +35,52 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
     enabled: !!propertyId && !isDemoMode
   });
 
+  // State for real-time updates
+  const [realtimeRooms, setRealtimeRooms] = useState<any[]>([]);
+
+  // Sync initial data to local state
+  React.useEffect(() => {
+    if (initialData?.rooms) {
+      setRealtimeRooms(initialData.rooms);
+    }
+  }, [initialData]);
+
+  // Firestore Listener for Room Status
+  React.useEffect(() => {
+    if (!propertyId || isDemoMode) return;
+
+    const unsubscribe = onSnapshot(collection(db, `hotels/${propertyId}/rooms`), (snapshot) => {
+      const updates: Record<string, any> = {};
+      snapshot.forEach(doc => {
+        updates[doc.id] = doc.data();
+      });
+
+      setRealtimeRooms(prevRooms => {
+        return prevRooms.map(room => {
+          const update = updates[room.id];
+          if (update) {
+            return { ...room, status: update.status }; // Override status from Firestore
+          }
+          return room;
+        });
+      });
+    });
+
+    return () => unsubscribe();
+  }, [propertyId, isDemoMode, db]);
+
+
   // Merge Real Data or Use Mocks
   const rooms = useMemo(() => {
-    if (!data) return [];
+    if (!realtimeRooms.length && !initialData) return [];
+
+    const sourceRooms = realtimeRooms.length ? realtimeRooms : (initialData?.rooms || []);
+    const bookings = initialData?.bookings || [];
 
     // Merge SQL Rooms with Active Bookings to determine Guest Name
-    return data.rooms.map((room: any) => {
+    return sourceRooms.map((room: any) => {
       // Find if there is an active booking for this room
-      const activeBooking = data.bookings.find((b: any) =>
+      const activeBooking = bookings.find((b: any) =>
         b.room?.roomNumber === room.roomNumber && b.status === 'CONFIRMED'
       );
 
@@ -50,14 +88,16 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
         ...room,
         number: room.roomNumber, // Map SQL 'roomNumber' to UI 'number'
         floor: room.floor || 1,  // Default if missing
-        type: room.roomType,     // Map SQL 'roomType' to UI 'type'
-        status: room.roomStatus || 'AVAILABLE', // Map SQL 'roomStatus' to UI 'status'
+        type: room.roomType,    // Map SQL 'roomType' to UI 'type'
+        // If status was updated via Firestore, 'room.status' (mapped above) works. 
+        // If not, fall back to SQL 'roomStatus' or 'AVAILABLE'
+        status: room.status || room.roomStatus || 'AVAILABLE',
         price: room.price,
         guestName: activeBooking ? activeBooking.guestName : null,
         checkoutDate: activeBooking ? activeBooking.checkOutDate : null
       };
     });
-  }, [data, isDemoMode]);
+  }, [realtimeRooms, initialData, isDemoMode]);
 
   // UI State
   const [filterStatus, setFilterStatus] = useState<string | 'ALL'>('ALL');
@@ -151,7 +191,7 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   if (isLoading) return <div className="p-12 text-center text-slate-400 font-bold">Loading Rooms...</div>;
 
   // --- WIZARD LOGIC ---
-  const showWizard = !isDemoMode && !isLoading && data && (!data.rooms || data.rooms.length === 0);
+  const showWizard = !isDemoMode && !isLoading && initialData && (!initialData.rooms || initialData.rooms.length === 0);
 
   if (showWizard) {
     return (

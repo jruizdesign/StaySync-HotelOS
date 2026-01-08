@@ -79,6 +79,25 @@ export const api = {
         getMe: async (uid: string) => {
             return authenticatedFetch(`/users/${uid}`, undefined, 'GET');
         }
+    },
+
+    maintenance: {
+        list: async (propertyId: string) => authenticatedFetch(`/maintenance?propertyId=${propertyId}`, undefined, 'GET'),
+        create: async (data: any) => authenticatedFetch('/maintenance', data, 'POST'),
+        update: async (id: string, data: any) => authenticatedFetch(`/maintenance/${id}`, data, 'PUT'),
+    },
+
+    guests: {
+        list: async (searchQuery: string = '', isDNR: boolean = false) => authenticatedFetch(`/guests?searchQuery=${encodeURIComponent(searchQuery)}&isDNR=${isDNR}`, undefined, 'GET'),
+        get: async (id: string) => authenticatedFetch(`/guests/${id}`, undefined, 'GET'),
+        create: async (data: any) => authenticatedFetch('/guests', data, 'POST'),
+        addDocument: async (guestId: string, data: any) => authenticatedFetch(`/guests/${guestId}/documents`, data, 'POST'),
+        generateInvoice: async (guestId: string, data: { amount: number, bookingId?: string }) => authenticatedFetch(`/guests/${guestId}/invoices`, data, 'POST'),
+    },
+
+    features: {
+        list: async () => authenticatedFetch('/features', undefined, 'GET'),
+        create: async (data: any) => authenticatedFetch('/features', data, 'POST'),
     }
 };
 

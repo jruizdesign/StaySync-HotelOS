@@ -144,10 +144,8 @@ export default function PropertyDashboard() {
             {activeTab === 'maintenance' && (
                 <Maintenance
                     isDemoMode={isDemoMode}
-                    tasks={maintenanceTasks}
-                    onAddTask={(t: any) => setMaintenanceTasks((prev: any) => [t, ...prev])}
-                    onUpdateTask={(t: any) => setMaintenanceTasks((prev: any) => prev.map((old: any) => old.id === t.id ? t : old))}
-                    onDeleteTask={(id: string) => setMaintenanceTasks((prev: any) => prev.filter((t: any) => t.id !== id))}
+                    user={appUser}
+                    propertyId={propertyId || ''}
                 />
             )}
 
@@ -167,10 +165,7 @@ export default function PropertyDashboard() {
 
             {activeTab === 'features' && (
                 <FeatureRequests
-                    requests={featureRequests}
                     user={appUser}
-                    onAddRequest={(r: any) => setFeatureRequests((prev: any) => [r, ...prev])}
-                    onUpdateRequest={(r: any) => setFeatureRequests((prev: any) => prev.map((old: any) => old.id === r.id ? r : old))}
                 />
             )}
 

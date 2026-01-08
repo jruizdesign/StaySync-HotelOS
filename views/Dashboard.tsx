@@ -141,7 +141,7 @@ function ManagerView({ data, property, isDemoMode }: { data: any, property: Prop
 
   // GitHub Fetch
   useEffect(() => {
-    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=1')
+    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=1&sha=migrateToNodeJS')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

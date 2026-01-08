@@ -61,7 +61,7 @@ const DEMO_STEPS = [
     id: 'maintenance',
     label: 'Work Orders',
     description: 'Track repairs, assign costs, and link expenses to accounting.',
-    component: <Maintenance isDemoMode={true} tasks={[]} onUpdateTask={() => { }} onAddTask={() => { }} onDeleteTask={() => { }} />, // Passing empty props as component handles demo data internally
+    component: <Maintenance isDemoMode={true} user={DEMO_USER} propertyId={DEMO_PROPERTY.id} />,
     icon: Wrench,
     highlight: "Seamlessly link repairs to financial ledger."
   },
@@ -83,7 +83,7 @@ const LandingPage: React.FC = () => {
 
   // GitHub Fetch
   useEffect(() => {
-    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=3')
+    fetch('https://api.github.com/repos/jruizdesign/StaySync-HotelOS/commits?per_page=3&sha=migrateToNodeJS')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

@@ -77,6 +77,10 @@ export interface Guest {
   isDNR: boolean;
   dnrReason?: string;
   photoUrl?: string;
+  phoneNumber?: string; // Add optional as usage varies
+  bookings?: any[]; // Avoiding circular dep complexity for now
+  notes?: any[];
+  invoices?: any[];
 }
 
 export interface Booking {

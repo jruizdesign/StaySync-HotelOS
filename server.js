@@ -22,6 +22,9 @@ const prisma = new PrismaClient({ adapter });
 app.use(express.json());
 app.use(cors());
 
+// Health Check (Public)
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
 // Initialize Firebase (for Auth check & Firestore Sync)
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
@@ -348,6 +351,269 @@ app.get('/api/users/:uid', authMiddleware, async (req, res) => {
     res.json({ ...user, defaultPropertyId });
   } catch (e) {
     console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// --- NEW ENDPOINTS ---
+
+// 9. MAINTENANCE REQUESTS
+// GET /api/maintenance?propertyId=...
+app.get('/api/maintenance', authMiddleware, async (req, res) => {
+  const { propertyId } = req.query;
+  if (!propertyId) return res.status(400).json({ error: 'Property ID required' });
+
+  try {
+    const tasks = await prisma.maintenanceRequest.findMany({
+      where: { propertyId: String(propertyId) },
+      orderBy: { reportedDate: 'desc' },
+      include: { assignedTo: true, reporter: true }
+    });
+    res.json({ tasks });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/maintenance
+app.post('/api/maintenance', authMiddleware, async (req, res) => {
+  const { propertyId, description, priority, roomNumber, assignedToId } = req.body;
+  try {
+    const task = await prisma.maintenanceRequest.create({
+      data: {
+        propertyId,
+        description,
+        priority,
+        roomNumber,
+        assignedToId,
+        reporterId: req.user.uid,
+        status: 'Pending'
+      }
+    });
+
+    // Real-time Trigger (Firestore) - Dual Write
+    await db.collection('hotels').doc(propertyId).collection('maintenance_events').add({
+      type: 'NEW_TASK',
+      taskId: task.id,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, task });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /api/maintenance/:id
+app.put('/api/maintenance/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { status, cost, assignedToId, completedDate } = req.body;
+  try {
+    const task = await prisma.maintenanceRequest.update({
+      where: { id },
+      data: { status, cost, assignedToId, completedDate: completedDate ? new Date(completedDate) : undefined }
+    });
+
+    // Real-time Trigger
+    await db.collection('hotels').doc(task.propertyId).collection('maintenance_events').add({
+      type: 'UPDATE_TASK',
+      taskId: task.id,
+      status: status,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, task });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+// 10. GUESTS
+// GET /api/guests?propertyId=...
+app.get('/api/guests', authMiddleware, async (req, res) => {
+  try {
+    const { searchQuery, isDNR } = req.query;
+
+    const where = {};
+
+    if (searchQuery) {
+      where.OR = [
+        { name: { contains: String(searchQuery), mode: 'insensitive' } },
+        { email: { contains: String(searchQuery), mode: 'insensitive' } },
+        { phoneNumber: { contains: String(searchQuery), mode: 'insensitive' } },
+        { idNumber: { contains: String(searchQuery), mode: 'insensitive' } }
+      ];
+    }
+
+    if (isDNR) {
+      where.isDNR = isDNR === 'true';
+    }
+
+    const guests = await prisma.guest.findMany({
+      where,
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+      include: {
+        _count: {
+          select: { bookings: true }
+        }
+      }
+    });
+
+    // Calculate lifetime spend (simple aggregate if possible, or do it in SQL)
+    // Prisma aggregate is cleaner
+    // For now, returning basic list. Lifetime spend usually requires a separate aggregate query per guest or a raw query.
+    // We'll skip complex lifetime spend calculation in List view for performance unless needed.
+
+    res.json({ guests });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/guests/:id
+app.get('/api/guests/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const guest = await prisma.guest.findUnique({
+      where: { id },
+      include: {
+        bookings: {
+          include: { room: true },
+          orderBy: { checkInDate: 'desc' }
+        },
+        notes: { orderBy: { createdAt: 'desc' } },
+        invoices: { include: { payments: true } },
+        documents: { orderBy: { uploadDate: 'desc' } }
+      }
+    });
+    if (!guest) return res.status(404).json({ error: 'Guest not found' });
+
+    // Calculate Stats
+    // This is simple in-memory calc for single record.
+    const completedBookings = guest.bookings.filter(b => b.status === 'Completed' || b.status === 'CheckedOut');
+    const lifetimeSpend = guest.invoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+
+    res.json({
+      guest: {
+        ...guest,
+        lifetimeSpend,
+        totalStays: completedBookings.length
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/guests (Upsert)
+app.post('/api/guests', authMiddleware, async (req, res) => {
+  const { email, name, phoneNumber, address, idNumber, status, isDNR, dnrReason, photoUrl } = req.body;
+  try {
+    const guest = await prisma.guest.upsert({
+      where: { email },
+      update: {
+        name, phoneNumber, address, idNumber, status, isDNR: Boolean(isDNR), dnrReason, photoUrl
+      },
+      create: {
+        email, name, phoneNumber, address, idNumber, status, isDNR: Boolean(isDNR), dnrReason, photoUrl
+      }
+    });
+    res.json({ success: true, guest });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/guests/:id/documents
+app.post('/api/guests/:id/documents', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { fileName, fileUrl, type, amount } = req.body;
+
+  try {
+    const doc = await prisma.guestDocument.create({
+      data: {
+        guestId: id,
+        fileName,
+        fileUrl,
+        type,
+        amount: amount ? Number(amount) : null
+      }
+    });
+    res.json({ success: true, document: doc });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/guests/:id/invoices
+app.post('/api/guests/:id/invoices', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { amount, bookingId } = req.body; // Optional bookingId
+  try {
+    const invoice = await prisma.invoice.create({
+      data: {
+        guestId: id,
+        bookingId: bookingId || null, // Optional link
+        totalAmount: Number(amount) || 0,
+        status: 'PENDING',
+        generatedAt: new Date()
+      }
+    });
+
+    // Also create a "Document" record for this invoice
+    await prisma.guestDocument.create({
+      data: {
+        guestId: id,
+        type: 'Invoice',
+        fileName: `Invoice_${invoice.id.split('-')[0]}.pdf`, // Mock PDF name
+        fileUrl: '#', // In real app, generate PDF -> upload -> get URL
+        uploadDate: new Date(),
+        amount: invoice.totalAmount
+      }
+    });
+
+    res.json({ success: true, invoice });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 11. FEATURE REQUESTS
+app.get('/api/features', authMiddleware, async (req, res) => {
+  try {
+    const requests = await prisma.featureRequest.findMany({
+      orderBy: { votes: 'desc' },
+      include: { requester: true }
+    });
+    res.json({ requests });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/features', authMiddleware, async (req, res) => {
+  const { title, description, priority } = req.body;
+  try {
+    const reqItem = await prisma.featureRequest.create({
+      data: {
+        title,
+        description,
+        priority,
+        requesterId: req.user.uid
+      }
+    });
+
+    // Real-time Trigger
+    await db.collection('global').doc('features').collection('events').add({
+      type: 'NEW_FEATURE',
+      featureId: reqItem.id,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true, request: reqItem });
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
