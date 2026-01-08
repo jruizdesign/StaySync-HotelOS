@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "latest",
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@stay-sync/hotel-os": "file:src/dataconnect-generated",
     "@tanstack/react-query": "^5.90.16",
@@ -23,6 +24,7 @@
     "google-auth-library": "^10.5.0",
     "graphql-request": "^7.4.0",
     "lucide-react": "0.460.0",
+    "pg": "^8.16.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.11.0",

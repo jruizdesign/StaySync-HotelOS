@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // FIX 2: Added URL env var
 }
 
 // --- MODELS ---
@@ -59,3 +58,16 @@ model Booking {
 
   @@index([propertyId])
   @@index([roomId])
+  @@map("bookings")
+}
+
+model User {
+  id         String     @id
+  email      String     @unique
+  name       String?
+  role       String     @default("STAFF")
+
+  properties Property[]
+
+  @@map("users")
+}

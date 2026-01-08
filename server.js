@@ -1,15 +1,24 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './src/generated/prisma/index.js';
 import admin from 'firebase-admin';
 import cors from 'cors';
 import { createRequire } from 'module';
+
+import 'dotenv/config';
+import pg from 'pg';
+const { Pool } = pg;
+import { PrismaPg } from '@prisma/adapter-pg';
 
 const require = createRequire(import.meta.url);
 const serviceAccount = require('./service-account.json');
 
 // --- INIT ---
 const app = express();
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
 app.use(express.json());
 app.use(cors());
 
