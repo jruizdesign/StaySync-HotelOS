@@ -1,6 +1,6 @@
 import "./lib/firebase"; // Initialize Firebase first
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./components/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider, useAuth } from "./components/AuthContext";
 import LoginPage from "./views/Login";
 import PropertySelector from "./views/PropertySelector";
 import PropertyDashboard from "./views/PropertyDashboard";
@@ -9,8 +9,22 @@ import DigitalSolutions from "./views/DigitalSolutions";
 import ITSecurity from "./views/ITSecurity";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
 
+//Sub-Views
+import Bookings from "./views/Bookings";
+import Rooms from "./views/Rooms";
+import Maintenance from "./views/Maintenance";
+import Settings from "./views/Settings";
+
+const queryClient = new QueryClient();
+const PrivateRoute = () => {
+  const { user, loading } = useAuth();
+  if (loading)
+    return (
+      <div>Loading...</div>
+    );
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
+};
 
 function App() {
   return (

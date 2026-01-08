@@ -5,6 +5,9 @@ import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
 import { useQuery } from '@tanstack/react-query';
 import { getPropertyDashboard, adminListProperties } from '@firebasegen/default';
+import { Outlet } from 'react-router-dom';
+
+// inside PropertyDashboard JSX:
 
 // Import your views
 import Dashboard from "./Dashboard";
