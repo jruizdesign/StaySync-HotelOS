@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../lib/firebase'; // Ensure this path is correct
+import { api } from '../lib/api';
 import {
   getFirestore,
   collection,
@@ -68,9 +67,9 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
 
   const inviteMutation = useMutation({
     mutationFn: async (vars: any) => {
-      const createTenantUser = httpsCallable(functions, 'createTenantUser');
-      const result = await createTenantUser(vars);
-      return result.data;
+      // Use Node.js API
+      const res = await api.users.create(vars);
+      return res.user;
     },
     onSuccess: () => {
       // Invalidate dashboard query to refresh staff list

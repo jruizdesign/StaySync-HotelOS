@@ -9,8 +9,9 @@ import RoomSetupWizard from './RoomSetupWizard';
 
 // Backend Imports
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPropertyDashboard, updateRoom } from '@firebasegen/default'; // Corrected imports
+import { getPropertyDashboard } from '@firebasegen/default'; // Corrected imports
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { api } from '../lib/api';
 
 interface RoomsProps {
   isDemoMode: boolean;
@@ -71,8 +72,8 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   // 2. MUTATION: Update Room (SQL)
   const updateRoomMutation = useMutation({
     mutationFn: async (vars: any) => {
-      // Direct call to generated SDK function
-      return await updateRoom(vars);
+      const { id, ...rest } = vars;
+      return await api.rooms.update(id, rest);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard', propertyId] });

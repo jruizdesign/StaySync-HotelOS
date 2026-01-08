@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminListProperties, createProperty, linkUserToProperty } from '@firebasegen/default';
+import { adminListProperties } from '@firebasegen/default';
+import { api } from '../lib/api';
 import { useAuth } from '../components/AuthContext';
 import {
     MapPin,
@@ -25,16 +26,10 @@ export default function PropertySelector() {
     const [isCreating, setIsCreating] = useState(false);
 
     // MUTATIONS
+    // MUTATIONS
     const createPropMutation = useMutation({
         mutationFn: async (vars: { name: string, address: string }) => {
-            const res = await createProperty(vars);
-            return res.data.property_insert.id;
-        }
-    });
-
-    const linkUserMutation = useMutation({
-        mutationFn: async (vars: { id: string, propertyId: string }) => {
-            return await linkUserToProperty(vars);
+            return await api.properties.create(vars);
         }
     });
 
@@ -44,18 +39,13 @@ export default function PropertySelector() {
         setIsCreating(true);
         try {
             // 1. Create Property
-            const newPropertyId = await createPropMutation.mutateAsync({
+            const res = await createPropMutation.mutateAsync({
                 name: form.name,
                 address: form.address
             });
+            const newPropertyId = res.property.id;
 
-            // 2. Link User
-            await linkUserMutation.mutateAsync({
-                id: firebaseUser.uid,
-                propertyId: newPropertyId
-            });
-
-            // 3. Refresh & Redirect
+            // 2. Refresh & Redirect
             navigate(`/dashboard/${newPropertyId}`);
         } catch (err) {
             console.error("Creation failed", err);

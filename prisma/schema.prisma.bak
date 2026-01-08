@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model bookings {
+  id             String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  property_id    String     @db.Uuid
+  room_id        String?    @db.Uuid
+  check_in_date  DateTime   @db.Date
+  check_out_date DateTime   @db.Date
+  guest_name     String
+  status         String
+  properties     properties @relation(fields: [property_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rooms          rooms?     @relation(fields: [room_id], references: [id], onUpdate: NoAction)
+
+  @@index([property_id], map: "bookings_propertyId_idx")
+  @@index([room_id], map: "bookings_roomId_idx")
+}
+
+model properties {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  address      String?
+  email        String?
+  name         String
+  phone_number String?
+  bookings     bookings[]
+  rooms        rooms[]
+  users        users[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rooms {
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  property_id String     @db.Uuid
+  capacity    Int?
+  room_number String
+  room_type   String
+  floor       Int?
+  price       Float?
+  room_status String?
+  bookings    bookings[]
+  properties  properties @relation(fields: [property_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([property_id], map: "rooms_propertyId_idx")
+}
+
+model users {
+  uid         String      @id
+  property_id String?     @db.Uuid
+  email       String
+  role        String
+  last_active DateTime?   @db.Date
+  name        String?
+  pin         String?
+  status      String?
+  properties  properties? @relation(fields: [property_id], references: [id], onUpdate: NoAction)
+
+  @@index([property_id], map: "users_propertyId_idx")
+}

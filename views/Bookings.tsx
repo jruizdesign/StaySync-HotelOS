@@ -1,7 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPropertyDashboard, createBooking } from '@firebasegen/default';
+import { getPropertyDashboard } from '@firebasegen/default';
+import { api } from '../lib/api';
 import {
   Plus,
   Search,
@@ -84,7 +85,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
   // 3. Mutation
   const createBookingMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await createBooking(data);
+      return await api.bookings.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard', propertyId] });
@@ -115,7 +116,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
       checkIn: new Date().toISOString().split('T')[0],
       checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
       status: 'Confirmed',
-      dailyRate: 0, 
+      dailyRate: 0,
       currentStayTotalAmount: 0
     });
     setGuestSuggestions([]);
@@ -171,6 +172,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
       setIsGeneratingDocs(true); // Reusing loading state
       createBookingMutation.mutate({
         propertyId: propertyId!,
+        roomNumber: currentBooking.roomNumber,
         guestName: currentBooking.guestName || 'Guest',
         guestEmail: currentBooking.guestEmail,
         guestPhone: currentBooking.guestPhone,

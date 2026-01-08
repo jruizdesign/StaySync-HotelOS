@@ -1,14 +1,61 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js" // FIX 1: Correct provider name
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL") // FIX 2: Added URL env var
 }
+
+// --- MODELS ---
+
+model Property {
+  id          String    @id @default(uuid()) @db.Uuid // FIX 3: Native UUID
+  name        String
+  address     String?
+  email       String?
+  phoneNumber String?   @map("phone_number") // JS: phoneNumber, DB: phone_number
+  
+  bookings    Booking[]
+  rooms       Room[]
+  users       User[]
+
+  @@map("properties") // Keeps your DB table named 'properties'
+}
+
+model Room {
+  id         String     @id @default(uuid()) @db.Uuid
+  roomNumber String     @map("room_number")
+  roomType   String     @map("room_type")
+  capacity   Int?
+  floor      Int?
+  price      Decimal?   @db.Decimal(10, 2) // FIX 4: Decimal for money
+  status     String?    @map("room_status")
+
+  // Tenancy
+  propertyId String     @map("property_id") @db.Uuid
+  property   Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  bookings   Booking[]
+
+  @@index([propertyId])
+  @@map("rooms")
+}
+
+model Booking {
+  id           String    @id @default(uuid()) @db.Uuid
+  checkInDate  DateTime  @map("check_in_date") @db.Date
+  checkOutDate DateTime  @map("check_out_date") @db.Date
+  guestName    String    @map("guest_name")
+  status       String
+
+  // Tenancy
+  propertyId   String    @map("property_id") @db.Uuid
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  roomId       String?   @map("room_id") @db.Uuid
+  room         Room?     @relation(fields: [roomId], references: [id])
+
+  @@index([propertyId])
+  @@index([roomId])
