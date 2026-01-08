@@ -7,18 +7,6 @@ const connectorConfig = {
 };
 exports.connectorConfig = connectorConfig;
 
-const createRoomEntryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateRoomEntry', inputVars);
-}
-createRoomEntryRef.operationName = 'CreateRoomEntry';
-exports.createRoomEntryRef = createRoomEntryRef;
-
-exports.createRoomEntry = function createRoomEntry(dcOrVars, vars) {
-  return executeMutation(createRoomEntryRef(dcOrVars, vars));
-};
-
 const adminListPropertiesRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
@@ -149,4 +137,16 @@ exports.upsertUserRef = upsertUserRef;
 
 exports.upsertUser = function upsertUser(dcOrVars, vars) {
   return executeMutation(upsertUserRef(dcOrVars, vars));
+};
+
+const createRoomEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateRoomEntry', inputVars);
+}
+createRoomEntryRef.operationName = 'CreateRoomEntry';
+exports.createRoomEntryRef = createRoomEntryRef;
+
+exports.createRoomEntry = function createRoomEntry(dcOrVars, vars) {
+  return executeMutation(createRoomEntryRef(dcOrVars, vars));
 };

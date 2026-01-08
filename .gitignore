@@ -31,3 +31,4 @@ service-account-key.json
 
 # Firebase Emulators
 firebase-debug.log
+/src/generated/prisma
