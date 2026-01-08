@@ -1,4 +1,5 @@
-import { getPropertyDashboard } from "@firebasegen/default";
+// import { getPropertyDashboard } from "@firebasegen/default"; // REMOVED
+import { api } from './api';
 
 // --- Tool Schemas for Gemini ---
 
@@ -64,19 +65,18 @@ export async function executeTool(name: string, args: any) {
 
 async function getPropertyStats(propertyId: string) {
     try {
-        const res = await getPropertyDashboard({ propertyId });
-        const data = res.data;
+        const data = await api.properties.getDashboard(propertyId);
 
         if (!data.property) return { error: "Property not found" };
 
         const rooms = data.rooms || [];
         const totalRooms = rooms.length;
-        const occupied = rooms.filter(r => r.roomStatus === 'OCCUPIED').length;
+        const occupied = rooms.filter((r: any) => r.status === 'OCCUPIED').length; // Check property name (status vs roomStatus)
         const occupancyRate = totalRooms > 0 ? ((occupied / totalRooms) * 100).toFixed(1) + '%' : '0%';
 
         // RevPAR simplified calculation
         const bookings = data.bookings || [];
-        const revenue = bookings.reduce((sum, b) => sum + (b.currentStayTotalAmount || 0), 0);
+        const revenue = bookings.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
 
         return {
             propertyName: data.property.name,
@@ -94,19 +94,19 @@ async function getPropertyStats(propertyId: string) {
 
 async function listGuestsWithArrears(propertyId: string) {
     try {
-        const res = await getPropertyDashboard({ propertyId });
-        const bookings = res.data.bookings || [];
+        const res = await api.properties.getDashboard(propertyId);
+        const bookings = res.bookings || [];
 
         const debtors = bookings
-            .map(b => ({
+            .map((b: any) => ({
                 guestName: b.guestName,
                 room: b.room?.roomNumber || 'Unknown',
-                total: b.currentStayTotalAmount || 0,
+                total: b.totalAmount || 0,
                 paid: b.amountPaid || 0,
-                owing: (b.currentStayTotalAmount || 0) - (b.amountPaid || 0)
+                owing: (b.totalAmount || 0) - (b.amountPaid || 0)
             }))
-            .filter(g => g.owing > 0)
-            .sort((a, b) => b.owing - a.owing) // Highest debt first
+            .filter((g: any) => g.owing > 0)
+            .sort((a: any, b: any) => b.owing - a.owing) // Highest debt first
             .slice(0, 10); // Top 10
 
         return {
@@ -120,14 +120,14 @@ async function listGuestsWithArrears(propertyId: string) {
 
 async function checkRoomStatus(propertyId: string, roomNumber: string) {
     try {
-        const res = await getPropertyDashboard({ propertyId });
-        const room = res.data.rooms.find(r => r.roomNumber === roomNumber);
+        const res = await api.properties.getDashboard(propertyId);
+        const room = res.rooms.find((r: any) => r.roomNumber === roomNumber);
 
         if (!room) return { error: `Room ${roomNumber} not found.` };
 
         return {
             roomNumber: room.roomNumber,
-            status: room.roomStatus,
+            status: room.status,
             type: room.roomType,
             floor: room.floor
         };

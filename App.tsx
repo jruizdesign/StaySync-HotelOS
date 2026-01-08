@@ -43,11 +43,13 @@ function App() {
 
             <Route path="/login" element={<LoginPage />} />
 
-            {/* Super Admin Route */}
-            <Route path="/admin/properties" element={<PropertySelector />} />
+            <Route element={<PrivateRoute />}>
+              {/* Super Admin Route */}
+              <Route path="/admin/properties" element={<PropertySelector />} />
 
-            {/* The Shared Dashboard */}
-            <Route path="/dashboard/:propertyId" element={<PropertyDashboard />} />
+              {/* The Shared Dashboard */}
+              <Route path="/dashboard/:propertyId" element={<PropertyDashboard />} />
+            </Route>
 
             {/* Default Redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />

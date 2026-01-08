@@ -30,7 +30,7 @@ export default function Login() {
 
             // 2. Fetch the latest Claims (Roles/PropertyId)
             const tokenResult = await user.getIdTokenResult(true);
-            const claims = tokenResult.claims as CustomClaims;
+            const claims = tokenResult.claims as unknown as CustomClaims;
 
             console.log("Login Success. Role:", claims.role, "Property:", claims.propertyId);
 

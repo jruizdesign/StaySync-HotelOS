@@ -9,7 +9,7 @@ import RoomSetupWizard from './RoomSetupWizard';
 
 // Backend Imports
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPropertyDashboard } from '@firebasegen/default'; // Corrected imports
+// import { getPropertyDashboard } from '@firebasegen/default'; // REMOVED
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { api } from '../lib/api';
 
@@ -27,9 +27,10 @@ const Rooms: React.FC<RoomsProps> = ({ isDemoMode, user, propertyId }) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['dashboard', propertyId],
     queryFn: async () => {
-      // Direct call to generated SDK function
-      const response = await getPropertyDashboard({ propertyId });
-      return response.data;
+      if (!propertyId || isDemoMode) return null;
+      // Direct call to Node.js API
+      const response = await api.properties.getDashboard(propertyId);
+      return response; // response is { property, rooms, bookings }
     },
     enabled: !!propertyId && !isDemoMode
   });

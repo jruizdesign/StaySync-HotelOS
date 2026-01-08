@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPropertyDashboard } from '@firebasegen/default';
+// import { getPropertyDashboard } from '@firebasegen/default'; // REMOVED
 import { api } from '../lib/api';
 import {
   Plus,
@@ -47,8 +47,8 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
     queryKey: ['dashboard', propertyId],
     queryFn: async () => {
       if (!propertyId) return null;
-      const res = await getPropertyDashboard({ propertyId });
-      return res.data;
+      const res = await api.properties.getDashboard(propertyId);
+      return res;
     },
     enabled: !!propertyId
   });

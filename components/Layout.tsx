@@ -44,8 +44,7 @@ const Layout: React.FC<LayoutProps> = ({
   // PHASE 1 FIX: Robust Role Check
   // We check against the string 'SUPER_ADMIN' explicitly because that is what is in your DB
   const canSwitchProperty =
-    user.role === 'SUPER_ADMIN' ||
-    user.role === 'SYSTEM_ADMIN' ||
+    user.role === UserRole.SUPER_ADMIN ||
     user.role === UserRole.SYSTEM_ADMIN;
 
   const mainMenuItems = [

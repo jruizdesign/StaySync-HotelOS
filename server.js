@@ -140,6 +140,31 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
   }
 });
 
+// 2b. UPDATE PROPERTY
+app.put('/api/properties/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { name, address, email, phoneNumber } = req.body;
+
+  // In real app, verify user has permission to update this property
+  // e.g. check if req.user.uid is admin or belongs to property
+
+  try {
+    const property = await prisma.property.update({
+      where: { id },
+      data: {
+        name,
+        address,
+        email,
+        phoneNumber
+      }
+    });
+    res.json({ success: true, property });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // 3. CREATE ROOM
 app.post('/api/rooms', authMiddleware, async (req, res) => {
   const { hotelId: tokenHotelId } = req.user;
@@ -231,8 +256,6 @@ app.put('/api/rooms/:id', authMiddleware, async (req, res) => {
     });
 
     // Sync to Firestore
-    // Using room.propertyId if we fetched it, or trusting hotelId if checked.
-    // Better:
     if (room.propertyId === hotelId) {
       await db.collection('hotels').doc(String(hotelId))
         .collection('rooms').doc(String(id))
@@ -243,6 +266,86 @@ app.put('/api/rooms/:id', authMiddleware, async (req, res) => {
     }
 
     res.json({ success: true, room });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 6. GET PROPERTIES (List)
+app.get('/api/properties', authMiddleware, async (req, res) => {
+  const { uid } = req.user;
+  try {
+    // Find properties where the user is a member
+    // This depends on your Prisma schema. Assuming Implicit M-N or Explicit.
+    // Based on POST /api/users, it seems to be Explicit or Implicit via 'users' relation.
+    // Checking schema implicitly from code: property.users.connect
+    const properties = await prisma.property.findMany({
+      where: {
+        users: {
+          some: {
+            id: uid
+          }
+        }
+      },
+      include: {
+        rooms: true, // Optional: include counts if needed
+        bookings: true
+      }
+    });
+    res.json({ properties });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 7. GET DASHBOARD (Single Property)
+app.get('/api/properties/:id/dashboard', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const property = await prisma.property.findUnique({
+      where: { id },
+    });
+
+    if (!property) return res.status(404).json({ error: 'Property not found' });
+
+    const rooms = await prisma.room.findMany({
+      where: { propertyId: id }
+    });
+
+    const bookings = await prisma.booking.findMany({
+      where: { propertyId: id },
+      include: {
+        room: true // Include room details for the booking
+      }
+    });
+
+    res.json({ property, rooms, bookings });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 8. GET USER (Me)
+app.get('/api/users/:uid', authMiddleware, async (req, res) => {
+  const { uid } = req.params; // Or use req.user.uid
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: uid },
+      include: {
+        properties: true // Include properties they belong to?
+      }
+    });
+
+    // Return default property ID logic if needed
+    let defaultPropertyId = null;
+    if (user && user.properties && user.properties.length > 0) {
+      defaultPropertyId = user.properties[0].id;
+    }
+
+    res.json({ ...user, defaultPropertyId });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });

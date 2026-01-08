@@ -29,6 +29,18 @@ export const api = {
     properties: {
         create: async (data: { name: string; address: string }) => {
             return authenticatedFetch('/properties', data);
+        },
+        list: async () => {
+            // For Admin Property Selector
+            return authenticatedFetch('/properties', undefined, 'GET');
+        },
+        getDashboard: async (id: string) => {
+            // For the main dashboard view
+            // Returns { property, rooms, bookings, etc } (DashboardDTO)
+            return authenticatedFetch(`/properties/${id}/dashboard`, undefined, 'GET');
+        },
+        update: async (id: string, data: any) => {
+            return authenticatedFetch(`/properties/${id}`, data, 'PUT');
         }
     },
 
@@ -63,6 +75,9 @@ export const api = {
             propertyId: string;
         }) => {
             return authenticatedFetch('/users', data);
+        },
+        getMe: async (uid: string) => {
+            return authenticatedFetch(`/users/${uid}`, undefined, 'GET');
         }
     }
 };
@@ -73,14 +88,19 @@ const authenticatedFetch = async (endpoint: string, data: any, method = 'POST') 
     if (!user) throw new Error('User not authenticated');
     const token = await user.getIdToken();
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const options: RequestInit = {
         method,
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    });
+        }
+    };
+
+    if (method !== 'GET' && data) {
+        options.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

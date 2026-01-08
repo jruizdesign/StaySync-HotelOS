@@ -4,7 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
 import { useQuery } from '@tanstack/react-query';
-import { getPropertyDashboard, adminListProperties } from '@firebasegen/default';
+// import { getPropertyDashboard, adminListProperties } from '@firebasegen/default'; // REMOVED
+import { api } from '../lib/api';
 import { Outlet } from 'react-router-dom';
 
 // inside PropertyDashboard JSX:
@@ -57,8 +58,8 @@ export default function PropertyDashboard() {
         queryKey: ['dashboard', propertyId],
         queryFn: async () => {
             if (isDemoMode || !propertyId) return null;
-            const res = await getPropertyDashboard({ propertyId });
-            return res.data;
+            const res = await api.properties.getDashboard(propertyId);
+            return res; // API should return flat object or matching structure
         },
         enabled: !!propertyId && !isDemoMode
     });
@@ -67,8 +68,8 @@ export default function PropertyDashboard() {
     const { data: propertiesList } = useQuery({
         queryKey: ['admin-properties'],
         queryFn: async () => {
-            const res = await adminListProperties();
-            return res.data.properties;
+            const res = await api.properties.list();
+            return res.properties;
         },
         // Only fetch if user is admin (and we have the user object)
         enabled: !!appUser && appUser.role === 'SYSTEM_ADMIN'

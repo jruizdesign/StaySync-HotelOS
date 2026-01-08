@@ -27,7 +27,14 @@
         "./src/generated"
       ]
     },
-    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
     "noEmit": true
-  }
+  },
+  "include": [
+    ".",
+    "src",
+    "components",
+    "views",
+    "lib"
+  ]
 }

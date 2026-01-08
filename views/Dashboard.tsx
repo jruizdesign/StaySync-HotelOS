@@ -36,7 +36,8 @@ import {
 import { GoogleGenAI } from '@google/genai';
 import { useQuery } from "@tanstack/react-query";
 import { httpsCallable } from 'firebase/functions';
-import { adminListProperties, getPropertyDashboard } from "@firebasegen/default";
+// import { adminListProperties, getPropertyDashboard } from "@firebasegen/default"; // REMOVED
+import { api } from '../lib/api';
 import { dc, functions } from '../lib/firebase';
 
 // --- Types ---
@@ -477,12 +478,9 @@ const Dashboard: React.FC<DashboardProps> = ({ property, isDemoMode, user }) => 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard', propertyIdToFetch],
     queryFn: async () => {
-      // The generated SDK function takes the variables directly.
-      // It already knows which "dc" instance to use from your initialization in @stay-sync/hotel-os
-      const result = await getPropertyDashboard({
-        propertyId: propertyIdToFetch
-      });
-      return result.data; // Usually the actual data is inside .data
+      // Direct call to Node.js API
+      const result = await api.properties.getDashboard(propertyIdToFetch);
+      return result; // API returns matching structure
     },
     enabled: !!propertyIdToFetch && !isDemoMode
   });

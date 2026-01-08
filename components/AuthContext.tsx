@@ -1,49 +1,83 @@
-import { useState, useEffect, useContext, createContext } from "react";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { createContext, useEffect, useState, useContext, ReactNode } from 'react';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { api } from '../lib/api';
 
-export interface CustomClaims {
-    role?: string;
-    propertyId?: string;
-    [key: string]: any;
+interface DbProfile {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    defaultPropertyId: string;
+    // add other fields as needed based on your API response
 }
 
 interface AuthContextType {
-    user: User | null;
-    claims: CustomClaims | null;
+    user: FirebaseUser | null;
+    dbProfile: DbProfile | null;
+    hotelId: string | null;
+    switchProperty: (id: string) => void;
     loading: boolean;
+    // Add claims if you are using them in App.tsx
+    claims?: CustomClaims;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, claims: null, loading: true });
+export interface CustomClaims {
+    role: string;
+    propertyId?: string;
+}
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [claims, setClaims] = useState<CustomClaims | null>(null);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
+
+interface AuthProviderProps {
+    children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [dbProfile, setDbProfile] = useState<DbProfile | null>(null);
+    const [hotelId, setHotelId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                // 1. Get the latest token to ensure we have the custom claims
-                const tokenResult = await firebaseUser.getIdTokenResult(true);
+        // 1. Listen for Firebase Auth (Identity)
+        const unsub = onAuthStateChanged(auth, async (fbUser) => {
+            setUser(fbUser);
 
-                setUser(firebaseUser);
-                setClaims(tokenResult.claims); // This contains { role, propertyId }
+            if (fbUser) {
+                // 2. Fetch "Real" Profile from Postgres API
+                // This gets us the Role and Default Property ID
+                try {
+                    const profile = await api.users.getMe(fbUser.uid);
+                    setDbProfile(profile);
+                    if (profile?.defaultPropertyId) {
+                        setHotelId(profile.defaultPropertyId);
+                    }
+                } catch (e) {
+                    console.error("User not in SQL DB", e);
+                }
             } else {
-                setUser(null);
-                setClaims(null);
+                setDbProfile(null);
+                setHotelId(null);
             }
             setLoading(false);
         });
-
-        return unsubscribe;
+        return () => unsub();
     }, []);
 
+    const switchProperty = (id: string) => setHotelId(id);
+
     return (
-        <AuthContext.Provider value={{ user, claims, loading }}>
-            {!loading && children}
+        <AuthContext.Provider value={{ user, dbProfile, hotelId, switchProperty, loading }}>
+            {children}
         </AuthContext.Provider>
     );
-}
-
-export const useAuth = () => useContext(AuthContext);
+};

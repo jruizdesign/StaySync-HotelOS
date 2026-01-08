@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminListProperties } from '@firebasegen/default';
+// import { adminListProperties } from '@firebasegen/default'; // REMOVED
 import { api } from '../lib/api';
 import { useAuth } from '../components/AuthContext';
 import {
@@ -56,26 +56,27 @@ export default function PropertySelector() {
     };
 
     // 1. FETCH REAL DATA
-    const { data, isLoading, error } = useQuery({
+    const { data: properties, isLoading, error } = useQuery({
         queryKey: ["admin-properties"],
         queryFn: async () => {
-            const result = await adminListProperties();
-            return result.data;
+            const result = await api.properties.list();
+            return result.properties || []; // API returns { properties: [...] }
         },
     });
 
     // 2. SEARCH FILTERING & DATA JOIN
-    const properties = data?.properties || [];
-    const allRooms = data?.rooms || [];
-    const allBookings = data?.bookings || [];
+    // The new API might return just properties, or properties populated with rooms/bookings count
+    // Adjust destructuring based on actual API response structure.
+    const allRooms = []; // data?.rooms || []; (If API returns separate arrays, otherwise assume property has counts)
+    const allBookings = []; // data?.bookings || [];
 
-    const filteredProperties = properties.filter(p =>
+    const filteredProperties = (properties || []).filter((p: any) =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.address && p.address.toLowerCase().includes(searchTerm.toLowerCase()))
-    ).map(p => ({
+    ).map((p: any) => ({
         ...p,
-        rooms: allRooms.filter(r => r.propertyId === p.id),
-        bookings: allBookings.filter(b => b.propertyId === p.id)
+        rooms: p.rooms || [], // Assume API now nests rooms or provides count
+        bookings: p.bookings || []
     }));
 
     // 3. UI HELPERS & STATS

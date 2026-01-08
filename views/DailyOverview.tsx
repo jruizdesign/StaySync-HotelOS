@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getPropertyDashboard } from '@firebasegen/default';
+// import { getPropertyDashboard } from '@firebasegen/default'; // REMOVED
+import { api } from '../lib/api';
 import {
     Users,
     DollarSign,
@@ -24,8 +25,8 @@ export default function DailyOverview({ propertyId }: DailyOverviewProps) {
     const { data, isLoading } = useQuery({
         queryKey: ['dashboard', propertyId],
         queryFn: async () => {
-            const res = await getPropertyDashboard({ propertyId });
-            return res.data;
+            const res = await api.properties.getDashboard(propertyId);
+            return res;
         }
     });
 

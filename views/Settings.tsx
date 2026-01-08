@@ -17,7 +17,8 @@ import {
     Eye
 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateProperty } from '@firebasegen/default';
+// import { updateProperty } from '@firebasegen/default'; // REMOVED
+import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 
 interface SettingsProps {
@@ -60,10 +61,7 @@ const Settings: React.FC<SettingsProps> = ({ property, isDemoMode, dashboardData
     // DB Mutation
     const mutation = useMutation({
         mutationFn: async (data: typeof formData) => {
-            return await updateProperty({
-                id: property.id,
-                ...data
-            });
+            return await api.properties.update(property.id, data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['dashboard', property.id] });
