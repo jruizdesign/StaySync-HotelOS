@@ -27,12 +27,14 @@ import {
   Filter,
   Lock,
   Delete,
+  Delete,
   ShieldCheck,
   Timer,
   UserPlus,
   RefreshCw,
   Mail,
-  KeyRound
+  KeyRound,
+  Pencil
 } from 'lucide-react';
 import { TimeEntry } from '../types';
 
@@ -60,10 +62,14 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
   // PIN Pad State
   const [authStaff, setAuthStaff] = useState<{ id: string, name: string, action: string, currentStatus: string } | null>(null);
   const [pinBuffer, setPinBuffer] = useState('');
-  const [isError, setIsError] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'STAFF', password: '' });
   const [isInviting, setIsInviting] = useState(false);
+
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: 'STAFF', pin: '' });
 
   const inviteMutation = useMutation({
     mutationFn: async (vars: any) => {
@@ -82,6 +88,22 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
     onError: (err: any) => {
       console.error(err);
       alert(`Failed to create staff: ${err.message} `);
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (vars: any) => {
+      return api.users.update(vars.id, vars);
+    },
+    onSuccess: () => {
+      const queryClient = useQueryClient();
+      queryClient.invalidateQueries({ queryKey: ['dashboard', propertyId] });
+      setIsEditing(false);
+      setEditingStaffId(null);
+      alert("Staff member updated successfully!");
+    },
+    onError: (err: any) => {
+      alert(`Failed to update staff: ${err.message}`);
     }
   });
 
@@ -104,6 +126,34 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
       // handled in onError
     } finally {
       setIsInviting(false);
+    }
+  };
+
+  const openEditModal = (staff: any) => {
+    setEditingStaffId(staff.id);
+    setEditForm({
+      name: staff.name,
+      email: staff.email || '',
+      role: staff.role,
+      pin: staff.pin
+    });
+    setIsEditing(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStaffId) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: editingStaffId,
+        name: editForm.name,
+        role: editForm.role,
+        pin: editForm.pin,
+        status: 'Active', // Ensure active if editing
+        propertyId // Pass context for security check
+      });
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -396,7 +446,14 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
                 )}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-800">{staff.name}</h3>
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  {staff.name}
+                  {!isDemoMode && (
+                    <button onClick={() => openEditModal(staff)} className="text-slate-300 hover:text-blue-500 transition-colors">
+                      <Pencil size={14} />
+                    </button>
+                  )}
+                </h3>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{staff.role}</p>
                 {staff.status !== 'Out' && (
                   <div className="flex items-center gap-1.5 mt-2">
@@ -643,9 +700,67 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
             </form>
           </div>
         </div>
-      )}
+        </div>
+  )
+}
 
-      <style>{`
+{/* EDIT MODAL */ }
+{
+  isEditing && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsEditing(false)}></div>
+      <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 animate-in zoom-in duration-300">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-black text-slate-800">Edit Staff Profile</h2>
+          <button onClick={() => setIsEditing(false)}><X className="text-slate-400" /></button>
+        </div>
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase">Full Name</label>
+            <input
+              required
+              type="text"
+              className="w-full p-4 bg-slate-50 rounded-xl font-bold"
+              value={editForm.name}
+              onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase">PIN Code</label>
+            <input
+              required
+              type="text"
+              maxLength={4}
+              className="w-full p-4 bg-slate-50 rounded-xl font-bold font-mono tracking-widest"
+              value={editForm.pin}
+              onChange={e => setEditForm({ ...editForm, pin: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase">Role</label>
+            <select
+              className="w-full p-4 bg-slate-50 rounded-xl font-bold"
+              value={editForm.role}
+              onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+            >
+              <option value="STAFF">Staff</option>
+              <option value="MANAGER">Manager</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold mt-4 hover:bg-blue-700 transition-all flex justify-center items-center gap-2"
+          >
+            <Pencil size={18} />
+            Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+<style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-8px); }
@@ -655,7 +770,7 @@ const StaffTracker: React.FC<StaffTrackerProps> = ({ user, isDemoMode = true, pr
           animation: shake 0.2s ease-in-out infinite;
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

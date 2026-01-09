@@ -68,7 +68,7 @@ const CreateGuestModal = ({ onClose, onSuccess }: any) => {
   )
 }
 
-const EditGuestModal = ({ guest, onClose, onSuccess }: { guest: Guest, onClose: () => void, onSuccess: () => void }) => {
+const EditGuestModal = ({ guest, propertyId, onClose, onSuccess }: { guest: Guest, propertyId?: string, onClose: () => void, onSuccess: () => void }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -80,7 +80,8 @@ const EditGuestModal = ({ guest, onClose, onSuccess }: { guest: Guest, onClose: 
     // Convert checkbox to boolean
     const payload = {
       ...data,
-      isDNR: formData.get('isDNR') === 'on'
+      isDNR: formData.get('isDNR') === 'on',
+      propertyId // Pass context for Restricted Client permission check
     };
 
     try {
@@ -613,6 +614,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode, propertyId }) => {
       {isEditing && activeGuest && (
         <EditGuestModal
           guest={activeGuest}
+          propertyId={propertyId}
           onClose={() => setIsEditing(false)}
           onSuccess={() => {
             setIsEditing(false);

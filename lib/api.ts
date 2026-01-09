@@ -83,6 +83,9 @@ export const api = {
         },
         getMe: async (uid: string) => {
             return authenticatedFetch(`/users/${uid}`, undefined, 'GET');
+        },
+        update: async (id: string, data: any) => {
+            return authenticatedFetch(`/users/${id}`, data, 'PUT');
         }
     },
 

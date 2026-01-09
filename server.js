@@ -432,6 +432,48 @@ app.put('/api/maintenance/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// 10. USER MANAGEMENT (Edit)
+// PUT /api/users/:id
+app.put('/api/users/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { name, email, role, pin, status, propertyId } = req.body;
+
+  try {
+    // 1. Get Restricted Client
+    // Manager can only edit users in their property.
+    // Super Admin can edit anyone.
+    const dbClient = getTenantClient(req.user, propertyId);
+
+    // 2. Perform Update
+    // The restricted client 'dbClient' ensures we can only update if user.propertyId matches the token context
+    const updatedUser = await dbClient.user.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        role,
+        pin,
+        status
+      }
+    });
+
+    // 3. Optional: Sync to Firebase Auth (Custom Claims) if role changed?
+    // This usually requires Admin SDK. 
+    if (role) {
+      try {
+        await admin.auth().setCustomUserClaims(id, { role, propertyId: updatedUser.propertyId });
+      } catch (authErr) {
+        console.warn("Failed to update Firebase Claims", authErr);
+      }
+    }
+
+    res.json({ success: true, user: updatedUser });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to update user. Permission denied or User not found." });
+  }
+});
+
 
 // 10. GUESTS
 // GET /api/guests?propertyId=...
