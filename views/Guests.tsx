@@ -13,6 +13,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface GuestsProps {
   isDemoMode: boolean;
+  propertyId?: string;
 }
 
 // --- 1. Helper Components & Modals (Defined first for dependency availability) ---
@@ -451,7 +452,7 @@ const GuestDetailView: React.FC<{ guest: Guest; onBack: () => void; onUpdate: ()
 
 // --- 4. Main Controller (Dependent on Details) ---
 
-const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
+const Guests: React.FC<GuestsProps> = ({ isDemoMode, propertyId }) => {
   const queryClient = useQueryClient();
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -461,12 +462,13 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
 
   // Real Data Fetch
   const { data: fetchRes, isLoading } = useQuery({
-    queryKey: ['guests', search, isDNRFilter],
+    queryKey: ['guests', propertyId, search, isDNRFilter], // Include propertyId in key
     queryFn: async () => {
-      const res = await api.guests.list(search, isDNRFilter);
+      // Pass propertyId to API
+      const res = await api.guests.list(search, isDNRFilter, propertyId);
       return res.guests;
     },
-    enabled: !isDemoMode
+    enabled: !isDemoMode && !!propertyId // Only fetch if we have a propertyId
   });
 
   const guests = fetchRes || [];
@@ -606,6 +608,18 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
           setIsAddingNew(false);
           queryClient.invalidateQueries({ queryKey: ['guests'] });
         }} />
+      )}
+
+      {isEditing && activeGuest && (
+        <EditGuestModal
+          guest={activeGuest}
+          onClose={() => setIsEditing(false)}
+          onSuccess={() => {
+            setIsEditing(false);
+            queryClient.invalidateQueries({ queryKey: ['guest', selectedGuestId] });
+            queryClient.invalidateQueries({ queryKey: ['guests'] });
+          }}
+        />
       )}
     </div>
   );

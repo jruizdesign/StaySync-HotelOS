@@ -28,9 +28,7 @@ import {
 import { Booking } from '../types';
 
 // MOCK DATA removed for production
-
-// Simulated Database for Autocomplete Linking
-const MOCK_GUEST_DATABASE: any[] = [];
+// Auto-complete relies on API now
 
 
 
@@ -79,8 +77,9 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
   const [isGeneratingDocs, setIsGeneratingDocs] = useState(false);
 
   // Autocomplete State
-  const [guestSuggestions, setGuestSuggestions] = useState<typeof MOCK_GUEST_DATABASE>([]);
+  const [guestSuggestions, setGuestSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchingGuests, setIsSearchingGuests] = useState(false);
 
   // 3. Mutation
   const createBookingMutation = useMutation({
@@ -125,26 +124,34 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
   };
 
   // ... helpers ...
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setCurrentBooking(prev => prev ? ({ ...prev, guestName: val }) : null);
+    setCurrentBooking(prev => prev ? ({ ...prev, guestName: val, guestId: undefined }) : null); // Clear ID if typing manually
 
     if (val.length > 1) {
-      const matches = MOCK_GUEST_DATABASE.filter(g => g.name.toLowerCase().includes(val.toLowerCase()));
-      setGuestSuggestions(matches);
-      setShowSuggestions(true);
+      setIsSearchingGuests(true);
+      try {
+        const res = await api.guests.list(val, false, propertyId); // Use real API
+        setGuestSuggestions(res.guests || []);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("Failed to search guests", err);
+      } finally {
+        setIsSearchingGuests(false);
+      }
     } else {
       setGuestSuggestions([]);
       setShowSuggestions(false);
     }
   };
 
-  const selectGuest = (guest: typeof MOCK_GUEST_DATABASE[0]) => {
+  const selectGuest = (guest: any) => {
     setCurrentBooking(prev => prev ? ({
       ...prev,
       guestName: guest.name,
       guestEmail: guest.email,
-      guestPhone: guest.phone
+      guestPhone: guest.phoneNumber || guest.phone,
+      guestId: guest.id // Link the ID
     }) : null);
     setShowSuggestions(false);
   };
@@ -174,6 +181,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
         propertyId: propertyId!,
         roomNumber: currentBooking.roomNumber,
         guestName: currentBooking.guestName || 'Guest',
+        guestId: currentBooking.guestId, // Pass ID
         guestEmail: currentBooking.guestEmail,
         guestPhone: currentBooking.guestPhone,
         numberOfGuests: currentBooking.numberOfGuests,
@@ -391,7 +399,7 @@ const Bookings: React.FC<BookingsProps> = ({ isDemoMode, propertyId }) => {
                         >
                           <div>
                             <p className="font-bold text-slate-700 text-sm">{g.name}</p>
-                            <p className="text-[10px] text-slate-400">{g.email}</p>
+                            <p className="text-[10px] text-slate-400">{g.email} • {g.phoneNumber || g.phone}</p>
                           </div>
                           <div className="hidden group-hover:flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase">
                             <Sparkles size={10} /> Link

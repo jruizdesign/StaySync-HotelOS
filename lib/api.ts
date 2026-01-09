@@ -93,7 +93,10 @@ export const api = {
     },
 
     guests: {
-        list: async (searchQuery: string = '', isDNR: boolean = false) => authenticatedFetch(`/guests?searchQuery=${encodeURIComponent(searchQuery)}&isDNR=${isDNR}`, undefined, 'GET'),
+        list: async (searchQuery: string = '', isDNR: boolean = false, propertyId?: string) => {
+            const url = `/guests?searchQuery=${encodeURIComponent(searchQuery)}&isDNR=${isDNR}${propertyId ? `&propertyId=${propertyId}` : ''}`;
+            return authenticatedFetch(url, undefined, 'GET');
+        },
         get: async (id: string) => authenticatedFetch(`/guests/${id}`, undefined, 'GET'),
         create: async (data: any) => authenticatedFetch('/guests', data, 'POST'),
         update: async (id: string, data: any) => authenticatedFetch(`/guests/${id}`, data, 'PUT'),

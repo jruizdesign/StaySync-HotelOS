@@ -46,18 +46,25 @@ export default function PropertyDashboard() {
     // We combine the Firebase Auth data with the Custom Claims data
     const appUser: User | null = useMemo(() => {
         if (!firebaseUser) return null;
+
+        // Priority: 1. Claims (if loaded), 2. Default to STAFF
+        // Debugging: Log claims to see what we actually have
+        const role = (claims?.role as any) || "STAFF";
+
         return {
-            id: firebaseUser.uid, // Assuming Firebase UID can serve as the User ID
+            id: firebaseUser.uid,
             uid: firebaseUser.uid,
             email: firebaseUser.email || "",
-            name: firebaseUser.displayName || "Staff Member",
-            role: (claims?.role as any) || "STAFF", // Cast to match your UserRole type
-            propertyId: claims?.propertyId,
+            name: firebaseUser.displayName || firebaseUser.email || "Staff Member",
+            role: role,
+            propertyId: claims?.propertyId || claims?.hotelId, // Handle both potential claim keys
             photoUrl: firebaseUser.photoURL || undefined
         };
     }, [firebaseUser, claims]);
 
-    // Fetch Real Data if not demo
+    // Ensure we don't flash "Access Restricted" while loading claims
+    if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+
     const isDemoMode = propertyId === 'demo';
 
     const { data: dashboardData, isLoading: isLoadingData } = useQuery({
@@ -145,7 +152,7 @@ export default function PropertyDashboard() {
                 <DailyOverview propertyId={propertyId || ''} />
             )}
 
-            {activeTab === 'guests' && <Guests isDemoMode={isDemoMode} />}
+            {activeTab === 'guests' && <Guests isDemoMode={isDemoMode} propertyId={propertyId} />}
 
             {activeTab === 'maintenance' && (
                 <Maintenance

@@ -25,6 +25,7 @@ interface AuthContextType {
 export interface CustomClaims {
     role: string;
     propertyId?: string;
+    hotelId?: string; // Legacy/Backend field support
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
