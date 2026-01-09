@@ -1,23 +1,19 @@
 import express from 'express';
-import { PrismaClient } from './src/generated/prisma/index.js';
+// import { PrismaClient } from './src/generated/prisma/index.js'; // REMOVED
+import { globalPrisma, getTenantClient } from './lib/db.js'; // IMPORTED
 import admin from 'firebase-admin';
 import cors from 'cors';
 import { createRequire } from 'module';
 
 import 'dotenv/config';
-import pg from 'pg';
-const { Pool } = pg;
-import { PrismaPg } from '@prisma/adapter-pg';
+// PG Init moved to lib/db.js
 
 const require = createRequire(import.meta.url);
 const serviceAccount = require('./service-account.json');
 
 // --- INIT ---
 const app = express();
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = globalPrisma; // Default alias for global ops used in non-sensitive routes
 
 app.use(express.json());
 app.use(cors());
@@ -42,7 +38,8 @@ const authMiddleware = async (req, res, next) => {
     // Assuming you set this claim when you created the user
     req.user = {
       uid: decoded.uid,
-      hotelId: decoded.hotelId, // <-- CRITICAL SECURITY FIELD
+      // Map 'propertyId' (New Standard) OR 'hotelId' (Legacy) to this field
+      hotelId: decoded.propertyId || decoded.hotelId,
       role: decoded.role || 'STAFF'
     };
     next();
@@ -441,54 +438,44 @@ app.put('/api/maintenance/:id', authMiddleware, async (req, res) => {
 // SECURITY UPDATE: Filter guests by propertyId (derived from token or query for super admins)
 app.get('/api/guests', authMiddleware, async (req, res) => {
   try {
-    const { searchQuery, isDNR } = req.query;
-    const { hotelId: tokenHotelId, role } = req.user;
+    try {
+      const { searchQuery, isDNR, propertyId } = req.query;
 
-    // Use token's property ID unless SUPER_ADMIN (who can query global or specific)
-    // For now, strict separation: even Super Admin views "contextual" guests if operating as property admin
-    // If token has hotelId, we MUST filter by it.
-    const effectivePropertyId = tokenHotelId;
+      // 1. Get Restricted Client (Throws if User + Property combination is invalid)
+      const db = getTenantClient(req.user, propertyId);
 
-    const where = {};
+      const where = {};
+      // Note: 'db' automatically adds 'bookings: { some: { propertyId: ... } }' to Guest queries now.
 
-    // DATA SEPARATION: Only show guests who have bookings at this property
-    if (effectivePropertyId) {
-      where.bookings = {
-        some: {
-          propertyId: effectivePropertyId
-        }
-      };
-    }
-
-    if (searchQuery) {
-      where.OR = [
-        { name: { contains: String(searchQuery), mode: 'insensitive' } },
-        { email: { contains: String(searchQuery), mode: 'insensitive' } },
-        { phoneNumber: { contains: String(searchQuery), mode: 'insensitive' } },
-        { idNumber: { contains: String(searchQuery), mode: 'insensitive' } }
-      ];
-    }
-
-    if (isDNR) {
-      where.isDNR = isDNR === 'true';
-    }
-
-    const guests = await prisma.guest.findMany({
-      where,
-      orderBy: { updatedAt: 'desc' },
-      take: 50,
-      include: {
-        _count: {
-          select: { bookings: true }
-        }
+      if (searchQuery) {
+        where.OR = [
+          { name: { contains: String(searchQuery), mode: 'insensitive' } },
+          { email: { contains: String(searchQuery), mode: 'insensitive' } },
+          { phoneNumber: { contains: String(searchQuery), mode: 'insensitive' } },
+          { idNumber: { contains: String(searchQuery), mode: 'insensitive' } }
+        ];
       }
-    });
 
-    res.json({ guests });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+      if (isDNR) {
+        where.isDNR = isDNR === 'true';
+      }
+
+      const guests = await db.guest.findMany({
+        where,
+        orderBy: { updatedAt: 'desc' },
+        take: 50,
+        include: {
+          _count: {
+            select: { bookings: true }
+          }
+        }
+      });
+
+      res.json({ guests });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
 
 // GET /api/guests/:id
 app.get('/api/guests/:id', authMiddleware, async (req, res) => {
