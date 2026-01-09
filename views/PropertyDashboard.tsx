@@ -32,7 +32,7 @@ export default function PropertyDashboard() {
     const navigate = useNavigate();
     const { user: firebaseUser, claims, loading } = useAuth(); // Rename 'user' to 'firebaseUser' to avoid confusion
 
-    const [activeTab, setActiveTab] = useState("dashboard"); // REMOVED
+
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'dashboard';
 

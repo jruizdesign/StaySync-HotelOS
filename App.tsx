@@ -9,7 +9,6 @@ import LandingPage from "./views/InteractiveLanding";
 import DigitalSolutions from "./views/DigitalSolutions";
 import ITSecurity from "./views/ITSecurity";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Analytics } from "@vercel/analytics/next"
 
 //Sub-Views
 import Bookings from "./views/Bookings";
