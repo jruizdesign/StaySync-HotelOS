@@ -122,6 +122,18 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
   const uid = req.user.uid;
 
   try {
+    // SECURITY: Ensure user exists in our DB or fetch from Auth to create them
+    let userEmail = '';
+    let userName = 'Property Owner';
+
+    try {
+      const userRecord = await admin.auth().getUser(uid);
+      userEmail = userRecord.email;
+      userName = userRecord.displayName || 'Property Owner';
+    } catch (err) {
+      console.warn("Could not fetch user details from Firebase", err);
+    }
+
     const property = await prisma.property.create({
       data: {
         name,
@@ -129,11 +141,19 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
         users: {
           connectOrCreate: {
             where: { id: uid },
-            create: { id: uid } // Ensure user exists
+            create: {
+              id: uid,
+              email: userEmail,
+              name: userName,
+              role: 'MANAGER' // Default role for property creator?
+            }
           }
         }
       }
     });
+
+    // Auto-assign owner permission? 
+    // Usually handled by claims, but we just set the relation.
 
     res.json({ success: true, property });
   } catch (e) {
@@ -573,36 +593,17 @@ app.post('/api/guests', authMiddleware, async (req, res) => {
   }
 });
 
-// PUT /api/guests/:id (Update)
+// PUT /api/guests/:id
 app.put('/api/guests/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { name, email, phoneNumber, address, idNumber, status, isDNR, dnrReason, notes } = req.body;
-  const { hotelId, role } = req.user;
+  const { name, email, phoneNumber, address, idNumber, status, isDNR, dnrReason, propertyId } = req.body;
 
   try {
-    // SECURITY: Verify access
-    // If not SUPER_ADMIN, user can only edit guests who have stayed at their property?
-    // Or is editing guests global?
-    // Assuming strict for now: Must have stayed at property OR be SUPER_ADMIN
-    if (role !== 'SUPER_ADMIN' && hotelId) {
-      const hasHistory = await prisma.booking.findFirst({
-        where: {
-          guestId: id,
-          propertyId: hotelId
-        }
-      });
-      // Also allow if they are creating/managing this guest newly? 
-      // If hasHistory is null, maybe they are just now checking them in.
-      // For editing *existing* guest, we assume relation exists or it's a new global guest they just looked up.
-      // Relaxing constraint for "Update Profile" to allow staff to update info for anyone they can fetch.
-      // Since GET is filtered, PUT is implicitly protected by ID knowledge, but let's be safe.
-      if (!hasHistory) {
-        // Option: Allow if they are about to book them? 
-        // For now, allow it. Getting too strict might block valid workflows.
-      }
-    }
+    // SECURITY: Use Restricted Client
+    // This allows Managers to edit guests ONLY if they belong to their property (via bookings).
+    const dbClient = getTenantClient(req.user, propertyId);
 
-    const guest = await prisma.guest.update({
+    const guest = await dbClient.guest.update({
       where: { id },
       data: {
         name,
@@ -618,8 +619,15 @@ app.put('/api/guests/:id', authMiddleware, async (req, res) => {
 
     res.json({ success: true, guest });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to update guest" });
+    console.error("Guest update failed:", e);
+
+    if (e.code === 'P2025') {
+      // P2025: Record to update not found.
+      // This implies semantic permission denied (guest exists but not visible to restricted client).
+      res.status(404).json({ error: "Guest not found or access denied." });
+    } else {
+      res.status(500).json({ error: "Failed to update guest" });
+    }
   }
 });
 
