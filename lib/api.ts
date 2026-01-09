@@ -96,6 +96,7 @@ export const api = {
         list: async (searchQuery: string = '', isDNR: boolean = false) => authenticatedFetch(`/guests?searchQuery=${encodeURIComponent(searchQuery)}&isDNR=${isDNR}`, undefined, 'GET'),
         get: async (id: string) => authenticatedFetch(`/guests/${id}`, undefined, 'GET'),
         create: async (data: any) => authenticatedFetch('/guests', data, 'POST'),
+        update: async (id: string, data: any) => authenticatedFetch(`/guests/${id}`, data, 'PUT'),
         addDocument: async (guestId: string, data: any) => authenticatedFetch(`/guests/${guestId}/documents`, data, 'POST'),
         generateInvoice: async (guestId: string, data: { amount: number, bookingId?: string }) => authenticatedFetch(`/guests/${guestId}/invoices`, data, 'POST'),
     },

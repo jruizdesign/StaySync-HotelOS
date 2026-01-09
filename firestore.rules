@@ -28,12 +28,22 @@ service cloud.firestore {
     // COLLECTION RULES
     // ---------------------------------------------------------
 
-    // Root Collection: Properties (Multi-Tenant Isolation)
-    match /properties/{propertyId} {
+    // Root Collection: Hotels (Multi-Tenant Isolation)
+    // Legacy note: Code uses 'hotels', Schema uses 'properties'. 
+    // Matching 'hotels' here to align with active frontend/backend code.
+    match /hotels/{propertyId} {
       
       // Property Document Access
       allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
       allow write: if isSignedIn() && isSuperAdmin();
+
+      // -------------------------------------------------------
+      // SUB-COLLECTION: ROOMS
+      // -------------------------------------------------------
+      match /rooms/{roomId} {
+         allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+         // Writes are handled via Backend API -> Firestore Admin SDK
+      }
 
       // -------------------------------------------------------
       // SUB-COLLECTION: TIME CLOCKS
@@ -65,7 +75,14 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------
-      // SUB-COLLECTION: MAINTENANCE TICKETS
+      // SUB-COLLECTION: MAINTENANCE EVENTS (Real-time triggers)
+      // -------------------------------------------------------
+      match /maintenance_events/{eventId} {
+        allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+      }
+
+      // -------------------------------------------------------
+      // SUB-COLLECTION: MAINTENANCE TICKETS (Legacy/Direct)
       // -------------------------------------------------------
       match /maintenance_tickets/{ticketId} {
         // READ: Anyone in the property can view tickets
@@ -84,6 +101,13 @@ service cloud.firestore {
           ))
         );
       }
+    }
+
+    // ---------------------------------------------------------
+    // GLOBAL COLLECTIONS
+    // ---------------------------------------------------------
+    match /global/features/events/{eventId} {
+       allow read: if isSignedIn();
     }
     
     // Default Deny

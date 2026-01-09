@@ -3,7 +3,7 @@ import {
   UserPlus, Search, FileText, ArrowLeft,
   Mail, Phone, Upload, Receipt,
   Download, Sparkles, Loader2,
-  ShieldCheck, MapPin, Printer
+  ShieldCheck, MapPin, Printer, Pencil
 } from 'lucide-react';
 import { Guest } from '../types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -59,6 +59,76 @@ const CreateGuestModal = ({ onClose, onSuccess }: any) => {
             <button type="button" onClick={onClose} className="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">Cancel</button>
             <button disabled={loading} className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex justify-center">
               {loading ? <Loader2 className="animate-spin" /> : 'Create Profile'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+const EditGuestModal = ({ guest, onClose, onSuccess }: { guest: Guest, onClose: () => void, onSuccess: () => void }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    // Convert checkbox to boolean
+    const payload = {
+      ...data,
+      isDNR: formData.get('isDNR') === 'on'
+    };
+
+    try {
+      await api.guests.update(guest.id, payload);
+      onSuccess();
+    } catch (err) {
+      alert('Failed to update guest');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white w-full max-w-lg rounded-[2rem] p-8 shadow-2xl animate-in fade-in zoom-in duration-200">
+        <h2 className="text-xl font-bold text-slate-800 mb-6">Edit Guest Profile</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <input name="name" defaultValue={guest.name} placeholder="Full Name" required className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+            <input name="email" defaultValue={guest.email} type="email" placeholder="Email" required className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <input name="phoneNumber" defaultValue={guest.phoneNumber || ''} placeholder="Phone" className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+            <input name="idNumber" defaultValue={guest.idNumber || ''} placeholder="ID / Passport" className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+          </div>
+
+          <input name="address" defaultValue={guest.address || ''} placeholder="Address" className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+
+          <div className="flex gap-4">
+            <select name="status" defaultValue={guest.status} className="flex-1 px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700">
+              <option value="Regular">Regular</option>
+              <option value="VIP">VIP</option>
+              <option value="Restricted">Restricted</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 bg-rose-50 rounded-xl border border-rose-100">
+            <input name="isDNR" type="checkbox" defaultChecked={guest.isDNR} id="dnr-check" className="w-5 h-5 rounded text-rose-600 focus:ring-rose-500" />
+            <label htmlFor="dnr-check" className="font-bold text-rose-700 text-sm">Mark as Do Not Rent (DNR)</label>
+          </div>
+          {/* Only show reason if checked? For simplicity, show always or rely on user */}
+          <input name="dnrReason" defaultValue={guest.dnrReason || ''} placeholder="DNR Reason (if applicable)" className="w-full px-4 py-3 bg-slate-50 rounded-xl border-none outline-none font-bold text-slate-700" />
+
+          <div className="pt-4 flex gap-4">
+            <button type="button" onClick={onClose} className="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">Cancel</button>
+            <button disabled={loading} className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex justify-center">
+              {loading ? <Loader2 className="animate-spin" /> : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -287,7 +357,7 @@ const FinancialsTab = ({ guest }: { guest: Guest }) => {
 
 // --- 3. Detail View (Dependent on Tabs) ---
 
-const GuestDetailView: React.FC<{ guest: Guest; onBack: () => void; onUpdate: () => void }> = ({ guest, onBack, onUpdate }) => {
+const GuestDetailView: React.FC<{ guest: Guest; onBack: () => void; onUpdate: () => void; onEdit: () => void }> = ({ guest, onBack, onUpdate, onEdit }) => {
   const [tab, setTab] = useState<'overview' | 'documents' | 'communication' | 'financials'>('overview');
 
   return (
@@ -325,6 +395,11 @@ const GuestDetailView: React.FC<{ guest: Guest; onBack: () => void; onUpdate: ()
                 <InfoRow icon={Phone} value={guest.phoneNumber || 'N/A'} />
                 <InfoRow icon={MapPin} value={guest.address || 'No Address'} />
               </div>
+
+              <button onClick={onEdit} className="mt-8 w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                <Pencil size={16} />
+                Edit Profile
+              </button>
             </div>
           </div>
 
@@ -382,6 +457,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
   const [search, setSearch] = useState('');
   const [isDNRFilter, setIsDNRFilter] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Real Data Fetch
   const { data: fetchRes, isLoading } = useQuery({
@@ -519,6 +595,7 @@ const Guests: React.FC<GuestsProps> = ({ isDemoMode }) => {
         <GuestDetailView
           guest={activeGuest}
           onBack={() => setSelectedGuestId(null)}
+          onEdit={() => setIsEditing(true)}
           onUpdate={() => queryClient.invalidateQueries({ queryKey: ['guest', selectedGuestId] })}
         />
       )}
