@@ -499,45 +499,45 @@ app.put('/api/users/:id', authMiddleware, async (req, res) => {
 // GET /api/guests?propertyId=...
 // SECURITY UPDATE: Filter guests by propertyId (derived from token or query for super admins)
 app.get('/api/guests', authMiddleware, async (req, res) => {
+
   try {
-    try {
-      const { searchQuery, isDNR, propertyId } = req.query;
+    const { searchQuery, isDNR, propertyId } = req.query;
 
-      // 1. Get Restricted Client (Throws if User + Property combination is invalid)
-      const db = getTenantClient(req.user, propertyId);
+    // 1. Get Restricted Client (Throws if User + Property combination is invalid)
+    const db = getTenantClient(req.user, propertyId);
 
-      const where = {};
-      // Note: 'db' automatically adds 'bookings: { some: { propertyId: ... } }' to Guest queries now.
+    const where = {};
+    // Note: 'db' automatically adds 'bookings: { some: { propertyId: ... } }' to Guest queries now.
 
-      if (searchQuery) {
-        where.OR = [
-          { name: { contains: String(searchQuery), mode: 'insensitive' } },
-          { email: { contains: String(searchQuery), mode: 'insensitive' } },
-          { phoneNumber: { contains: String(searchQuery), mode: 'insensitive' } },
-          { idNumber: { contains: String(searchQuery), mode: 'insensitive' } }
-        ];
-      }
-
-      if (isDNR) {
-        where.isDNR = isDNR === 'true';
-      }
-
-      const guests = await db.guest.findMany({
-        where,
-        orderBy: { updatedAt: 'desc' },
-        take: 50,
-        include: {
-          _count: {
-            select: { bookings: true }
-          }
-        }
-      });
-
-      res.json({ guests });
-    } catch (e) {
-      res.status(500).json({ error: e.message });
+    if (searchQuery) {
+      where.OR = [
+        { name: { contains: String(searchQuery), mode: 'insensitive' } },
+        { email: { contains: String(searchQuery), mode: 'insensitive' } },
+        { phoneNumber: { contains: String(searchQuery), mode: 'insensitive' } },
+        { idNumber: { contains: String(searchQuery), mode: 'insensitive' } }
+      ];
     }
-  });
+
+    if (isDNR) {
+      where.isDNR = isDNR === 'true';
+    }
+
+    const guests = await db.guest.findMany({
+      where,
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+      include: {
+        _count: {
+          select: { bookings: true }
+        }
+      }
+    });
+
+    res.json({ guests });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // GET /api/guests/:id
 app.get('/api/guests/:id', authMiddleware, async (req, res) => {
@@ -622,14 +622,13 @@ app.put('/api/guests/:id', authMiddleware, async (req, res) => {
     console.error("Guest update failed:", e);
 
     if (e.code === 'P2025') {
-      // P2025: Record to update not found.
-      // This implies semantic permission denied (guest exists but not visible to restricted client).
       res.status(404).json({ error: "Guest not found or access denied." });
     } else {
       res.status(500).json({ error: "Failed to update guest" });
     }
   }
 });
+
 
 // POST /api/guests/:id/documents
 app.post('/api/guests/:id/documents', authMiddleware, async (req, res) => {
