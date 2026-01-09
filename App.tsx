@@ -1,5 +1,6 @@
 import "./lib/firebase"; // Initialize Firebase first
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import LoginPage from "./views/Login";
 import PropertySelector from "./views/PropertySelector";
@@ -55,6 +56,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
+        <Analytics />
       </AuthProvider>
     </QueryClientProvider>
   );
