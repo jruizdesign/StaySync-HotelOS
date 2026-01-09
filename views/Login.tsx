@@ -1,6 +1,6 @@
 
 import React, { useState, FormEvent } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { CustomClaims } from "../components/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ShieldCheck, User, Lock, ArrowRight, Loader2 } from 'lucide-react';
@@ -13,6 +13,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const navigate = useNavigate();
 
@@ -24,7 +25,10 @@ export default function Login() {
         const auth = getAuth();
 
         try {
-            // 1. Sign In
+            // 1. Set Persistence
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
+            // 2. Sign In
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
@@ -108,6 +112,19 @@ export default function Login() {
                             {error}
                         </div>
                     )}
+
+                    <div className="flex items-center gap-3 pl-4">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                            className="w-5 h-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 bg-slate-50 cursor-pointer"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                        <label htmlFor="rememberMe" className="text-sm font-bold text-slate-500 cursor-pointer select-none">
+                            Keep me logged in
+                        </label>
+                    </div>
 
                     <button
                         type="submit"
