@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Building2 } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Layout from "../components/Layout";
 import { useQuery } from '@tanstack/react-query';
@@ -32,7 +32,13 @@ export default function PropertyDashboard() {
     const navigate = useNavigate();
     const { user: firebaseUser, claims, loading } = useAuth(); // Rename 'user' to 'firebaseUser' to avoid confusion
 
-    const [activeTab, setActiveTab] = useState("dashboard");
+    const [activeTab, setActiveTab] = useState("dashboard"); // REMOVED
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'dashboard';
+
+    const handleTabChange = (tab: string) => {
+        setSearchParams({ tab });
+    };
     const [maintenanceTasks, setMaintenanceTasks] = useState([]);
     const [featureRequests, setFeatureRequests] = useState([]);
 
@@ -120,7 +126,7 @@ export default function PropertyDashboard() {
     return (
         <Layout
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleTabChange}
             user={appUser}
             currentProperty={currentProperty as any}
             properties={(propertiesList as any[]) || []}
