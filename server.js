@@ -1,4 +1,5 @@
 import express from 'express';
+import { fileURLToPath } from 'url';
 // import { PrismaClient } from './src/generated/prisma/index.js'; // REMOVED
 import { globalPrisma, getTenantClient } from './lib/db.js'; // IMPORTED
 import admin from 'firebase-admin';
@@ -871,4 +872,8 @@ app.post('/api/properties/:id/demo', authMiddleware, async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  app.listen(3000, () => console.log('Server running on port 3000'));
+}
+
+export default app;
