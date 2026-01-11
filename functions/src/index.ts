@@ -94,7 +94,7 @@ const geminiApiKey = defineSecret("GEMINI_API_KEY");
  * Generates an operational insight using Google Gemini.
  * Securely access the API Key on the server side.
  */
-export const generateOpInsight = onCall({ secrets: [geminiApiKey] }, async (request) => {
+export const generateOpInsight = onCall({ secrets: [geminiApiKey], cors: true }, async (request) => {
   // 1. Authenticate Request
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'User must be logged in.');
