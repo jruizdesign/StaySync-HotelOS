@@ -2,6 +2,7 @@ import "./lib/firebase"; // Initialize Firebase first
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./components/AuthContext";
+import { SuperAdminGuard } from "./components/SuperAdminGuard";
 import LoginPage from "./views/Login";
 import PropertySelector from "./views/PropertySelector";
 import SuperAdminDashboard from "./views/SuperAdminDashboard";
@@ -44,11 +45,13 @@ function App() {
 
             <Route path="/login" element={<LoginPage />} />
 
-            <Route element={<PrivateRoute />}>
+            <Route element={<SuperAdminGuard />}>
               {/* Super Admin Route */}
               <Route path="/super-admin" element={<SuperAdminDashboard />} />
               <Route path="/admin/properties" element={<PropertySelector />} />
+            </Route>
 
+            <Route element={<PrivateRoute />}>
               {/* The Shared Dashboard */}
               <Route path="/dashboard/:propertyId" element={<PropertyDashboard />} />
             </Route>
