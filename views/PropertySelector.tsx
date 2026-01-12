@@ -67,7 +67,7 @@ export default function PropertySelector() {
     // 2. SEARCH FILTERING & DATA JOIN
     // The new API might return just properties, or properties populated with rooms/bookings count
     // Adjust destructuring based on actual API response structure.
-    const allRooms = []; // data?.rooms || []; (If API returns separate arrays, otherwise assume property has counts)
+    const allRooms = []; // data?.rooms || []; //(If API returns separate arrays, otherwise assume property has counts)
     const allBookings = []; // data?.bookings || [];
 
     const filteredProperties = (properties || []).filter((p: any) =>

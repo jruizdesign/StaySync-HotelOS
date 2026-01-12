@@ -58,6 +58,12 @@ const LandingPage: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                         <Link
+                            to="/super-admin"
+                            className="px-6 py-2.5 bg-transparent border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-bold rounded-full transition-all flex items-center gap-2"
+                        >
+                            <ShieldCheck size={16} /> Admin
+                        </Link>
+                        <Link
                             to="/login"
                             className="px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-full hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2"
                         >

@@ -72,6 +72,7 @@ export const api = {
     },
 
     users: {
+        list: async () => authenticatedFetch('/users', undefined, 'GET'),
         create: async (data: {
             email: string;
             password: string; // Only sent to backend, not stored there (handled by Firebase Admin)
@@ -110,6 +111,10 @@ export const api = {
     features: {
         list: async () => authenticatedFetch('/features', undefined, 'GET'),
         create: async (data: any) => authenticatedFetch('/features', data, 'POST'),
+    },
+
+    admin: {
+        getSchema: async () => authenticatedFetch('/admin/schema', undefined, 'GET'),
     }
 };
 

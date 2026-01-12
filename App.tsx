@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import LoginPage from "./views/Login";
 import PropertySelector from "./views/PropertySelector";
+import SuperAdminDashboard from "./views/SuperAdminDashboard";
 import PropertyDashboard from "./views/PropertyDashboard";
 import LandingPage from "./views/InteractiveLanding";
 import DigitalSolutions from "./views/DigitalSolutions";
@@ -45,6 +46,7 @@ function App() {
 
             <Route element={<PrivateRoute />}>
               {/* Super Admin Route */}
+              <Route path="/super-admin" element={<SuperAdminDashboard />} />
               <Route path="/admin/properties" element={<PropertySelector />} />
 
               {/* The Shared Dashboard */}

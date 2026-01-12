@@ -11,6 +11,8 @@ import 'dotenv/config';
 
 const require = createRequire(import.meta.url);
 const serviceAccount = require('./service-account.json');
+import fs from 'fs';
+import path from 'path';
 
 // --- INIT ---
 const app = express();
@@ -212,6 +214,30 @@ app.post('/api/rooms', authMiddleware, async (req, res) => {
     res.json({ success: true, room });
   } catch (e) {
     console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 3.5. LIST USERS (Super Admin)
+app.get('/api/users', authMiddleware, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      include: { property: true },
+      orderBy: { name: 'asc' }
+    });
+    res.json({ users });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 3.6. GET DB SCHEMA (Super Admin)
+app.get('/api/admin/schema', authMiddleware, async (req, res) => {
+  try {
+    const schemaPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'prisma/schema.prisma');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+    res.json({ schema });
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
