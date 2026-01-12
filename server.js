@@ -1,18 +1,18 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
-// import { PrismaClient } from './src/generated/prisma/index.js'; // REMOVED
-import { globalPrisma, getTenantClient } from './lib/db.js'; // IMPORTED
-import admin from 'firebase-admin';
-import cors from 'cors';
 import { createRequire } from 'module';
-
+import fs from 'fs'; // Moved to top
+import path from 'path'; // Moved to top
+import cors from 'cors';
+import admin from 'firebase-admin';
 import 'dotenv/config';
+
+import { globalPrisma, getTenantClient } from './lib/db.js';
+
 // PG Init moved to lib/db.js
 
 const require = createRequire(import.meta.url);
 const serviceAccount = require('./service-account.json');
-import fs from 'fs';
-import path from 'path';
 
 // --- INIT ---
 const app = express();
