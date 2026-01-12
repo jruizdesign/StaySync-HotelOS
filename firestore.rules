@@ -7,8 +7,8 @@ service cloud.firestore {
     // ---------------------------------------------------------
 
     // 1. Role Checks
-    function isSuperAdmin() {
-      return request.auth.token.role == 'SUPER_ADMIN';
+    function isAdmin() {
+      return request.auth.token.role == 'ADMIN';
     }
 
     function isManager() {
@@ -34,14 +34,14 @@ service cloud.firestore {
     match /hotels/{propertyId} {
       
       // Property Document Access
-      allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
-      allow write: if isSignedIn() && isSuperAdmin();
+      allow read: if isSignedIn() && (isAdmin() || belongsToProperty(propertyId));
+      allow write: if isSignedIn() && isAdmin();
 
       // -------------------------------------------------------
       // SUB-COLLECTION: ROOMS
       // -------------------------------------------------------
       match /rooms/{roomId} {
-         allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+         allow read: if isSignedIn() && (isAdmin() || belongsToProperty(propertyId));
          // Writes are handled via Backend API -> Firestore Admin SDK
       }
 
@@ -51,13 +51,13 @@ service cloud.firestore {
       match /time_clocks/{clockId} {
         // READ: Managers can read all. Staff can read their own.
         allow read: if isSignedIn() && (
-          isSuperAdmin() || 
+          isAdmin() || 
           (belongsToProperty(propertyId) && (isManager() || resource.data.userId == request.auth.uid))
         );
 
         // CREATE: Staff can only create for themselves.
         allow create: if isSignedIn() && (
-          isSuperAdmin() || 
+          isAdmin() || 
           (belongsToProperty(propertyId) && (
             isManager() || 
             request.resource.data.userId == request.auth.uid
@@ -66,7 +66,7 @@ service cloud.firestore {
 
         // UPDATE: Users can clock out (update their own doc). Managers can edit any.
         allow update: if isSignedIn() && (
-          isSuperAdmin() || 
+          isAdmin() || 
           (belongsToProperty(propertyId) && (
             isManager() || 
             (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid)
@@ -78,7 +78,7 @@ service cloud.firestore {
       // SUB-COLLECTION: MAINTENANCE EVENTS (Real-time triggers)
       // -------------------------------------------------------
       match /maintenance_events/{eventId} {
-        allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+        allow read: if isSignedIn() && (isAdmin() || belongsToProperty(propertyId));
       }
 
       // -------------------------------------------------------
@@ -86,14 +86,14 @@ service cloud.firestore {
       // -------------------------------------------------------
       match /maintenance_tickets/{ticketId} {
         // READ: Anyone in the property can view tickets
-        allow read: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+        allow read: if isSignedIn() && (isAdmin() || belongsToProperty(propertyId));
 
         // CREATE: Anyone in the property can report an issue
-        allow create: if isSignedIn() && (isSuperAdmin() || belongsToProperty(propertyId));
+        allow create: if isSignedIn() && (isAdmin() || belongsToProperty(propertyId));
 
         // UPDATE: Managers can do anything. Staff can only update if assigned or created by them.
         allow update: if isSignedIn() && (
-          isSuperAdmin() || 
+          isAdmin() || 
           (belongsToProperty(propertyId) && (
             isManager() || 
             resource.data.assignedTo == request.auth.uid || 

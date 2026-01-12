@@ -17,11 +17,11 @@ async function setAdmin() {
 
         // 2. STAMP THE PASSPORT (Set Custom Claims)
         await admin.auth().setCustomUserClaims(user.uid, {
-            role: "SUPER_ADMIN", // Or 'MANAGER'
-            propertyId: null  // Super Admins are not locked to a specific hotel
+            role: "ADMIN", // Or 'MANAGER'
+            propertyId: null  // Admins are not locked to a specific hotel
         });
 
-        console.log("✅ SUCCESS! User is now a SUPER_ADMIN.");
+        console.log("✅ SUCCESS! User is now a ADMIN.");
         console.log("👉 ACTION REQUIRED: Log Out and Log Back In on your website.");
 
         process.exit();

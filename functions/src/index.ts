@@ -1,4 +1,5 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, HttpsError, onRequest } from "firebase-functions/v2/https";
+import { apiApp } from "./api.js";
 import * as admin from "firebase-admin";
 import { gql, GraphQLClient } from "graphql-request";
 import { GoogleAuth } from "google-auth-library";
@@ -143,3 +144,5 @@ export const generateOpInsight = onCall({ secrets: [geminiApiKey], cors: true },
     throw new HttpsError('internal', "AI generation failed.");
   }
 });
+// Export the Express API as a Cloud Function
+export const api = onRequest(apiApp);

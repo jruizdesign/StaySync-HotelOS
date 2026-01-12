@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { Loader2 } from 'lucide-react';
 
-export const SuperAdminGuard = () => {
+export const AdminGuard = () => {
     const { dbProfile, loading, user } = useAuth();
 
     if (loading) {
@@ -18,8 +18,8 @@ export const SuperAdminGuard = () => {
         return <Navigate to="/login" replace />;
     }
 
-    // 2. Must be SUPERADMIN
-    if (dbProfile?.role !== 'SUPERADMIN') {
+    // 2. Must be ADMIN
+    if (dbProfile?.role !== 'ADMIN') {
         // Redirect to their default dashboard if available, or just a safe fallback
         const fallback = dbProfile?.defaultPropertyId
             ? `/dashboard/${dbProfile.defaultPropertyId}`

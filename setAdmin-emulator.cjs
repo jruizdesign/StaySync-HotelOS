@@ -23,12 +23,12 @@ async function setAdmin() {
 
         // Force set the claims
         await admin.auth().setCustomUserClaims(user.uid, {
-            role: "SUPER_ADMIN",
+            role: "ADMIN",
             propertyId: null
         });
 
         console.log(`\nSUCCESS! ---------------------------------------------------`);
-        console.log(`User ${TARGET_EMAIL} has been promoted to SUPER_ADMIN.`);
+        console.log(`User ${TARGET_EMAIL} has been promoted to ADMIN.`);
         console.log(`You may now login. If you are already logged in, LOG OUT and LOG BACK IN.`);
         console.log(`------------------------------------------------------------\n`);
     } catch (error) {

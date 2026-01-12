@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Property {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  address     String?
+  email       String?
+  name        String
+  phoneNumber String?   @map("phone_number")
+  isDemoMode  Boolean   @default(false) @map("is_demo_mode")
+
+  bookings    Booking[]
+  rooms       Room[]
+  users       User[]
+  maintenanceRequests MaintenanceRequest[]
+
+  @@map("properties")
+}
+
+model Room {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  propertyId String    @map("property_id") @db.Uuid
+  capacity   Int?
+  roomNumber String    @map("room_number")
+  roomType   String    @map("room_type")
+  floor      Int?
+  price      Decimal?  @db.Decimal(10, 2)
+  status     String?   @map("room_status")
+  
+  bookings   Booking[]
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([propertyId], map: "rooms_propertyId_idx")
+  @@map("rooms")
+}
+
+model Booking {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  propertyId   String   @map("property_id") @db.Uuid
+  roomId       String?  @map("room_id") @db.Uuid
+  checkInDate  DateTime @map("check_in_date") @db.Date
+  checkOutDate DateTime @map("check_out_date") @db.Date
+  guestName    String   @map("guest_name")
+  status       String
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room         Room?    @relation(fields: [roomId], references: [id], onUpdate: NoAction)
+
+  guestId      String?   @map("guest_id") @db.Uuid
+  guest        Guest?    @relation(fields: [guestId], references: [id])
+  invoices     Invoice[]
+
+  @@index([propertyId], map: "bookings_propertyId_idx")
+  @@index([roomId], map: "bookings_roomId_idx")
+  @@index([guestId])
+  @@map("bookings")
+}
+
+model User {
+  id          String    @id @map("uid")
+  propertyId  String?   @map("property_id") @db.Uuid
+  email       String    @unique
+  role        String
+  lastActive  DateTime? @map("last_active") @db.Date
+  name        String?
+  pin         String?
+  status      String?
+  
+  property    Property? @relation(fields: [propertyId], references: [id], onUpdate: NoAction)
+
+  maintenanceRequests MaintenanceRequest[] @relation("assigned_user")
+  reportedMaintenance MaintenanceRequest[] @relation("reporter")
+  featureRequests     FeatureRequest[]
+
+  @@index([propertyId], map: "users_propertyId_idx")
+  @@map("users")
+}
+
+model Guest {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String   @unique
+  name        String
+  phoneNumber String?  @map("phone_number")
+  address     String?
+  idNumber    String?  @map("id_number")
+  status      String   @default("Regular")
+  isDNR       Boolean  @default(false)     @map("is_dnr")
+  dnrReason   String?  @map("dnr_reason")
+  photoUrl    String?  @map("photo_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  bookings    Booking[]
+  notes       GuestNote[]
+  invoices    Invoice[]
+  documents   GuestDocument[]
+
+  @@map("guests")
+}
+
+model GuestDocument {
+  id         String   @id @default(uuid()) @db.Uuid
+  type       String
+  fileName   String   @map("file_name")
+  fileUrl    String   @map("file_url")
+  uploadDate DateTime @default(now()) @map("upload_date")
+  amount     Decimal? @db.Decimal(10, 2)
+  
+  guestId    String   @map("guest_id") @db.Uuid
+  guest      Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([guestId])
+  @@map("guest_documents")
+}
+
+model GuestNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  guestId   String   @map("guest_id") @db.Uuid
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@map("guest_notes")
+}
+
+model MaintenanceRequest {
+  id           String    @id @default(uuid()) @db.Uuid
+  description  String
+  priority     String    @default("Medium")
+  status       String    @default("Pending")
+  roomNumber   String    @map("room_number")
+  reportedDate DateTime  @default(now()) @map("reported_date") @db.Date
+  completedDate DateTime? @map("completed_date") @db.Date
+  cost         Decimal?  @default(0) @db.Decimal(10, 2)
+  notes        String?
+
+  propertyId   String    @map("property_id") @db.Uuid
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  reporterId   String?   @map("reporter_id")
+  reporter     User?     @relation("reporter", fields: [reporterId], references: [id])
+
+  assignedToId String?   @map("assigned_to_id")
+  assignedTo   User?     @relation("assigned_user", fields: [assignedToId], references: [id])
+
+  @@index([propertyId])
+  @@map("maintenance_requests")
+}
+
+model FeatureRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  description String
+  priority    String   @default("Medium")
+  status      String   @default("New")
+  votes       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  requesterId String?  @map("requester_id")
+  requester   User?    @relation(fields: [requesterId], references: [id])
+
+  @@map("feature_requests")
+}
+
+model Invoice {
+  id            String   @id @default(uuid()) @db.Uuid
+  totalAmount   Decimal  @map("total_amount") @db.Decimal(10, 2)
+  status        String   @default("UNPAID")
+  generatedAt   DateTime @default(now()) @map("generated_at")
+  
+  guestId       String   @map("guest_id") @db.Uuid
+  guest         Guest    @relation(fields: [guestId], references: [id])
+  
+  bookingId     String?  @unique @map("booking_id") @db.Uuid
+  booking       Booking? @relation(fields: [bookingId], references: [id])
+
+  payments      Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id            String   @id @default(uuid()) @db.Uuid
+  amount        Decimal  @db.Decimal(10, 2)
+  method        String
+  status        String   @default("COMPLETED")
+  transactionId String?  @map("transaction_id")
+  processedAt   DateTime @default(now()) @map("processed_at")
+
+  invoiceId     String   @map("invoice_id") @db.Uuid
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}

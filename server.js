@@ -51,9 +51,9 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-const requireSuperAdmin = (req, res, next) => {
-  if (req.user.role !== 'SUPERADMIN') {
-    return res.status(403).json({ error: 'Access Denied: Super Admin Only' });
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Access Denied: Admin Only' });
   }
   next();
 };
@@ -225,8 +225,8 @@ app.post('/api/rooms', authMiddleware, async (req, res) => {
   }
 });
 
-// 3.5. LIST USERS (Super Admin)
-app.get('/api/users', authMiddleware, requireSuperAdmin, async (req, res) => {
+// 3.5. LIST USERS (Admin)
+app.get('/api/users', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       include: { property: true },
@@ -238,8 +238,8 @@ app.get('/api/users', authMiddleware, requireSuperAdmin, async (req, res) => {
   }
 });
 
-// 3.6. GET DB SCHEMA (Super Admin)
-app.get('/api/admin/schema', authMiddleware, requireSuperAdmin, async (req, res) => {
+// 3.6. GET DB SCHEMA (Admin)
+app.get('/api/admin/schema', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const schemaPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'prisma/schema.prisma');
     const schema = fs.readFileSync(schemaPath, 'utf8');

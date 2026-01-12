@@ -20,7 +20,7 @@ import {
     Plus
 } from 'lucide-react';
 
-export default function SuperAdminDashboard() {
+export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<'users' | 'properties' | 'database'>('users');
     const queryClient = useQueryClient();
 
@@ -33,7 +33,7 @@ export default function SuperAdminDashboard() {
                         <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-red-900/50">
                             SA
                         </div>
-                        <h1 className="text-xl font-bold tracking-tight">Super Admin <span className="text-slate-500">Control Panel</span></h1>
+                        <h1 className="text-xl font-bold tracking-tight">Admin <span className="text-slate-500">Control Panel</span></h1>
                     </div>
                 </div>
             </header>
@@ -50,8 +50,8 @@ export default function SuperAdminDashboard() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
                             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-all ${activeTab === tab.id
-                                    ? 'border-blue-500 text-blue-400'
-                                    : 'border-transparent text-slate-500 hover:text-slate-300'
+                                ? 'border-blue-500 text-blue-400'
+                                : 'border-transparent text-slate-500 hover:text-slate-300'
                                 }`}
                         >
                             {tab.icon}
@@ -120,9 +120,9 @@ function UsersTab() {
                                     <div className="text-xs text-slate-500">{user.email}</div>
                                 </td>
                                 <td className="p-4">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'SUPERADMIN' ? 'bg-red-500/20 text-red-400' :
-                                            user.role === 'MANAGER' ? 'bg-blue-500/20 text-blue-400' :
-                                                'bg-slate-700 text-slate-300'
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-400' :
+                                        user.role === 'MANAGER' ? 'bg-blue-500/20 text-blue-400' :
+                                            'bg-slate-700 text-slate-300'
                                         }`}>
                                         {user.role}
                                     </span>
